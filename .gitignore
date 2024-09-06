@@ -90,3 +90,4 @@ buildNumber.properties
 
 #Ignore tutorials folder
 tutorials/
+.idea
