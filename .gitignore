@@ -88,6 +88,6 @@ buildNumber.properties
 
 # End of https://www.toptal.com/developers/gitignore/api/java,android,maven
 
-#Ignore tutorials folder
+# Ignore tutorials folder
 tutorials/
 .idea
