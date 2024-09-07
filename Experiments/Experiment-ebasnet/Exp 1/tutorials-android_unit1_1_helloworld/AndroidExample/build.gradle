@@ -2,3 +2,8 @@
 plugins {
 id 'com.android.application' version '8.0.0' apply false
 }
+
+dependencies {
+    // Other dependencies
+    testImplementation 'junit:junit:4:13:2'
+}
