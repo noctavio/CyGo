@@ -88,6 +88,5 @@ buildNumber.properties
 
 # End of https://www.toptal.com/developers/gitignore/api/java,android,maven
 
-# Ignore tutorials folder and .idea(99% sure we're supposed to do this)
-tutorials/
+# Ignores intelliJ default config folder
 .idea
