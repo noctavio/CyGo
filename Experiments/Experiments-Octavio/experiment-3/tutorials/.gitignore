@@ -35,7 +35,7 @@ lib/
 manifest.yml
 out
 overridedb.*
-hellopeople/target/classes
+hellopeople-3/target/classes
 transaction-logs
 .flattened-pom.xml
 secrets.yml
