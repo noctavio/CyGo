@@ -17,7 +17,7 @@
 
 ### Avaiable End points : 
 1. GET : Can be run on the Browser Directly
-    1. /person /create - create dummy data
+    1. /person/create - create dummy data
     2. /people - get all Owners 
     3. /person/{id} - get specific owner
     4. /oops - to check what happens when exception is thrown  
