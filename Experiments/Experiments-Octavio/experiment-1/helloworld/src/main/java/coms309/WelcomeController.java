@@ -16,4 +16,9 @@ class WelcomeController {
     public String welcome(@PathVariable String name) {
         return "Hello and welcome to COMS 3090, previously known as COM S 309: " + name;
     }
+
+    @GetMapping("/{firstname}/{lastname}")
+    public String welcome(@PathVariable String firstname, @PathVariable String lastname) {
+        return "Localhost using port 8080 is sucessful! Your name is, " + firstname + " " + lastname;
+    }
 }
