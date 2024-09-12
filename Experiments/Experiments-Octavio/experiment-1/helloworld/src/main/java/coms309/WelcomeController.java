@@ -3,6 +3,8 @@ package coms309;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @RestController
 class WelcomeController {
@@ -18,7 +20,12 @@ class WelcomeController {
     }
 
     @GetMapping("/{firstname}/{lastname}")
-    public String welcome(@PathVariable String firstname, @PathVariable String lastname) {
+    public String welcomePath(@PathVariable String firstname, @PathVariable String lastname) {
         return "Localhost using port 8080 is sucessful! Your name is, " + firstname + " " + lastname;
+    }
+    // TO use this do /welcome?firstname={fName}&lastname={Lname}
+    @GetMapping("/welcome")
+    public String welcomeRequest(@RequestParam String firstname, @RequestParam String lastname) {
+        return "Hello " + firstname + " " + lastname;
     }
 }
