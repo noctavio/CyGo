@@ -3,10 +3,11 @@ import java.util.List;
 import java.util.ArrayList;
 
 class Cart {
-    private List<Item> cart = new ArrayList<>();
+    private List<Item> cart;
     private double currentTotal;
 
     public Cart () {
+        this.cart = new ArrayList<>();
         this.currentTotal = 0.0;
     }
 

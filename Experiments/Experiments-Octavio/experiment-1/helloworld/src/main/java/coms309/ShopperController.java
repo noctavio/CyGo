@@ -2,90 +2,108 @@ package coms309;
 
 import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/shoppers")
 public class ShopperController {
+    private HashMap<String, Shopper> shopperList = new HashMap<>();
+    private HashMap<String, Item> itemList = new HashMap<>();
+    private HashMap<String, Cart> shopperCarts = new HashMap<>();
 
-    // Creates new shopper
-    @GetMapping("/create")
-    public String createShopper(@RequestParam String firstname, @RequestParam String lastname, @RequestParam String memberID) {
 
-        Shopper newShopper = new Shopper(firstname, lastname, memberID);
-        shoppers.put(memberID, newShopper);
-        return "Shopper " + firstname + " " + lastname + " created!";
+    // Create a shopper
+    @PostMapping
+    public String createShopper(@RequestBody Shopper shopper, Cart cart) {
+        shopperList.put(shopper.getMemberID(), shopper);
+        shopperCarts.put(shopper.getMemberID(), cart);
+        return "New shopper " + shopper.getFirstName() + " saved.";
     }
 
-    // Get shopper details
-    @GetMapping("/{memberID}")
-    public Shopper getShopper(@PathVariable String memberID) {
-        return shoppers.get(memberID);
-    }
-
-    // Adds an item to cart
-    @PostMapping("/{memberID}/cart/add")
-    public String addItemToCart(@PathVariable String memberID, @RequestParam String itemName) {
-        Shopper shopper = shoppers.get(memberID);
-        if (shopper != null) {
-            shopper.getShoppingCart().addItem(new Item(itemName));
-            return "Added item " + itemName + " to " + shopper.getFirstName() + " " + shopper.getLastName() + "'s cart.\n Your total is" + shopper.getShoppingCart().getCurrentTotal();
-        }
-        return "Shopper not found!";
-    }
-
-    // Remove an item from cart
-    @PostMapping("/{memberID}/cart/remove")
-    public String removeItemFromCart(@PathVariable String memberID, @RequestParam String itemName) {
-        Shopper shopper = shoppers.get(memberID);
-        if (shopper != null) {
-            Cart cart = shopper.getShoppingCart();
-            List<Item> items = cart.getItems();
-
-            // Find the item to remove by matching the item name
-            Item itemToRemove = null;
-            for (Item item : items) {
-                if (item.getItemName().equals(itemName)) {
-                    itemToRemove = item;
-                    break;
-                }
-            }
-
-            // Remove the item if found
-            if (itemToRemove != null) {
-                items.remove(itemToRemove);  // Remove the item from the list
-                return "Removed item " + itemToRemove.getItemName() + " from " + shopper.getFirstName() + " " + shopper.getLastName() + "'s cart. \nYour total is " + shopper.getShoppingCart().getCurrentTotal();
-            }
-            return "Item not found in cart!";
-        }
-        return "Shopper not found!";
-    }
-
-    // View cart contents
+    // Display all of a specific Shopper's cart items
     @GetMapping("/{memberID}/cart")
-    public Cart getCart(@PathVariable String memberID) {
-        Shopper shopper = shoppers.get(memberID);
-        if (shopper != null) {
-            return shopper.getShoppingCart();
+    public List<Item> getCart(@PathVariable String memberID) {
+        Cart cart = shopperCarts.get(memberID);
+        if (cart != null) {
+            return cart.getItems();
+        } else {
+            throw new RuntimeException("Cart not found for shopper ID " + memberID);
         }
-        return null;
     }
 
-    @PostMapping("/{memberID}/cart/purchase")
-    public String purchaseAllInCart(@PathVaraible String memberID) {
-        Shopper shopper = shoppers.get(memberID);
+    // Get item price
+    @GetMapping("/items/{itemName}/price")
+    public double getItemPrice(@PathVariable String itemName) {
+        Item item = itemList.get(itemName);
+        if (item != null) {
+            return item.getItemPrice();
+        } else {
+            throw new RuntimeException("Item not found.");
+        }
+    }
+
+    // Display all items available
+    @GetMapping("/items")
+    public List<Item> getAllItems() {
+        return new ArrayList<>(itemList.values());
+    }
+
+    // Update shopper's cart
+    @PutMapping("/{memberID}/cart")
+    public String updateCart(@PathVariable String memberID, @RequestBody List<Item> items) {
+        Cart cart = shopperCarts.get(memberID);
+        if (cart != null) {
+            cart.getItems().clear();
+            for (Item item : items) {
+                cart.addItem(item);
+            }
+            return "Cart updated for shopper " + memberID;
+        } else {
+            throw new RuntimeException("Cart not found for shopper ID " + memberID);
+        }
+    }
+    // Adds an item to shopping cart
+    @PostMapping("/{memberID}/cart/items")
+    public String addItemToCart(@PathVariable String memberID, @RequestBody Item item) {
+        Cart cart = shopperCarts.get(memberID);
+        if (cart != null) {
+            cart.addItem(item);
+            return "Item " + item.getItemName() + " added to cart of shopper " + memberID;
+        } else {
+            // Debugging message
+            System.out.println("Shopper ID: " + memberID + " not found in shopperCarts.");
+            throw new RuntimeException("Cart not found for shopper ID " + memberID);
+        }
+    }
+
+    // Delete an item from a shopper's cart
+    @DeleteMapping("/{memberID}/cart/items/{itemName}")
+    public String deleteItemFromCart(@PathVariable String memberID, @PathVariable String itemName) {
+        Shopper shopper = shopperList.get(memberID);
         if (shopper != null) {
             Cart cart = shopper.getShoppingCart();
-            double total = cart.getCurrentTotal();
-            int itemCount = cart.getItems().size();
-
-            // Remove each item from the cart
-            for (Item item : new ArrayList<>(cart.getItems())) {
+            Item item = itemList.get(itemName);
+            if (item != null) {
                 cart.removeItem(item);
+                return "Item " + itemName + " removed from cart.";
+            } else {
+                throw new RuntimeException("Item not found.");
             }
-            return "Your total was " + total + " and you purchased " + itemCount + " items.";
+        } else {
+            throw new RuntimeException("Shopper not found.");
         }
-        return null;
+    }
+
+    // Creates an available item
+    @PostMapping("/items")
+    public String addItem(@RequestBody Item item) {
+        if (item != null && item.getItemName() != null && item.getItemPrice() > 0) {
+            itemList.put(item.getItemName(), item);
+            return "Item " + item.getItemName() + " added with price " + item.getItemPrice() + ".";
+        } else {
+            return "Item could not be added. Ensure 'name' is provided and 'price' is greater than 0.";
+        }
     }
 }

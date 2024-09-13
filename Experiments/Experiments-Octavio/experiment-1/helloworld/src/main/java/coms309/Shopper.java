@@ -4,7 +4,6 @@ public class Shopper {
     private String firstname;
     private String lastname;
     private String memberID;
-    private boolean premiumMember;
     private Cart shoppingCart;
 
     public Shopper(String firstname, String lastname, String memberID) {

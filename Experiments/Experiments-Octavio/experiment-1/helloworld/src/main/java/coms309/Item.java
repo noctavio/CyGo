@@ -5,20 +5,23 @@ public class Item {
     private String name;
     private double price;
 
-    public Item (String name) {
-        Random random = new Random();
-
-        double min = 1.0;
-        double max = 99.99;
-        this.price = min + (max - min) * random.nextDouble();
-
+    public Item (String name, double price) {
         this.name = name;
+        this.price = price;
     }
+
     public String getItemName() {
         return name;
     }
 
+    public void setItemName(String namevar) {
+        this.name = namevar;
+    }
+
     public double getItemPrice() {
         return price;
+    }
+    public void setPrice(double value) {
+        this.price = value;
     }
 }
