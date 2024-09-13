@@ -1,7 +1,7 @@
 package coms309;
 import java.util.List;
 import java.util.ArrayList;
-
+// THIS IS THE RIGHT ONE
 class Cart {
     private List<Item> cart;
     private double currentTotal;

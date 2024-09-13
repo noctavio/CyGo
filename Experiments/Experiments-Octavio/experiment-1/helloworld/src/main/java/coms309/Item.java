@@ -1,6 +1,6 @@
 package coms309;
 import java.util.Random;
-
+// THIS IS THE RIGHT ONE
 public class Item {
     private String name;
     private double price;

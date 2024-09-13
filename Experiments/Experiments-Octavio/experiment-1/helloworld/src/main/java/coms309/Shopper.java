@@ -1,5 +1,5 @@
 package coms309;
-
+// THIS IS THE RIGHT ONE
 public class Shopper {
     private String firstname;
     private String lastname;
@@ -25,7 +25,16 @@ public class Shopper {
         return memberID;
     }
 
+    public void setFirstName(String fN) {
+        this.firstname = fN;
+    }
+
+    public void setLastName(String lN) {
+        this.lastname = lN;
+    }
+
     public Cart getShoppingCart() {
         return shoppingCart;
     }
+
 }
