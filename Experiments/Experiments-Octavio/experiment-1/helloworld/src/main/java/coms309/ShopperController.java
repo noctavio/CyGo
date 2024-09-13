@@ -5,19 +5,33 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
-
+// THIS IS THE RIGHT ONE
 @RestController
 @RequestMapping("/shoppers")
 public class ShopperController {
     private HashMap<String, Shopper> shopperList = new HashMap<>();
     private HashMap<String, Item> itemList = new HashMap<>();
 
-
     // Create a shopper
     @PostMapping
     public String createShopper(@RequestBody Shopper shopper, Cart cart) {
         shopperList.put(shopper.getMemberID(), shopper);
         return "New shopper " + shopper.getFirstName() + " saved.";
+    }
+
+    // Updates a shopper's name and last name but memberID remains
+    @PutMapping("/{memberID}")
+    public String updateShopper(@PathVariable String memberID, @RequestBody Shopper updatedShopper) {
+        Shopper existingShopper = shopperList.get(memberID);
+
+        if (existingShopper != null) {
+            existingShopper.setFirstName(updatedShopper.getFirstName());
+            existingShopper.setLastName(updatedShopper.getLastName());
+            return "Shopper " + memberID + "'s name updated to " + updatedShopper.getFirstName() + " " + updatedShopper.getLastName() + ".";
+        }
+        else {
+            return "Shopper with ID " + memberID + " not found.";
+        }
     }
 
     // Deletes a Shopper
@@ -27,7 +41,8 @@ public class ShopperController {
         Shopper removedShopper = shopperList.remove(memberID);
         if (removedShopper != null) {
             return "Shopper " + memberID + " removed from shopperList.";
-        } else {
+        }
+        else {
             throw new RuntimeException("Shopper with ID " + memberID + " not found.");
         }
     }
@@ -44,7 +59,8 @@ public class ShopperController {
         if (item != null && item.getItemName() != null && item.getItemPrice() > 0) {
             itemList.put(item.getItemName(), item);
             return "Item " + item.getItemName() + " added with price " + item.getItemPrice() + ".";
-        } else {
+        }
+        else {
             return "Item could not be added. Ensure 'name' is provided and 'price' is greater than 0.";
         }
     }
@@ -57,7 +73,8 @@ public class ShopperController {
         if (shopper != null) {
             Cart cart = shopper.getShoppingCart();
             return cart.getItems();
-        } else {
+        }
+        else {
             throw new RuntimeException("Shopper not found for member ID " + memberID);
         }
     }
@@ -87,11 +104,14 @@ public class ShopperController {
             if (itemToReplace != null) {
                 cart.removeItem(itemToReplace);
                 cart.addItem(newItem);
+                itemList.put(newItem.getItemName(), newItem);
                 return "Item " + itemName + " replaced with " + newItem.getItemName() + " in cart of shopper " + memberID + ". Total is now " + cart.getCurrentTotal();
-            } else {
+            }
+            else {
                 throw new RuntimeException("Item " + itemName + " not found in cart.");
             }
-        } else {
+        }
+        else {
             throw new RuntimeException("Shopper not found for member ID " + memberID);
         }
     }
@@ -105,7 +125,8 @@ public class ShopperController {
             Cart cart = shopper.getShoppingCart();
             cart.addItem(item);
             return "Item " + item.getItemName() + " added to cart of shopper " + memberID + ". Total is now " + cart.getCurrentTotal();
-        } else {
+        }
+        else {
             System.out.println("Shopper ID: " + memberID + " not found.");
             throw new RuntimeException("Shopper not found for member ID " + memberID);
         }
@@ -129,10 +150,12 @@ public class ShopperController {
             if (itemToRemove != null) {
                 cart.removeItem(itemToRemove);
                 return "Item " + itemName + " removed from cart of shopper " + memberID + ". Total is now " + cart.getCurrentTotal();
-            } else {
+            }
+            else {
                 throw new RuntimeException("Item " + itemName + " not found in cart.");
             }
-        } else {
+        }
+        else {
             throw new RuntimeException("Shopper not found for member ID " + memberID);
         }
     }
