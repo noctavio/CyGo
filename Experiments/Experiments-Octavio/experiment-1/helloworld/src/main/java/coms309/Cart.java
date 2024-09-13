@@ -22,4 +22,7 @@ class Cart {
         cart.remove(someItem);
         currentTotal -= someItem.getItemPrice();
     }
+    public double getCurrentTotal() {
+        return currentTotal;
+    }
 }

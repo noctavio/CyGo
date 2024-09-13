@@ -14,11 +14,11 @@ public class ShopperController {
     // Creates new shopper
     @PostMapping("/create")
     public String createShopper(@RequestParam String firstname, @RequestParam String lastname, @RequestParam String memberID) {
+
         Shopper newShopper = new Shopper(firstname, lastname, memberID);
         shoppers.put(memberID, newShopper);
         return "Shopper " + firstname + " " + lastname + " created!";
     }
-
 
     // Get shopper details
     @GetMapping("/{memberID}")
@@ -28,26 +28,25 @@ public class ShopperController {
 
     // Adds an item to cart
     @PostMapping("/{memberID}/cart/add")
-    public String addItemToCart(@PathVariable String memberID, @RequestParam String itemName, @RequestParam Long itemID, @RequestParam double itemPrice) {
+    public String addItemToCart(@PathVariable String memberID, @RequestParam String itemName) {
         Shopper shopper = shoppers.get(memberID);
         if (shopper != null) {
-            Item newItem = new Item(itemName, itemID, itemPrice);
-            shopper.getShoppingCart().addItem(newItem);
-            return "Added item " + itemName + " to " + shopper.getFirstName() + " " + shopper.getLastName() + "'s cart.";
+            shopper.getShoppingCart().addItem(itemName);
+            return "Added item " + itemName + " to " + shopper.getFirstName() + " " + shopper.getLastName() + "'s cart.\n Your total is" + shopper.getShoppingCart().getCurrentTotal();
         }
         return "Shopper not found!";
     }
 
     // Remove an item from cart
     @PostMapping("/{memberID}/cart/remove")
-    public String removeItemFromCart(@PathVariable String memberID, @RequestParam Long itemID) {
+    public String removeItemFromCart(@PathVariable String memberID, @RequestParam String itemName) {
         Shopper shopper = shoppers.get(memberID);
         if (shopper != null) {
             Cart cart = shopper.getShoppingCart();
             Item itemToRemove = cart.getItems().stream().filter(i -> i.getItemID().equals(itemID)).findFirst().orElse(null);
             if (itemToRemove != null) {
                 cart.removeItem(itemToRemove);
-                return "Removed item " + itemToRemove.getItemName() + " from " +  shopper.getFirstName() + " " + shopper.getLastName() + "'s cart.";
+                return "Removed item " + itemToRemove.getItemName() + " from " +  shopper.getFirstName() + " " + shopper.getLastName() + "'s cart. \n Your total is"  shopper.getShoppingCart().getCurrentTotal();
             }
             return "Item not found in cart!";
         }
@@ -61,6 +60,10 @@ public class ShopperController {
         if (shopper != null) {
             return shopper.getShoppingCart();
         }
-        return null;
+        return "Shopper not found!";
     }
+
+    //get list of ALL items
+    //purchase items(person has infinite money)
+
 }
