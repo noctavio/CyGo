@@ -9,9 +9,6 @@ import java.util.List;
 @RequestMapping("/shoppers")
 public class ShopperController {
 
-    // Store shoppers in a simple map
-    private Map<String, Shopper> shoppers = new HashMap<>();
-
     // Creates new shopper
     @GetMapping("/create")
     public String createShopper(@RequestParam String firstname, @RequestParam String lastname, @RequestParam String memberID) {
@@ -75,7 +72,20 @@ public class ShopperController {
         return null;
     }
 
-    //get list of ALL items
-    //purchase items(person has infinite money)
+    @PostMapping("/{memberID}/cart/purchase")
+    public String purchaseAllInCart(@PathVaraible String memberID) {
+        Shopper shopper = shoppers.get(memberID);
+        if (shopper != null) {
+            Cart cart = shopper.getShoppingCart();
+            double total = cart.getCurrentTotal();
+            int itemCount = cart.getItems().size();
 
+            // Remove each item from the cart
+            for (Item item : new ArrayList<>(cart.getItems())) {
+                cart.removeItem(item);
+            }
+            return "Your total was " + total + " and you purchased " + itemCount + " items.";
+        }
+        return null;
+    }
 }
