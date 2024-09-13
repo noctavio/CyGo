@@ -11,23 +11,21 @@ import java.util.Map;
 public class ShopperController {
     private HashMap<String, Shopper> shopperList = new HashMap<>();
     private HashMap<String, Item> itemList = new HashMap<>();
-    private HashMap<String, Cart> shopperCarts = new HashMap<>();
 
 
     // Create a shopper
     @PostMapping
     public String createShopper(@RequestBody Shopper shopper, Cart cart) {
         shopperList.put(shopper.getMemberID(), shopper);
-        shopperCarts.put(shopper.getMemberID(), cart);
         return "New shopper " + shopper.getFirstName() + " saved.";
     }
 
     // Deletes a Shopper
     @DeleteMapping("/{memberID}")
     public String deleteShopper(@PathVariable String memberID) {
+        // Remove the shopper directly from shopperList
         Shopper removedShopper = shopperList.remove(memberID);
         if (removedShopper != null) {
-            shopperCarts.remove(memberID);
             return "Shopper " + memberID + " removed from shopperList.";
         } else {
             throw new RuntimeException("Shopper with ID " + memberID + " not found.");
@@ -54,13 +52,16 @@ public class ShopperController {
     // Display all of a specific Shopper's cart items
     @GetMapping("/{memberID}/cart")
     public List<Item> getCart(@PathVariable String memberID) {
-        Cart cart = shopperCarts.get(memberID);
-        if (cart != null) {
+        // Retrieve the shopper from the shopperList
+        Shopper shopper = shopperList.get(memberID);
+        if (shopper != null) {
+            Cart cart = shopper.getShoppingCart();
             return cart.getItems();
         } else {
-            throw new RuntimeException("Cart not found for shopper ID " + memberID);
+            throw new RuntimeException("Shopper not found for member ID " + memberID);
         }
     }
+
 
     // Display all available items
     @GetMapping("/items")
@@ -71,13 +72,27 @@ public class ShopperController {
     // Replace an item in the cart for another
     @PutMapping("/{memberID}/cart/items/{itemName}")
     public String replaceItemInCart(@PathVariable String memberID, @PathVariable String itemName, @RequestBody Item newItem) {
-        Cart cart = shopperCarts.get(memberID);
-        if (cart != null) {
-            cart.getItems().removeIf(item -> item.getItemName().equals(itemName));
-            cart.addItem(newItem);
-            return "Item " + itemName + " replaced with " + newItem.getItemName() + " in cart of shopper " + memberID;
+        // Retrieve the shopper from the shopperList
+        Shopper shopper = shopperList.get(memberID);
+        if (shopper != null) {
+            Cart cart = shopper.getShoppingCart();
+            // Find and remove the item to be replaced
+            Item itemToReplace = null;
+            for (Item item : cart.getItems()) {
+                if (item.getItemName().equals(itemName)) {
+                    itemToReplace = item;
+                    break;
+                }
+            }
+            if (itemToReplace != null) {
+                cart.removeItem(itemToReplace);
+                cart.addItem(newItem);
+                return "Item " + itemName + " replaced with " + newItem.getItemName() + " in cart of shopper " + memberID + ". Total is now " + cart.getCurrentTotal();
+            } else {
+                throw new RuntimeException("Item " + itemName + " not found in cart.");
+            }
         } else {
-            throw new RuntimeException("Cart not found for shopper ID " + memberID);
+            throw new RuntimeException("Shopper not found for member ID " + memberID);
         }
     }
 
