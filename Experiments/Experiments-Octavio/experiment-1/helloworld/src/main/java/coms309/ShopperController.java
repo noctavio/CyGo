@@ -3,6 +3,7 @@ package coms309;
 import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
 @RestController
 @RequestMapping("/shoppers")
@@ -12,7 +13,7 @@ public class ShopperController {
     private Map<String, Shopper> shoppers = new HashMap<>();
 
     // Creates new shopper
-    @PostMapping("/create")
+    @GetMapping("/create")
     public String createShopper(@RequestParam String firstname, @RequestParam String lastname, @RequestParam String memberID) {
 
         Shopper newShopper = new Shopper(firstname, lastname, memberID);
@@ -31,7 +32,7 @@ public class ShopperController {
     public String addItemToCart(@PathVariable String memberID, @RequestParam String itemName) {
         Shopper shopper = shoppers.get(memberID);
         if (shopper != null) {
-            shopper.getShoppingCart().addItem(itemName);
+            shopper.getShoppingCart().addItem(new Item(itemName));
             return "Added item " + itemName + " to " + shopper.getFirstName() + " " + shopper.getLastName() + "'s cart.\n Your total is" + shopper.getShoppingCart().getCurrentTotal();
         }
         return "Shopper not found!";
@@ -43,10 +44,21 @@ public class ShopperController {
         Shopper shopper = shoppers.get(memberID);
         if (shopper != null) {
             Cart cart = shopper.getShoppingCart();
-            Item itemToRemove = cart.getItems().stream().filter(i -> i.getItemID().equals(itemID)).findFirst().orElse(null);
+            List<Item> items = cart.getItems();
+
+            // Find the item to remove by matching the item name
+            Item itemToRemove = null;
+            for (Item item : items) {
+                if (item.getItemName().equals(itemName)) {
+                    itemToRemove = item;
+                    break;
+                }
+            }
+
+            // Remove the item if found
             if (itemToRemove != null) {
-                cart.removeItem(itemToRemove);
-                return "Removed item " + itemToRemove.getItemName() + " from " +  shopper.getFirstName() + " " + shopper.getLastName() + "'s cart. \n Your total is"  shopper.getShoppingCart().getCurrentTotal();
+                items.remove(itemToRemove);  // Remove the item from the list
+                return "Removed item " + itemToRemove.getItemName() + " from " + shopper.getFirstName() + " " + shopper.getLastName() + "'s cart. \nYour total is " + shopper.getShoppingCart().getCurrentTotal();
             }
             return "Item not found in cart!";
         }
@@ -60,7 +72,7 @@ public class ShopperController {
         if (shopper != null) {
             return shopper.getShoppingCart();
         }
-        return "Shopper not found!";
+        return null;
     }
 
     //get list of ALL items
