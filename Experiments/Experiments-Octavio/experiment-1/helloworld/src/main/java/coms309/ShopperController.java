@@ -27,7 +27,7 @@ public class ShopperController {
     public String deleteShopper(@PathVariable String memberID) {
         Shopper removedShopper = shopperList.remove(memberID);
         if (removedShopper != null) {
-            shopperCarts.remove(memberID); // Ensure the cart is also removed
+            shopperCarts.remove(memberID);
             return "Shopper " + memberID + " removed from shopperList.";
         } else {
             throw new RuntimeException("Shopper with ID " + memberID + " not found.");
@@ -73,9 +73,7 @@ public class ShopperController {
     public String replaceItemInCart(@PathVariable String memberID, @PathVariable String itemName, @RequestBody Item newItem) {
         Cart cart = shopperCarts.get(memberID);
         if (cart != null) {
-            // Remove the existing item
             cart.getItems().removeIf(item -> item.getItemName().equals(itemName));
-            // Add the new item
             cart.addItem(newItem);
             return "Item " + itemName + " replaced with " + newItem.getItemName() + " in cart of shopper " + memberID;
         } else {
@@ -83,7 +81,7 @@ public class ShopperController {
         }
     }
 
-    // ADD ITEMS
+    // Add specified item to specified shopper
     @PostMapping("/{memberID}/cart/items")
     public String addItemToCart(@PathVariable String memberID, @RequestBody Item item) {
         // Get the shopper from the HashMap using memberID
@@ -93,19 +91,19 @@ public class ShopperController {
             cart.addItem(item);
             return "Item " + item.getItemName() + " added to cart of shopper " + memberID + ". Total is now " + cart.getCurrentTotal();
         } else {
-            // Debugging message
             System.out.println("Shopper ID: " + memberID + " not found.");
             throw new RuntimeException("Shopper not found for member ID " + memberID);
         }
     }
 
+    // Deletes a specified item from a specified shopper
     @DeleteMapping("/{memberID}/cart/items/{itemName}")
     public String deleteItemFromCart(@PathVariable String memberID, @PathVariable String itemName) {
         // Retrieve the shopper from the shopperList
         Shopper shopper = shopperList.get(memberID);
         if (shopper != null) {
             Cart cart = shopper.getShoppingCart();
-            // Find the item in the cart by matching its name
+            // Find the item in the cart by matching name
             Item itemToRemove = null;
             for (Item item : cart.getItems()) {
                 if (item.getItemName().equals(itemName)) {
