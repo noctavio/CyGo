@@ -5,14 +5,14 @@
 
 ### Pre-requisites
 
-0. Go through the springboot_unit1_1_helloworld
+0. Go through the springboot_unit1_1_hellopeople
 1. Maven has to be installed on command line OR your IDE must be configured with maven
 2. Java version 1.8 - 1.10 (Some versions of springboot are really unhappy with java 11)
 
 ### To Run the project 
 1. Command Line (Make sure that you are in the folder containing pom.xml)</br>
 <code> mvn package</code></br>
-<code>java -jar target/helloworld-1.0.0.jar</code>
+<code>java -jar target/hellopeople-1.0.0.jar</code>
 2. IDE : Right click on Application.java and run as Java Application
 
 ### Avaiable End points : 
