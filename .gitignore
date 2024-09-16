@@ -11,6 +11,7 @@ local.properties
 
 # Log/OS Files
 *.log
+.DS_Store
 
 # Android Studio generated files and folders
 captures/
@@ -89,4 +90,4 @@ buildNumber.properties
 # End of https://www.toptal.com/developers/gitignore/api/java,android,maven
 
 # Ignores intelliJ default config folder
-.idea
+.idea.DS_Store
