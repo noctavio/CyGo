@@ -1,3 +1,5 @@
+package com.example.login;
+
 import javax.persistence.*;
 
 @Entity
