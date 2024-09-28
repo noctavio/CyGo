@@ -1,5 +1,7 @@
 package com.example.login;
 
+import com.example.login.User; // Import User class
+import com.example.login.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +16,7 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<User> registerUser(@RequestBody User user) {
+        System.out.println("WE REACHED THIS POINT!!!!!!!!!");
         System.out.println("Register user: " + user.getUsername());
         return ResponseEntity.ok(userService.register(user));
     }
