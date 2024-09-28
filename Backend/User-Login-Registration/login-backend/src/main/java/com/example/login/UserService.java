@@ -1,5 +1,7 @@
+package com.example.login;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+//import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -9,10 +11,10 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    //private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public User register(User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        //user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
 
@@ -28,7 +30,7 @@ public class UserService {
         User user = getUserById(id);
         if (user != null) {
             user.setUsername(userDetails.getUsername());
-            user.setPassword(passwordEncoder.encode(userDetails.getPassword()));
+            user.setPassword(userDetails.getPassword());
             return userRepository.save(user);
         }
         return null;

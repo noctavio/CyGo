@@ -1,3 +1,5 @@
+package com.example.login;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +14,7 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<User> registerUser(@RequestBody User user) {
+        System.out.println("Register user: " + user.getUsername());
         return ResponseEntity.ok(userService.register(user));
     }
 
