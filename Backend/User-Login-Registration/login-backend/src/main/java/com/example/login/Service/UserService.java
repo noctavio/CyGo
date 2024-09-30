@@ -14,13 +14,23 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
+    private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
     public User registerUser(User user) {
         String secret = user.getPassword();
-        PasswordEncoder encoder = new BCryptPasswordEncoder();
-        user.setPassword(encoder.encode(secret));
+
+        user.setPassword(passwordEncoder.encode(secret));
 
         return userRepository.save(user);
     }
+    public Boolean authenticateUser(String username, String password) {
+        User user = userRepository.findByusername(username);
+        if (user != null && passwordEncoder.matches(password, user.getPassword())) {
+            return true;
+        }
+        return false;
+    }
+
 
     public User updateUser(User user) {
         String secret = user.getPassword();
