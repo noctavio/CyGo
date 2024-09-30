@@ -21,10 +21,26 @@ public class UserService {
 
         return userRepository.save(user);
     }
+
+    public User updateUser(User user) {
+        String secret = user.getPassword();
+        PasswordEncoder encoder = new BCryptPasswordEncoder();
+        user.setPassword(encoder.encode(secret));
+
+        return userRepository.save(user);
+    }
+
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
     public User getUserById(int id) {
         return userRepository.findById(id).orElse(null);
+    }
+    public boolean deleteUserById(int id) {
+        if (userRepository.existsById(id)) {
+            userRepository.deleteById(id);
+            return true;
+        }
+        return false;
     }
 }
