@@ -25,8 +25,4 @@ public class User {
     private String username;
     @Column(name = "PASSWORD")
     private String password;
-    @Column(name = "CLUB")
-    private String clubname;
-    @Column(name = "RATING")
-    private Integer rating; //must be set to Integer, because primitive int can't be set to null.
 }
