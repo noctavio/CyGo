@@ -18,4 +18,10 @@ public class PlayerController {
     public List<Player> getLeaderboard() {
         return playerService.getTop100Players();
     }
+
+    // TODO must add delete for this controller, check demo-2 requirements
+    // TODO figure out how to merge
+    // TODO rewrite screen sketches for tables
+
+    // TODO display top 100 and some stats :)
 }
