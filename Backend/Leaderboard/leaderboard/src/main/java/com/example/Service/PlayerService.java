@@ -24,5 +24,11 @@ public class PlayerService {
         // Limit to top 100 players
         return players.stream().limit(100).collect(Collectors.toList());
     }
-
+    public Player getUserById(int id) {
+        
+        return playerRepository.findById(id).orElse(null);
+    }
+    public Player updatePlayer(Player player) {
+        return playerRepository.save(player);
+    }
 }
