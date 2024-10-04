@@ -34,13 +34,12 @@ public class UserController {
 
     @PutMapping("/update/{id}")
     public ResponseEntity<User> updateUser(@PathVariable int id, @RequestBody User user) {
+        // TODO change this so you can change user/password separately without the other going null
         User existingUser = userService.getUserById(id);
         if (existingUser == null) {
             return ResponseEntity.notFound().build();
         }
         existingUser.setUsername(user.getUsername());
-        existingUser.setRating(user.getRating());
-        existingUser.setClubname(user.getClubname());
 
         String newPassword = user.getPassword();
         //updates pass if it changed
