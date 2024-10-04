@@ -39,13 +39,17 @@ public class UserController {
         if (existingUser == null) {
             return ResponseEntity.notFound().build();
         }
-        existingUser.setUsername(user.getUsername());
+        if (user.getUsername() != null) {
+            existingUser.setUsername(user.getUsername());
+        }
 
-        String newPassword = user.getPassword();
-        //updates pass if it changed
-        if (newPassword != null && !newPassword.isEmpty()) {
-            PasswordEncoder encoder = new BCryptPasswordEncoder();
-            existingUser.setPassword(encoder.encode(newPassword));
+        if (user.getPassword() != null) {
+            String newPassword = user.getPassword();
+            //updates pass if it changed
+            if (!newPassword.isEmpty()) {
+                PasswordEncoder encoder = new BCryptPasswordEncoder();
+                existingUser.setPassword(encoder.encode(newPassword));
+            }
         }
         User updatedUser = userService.updateUser(existingUser);
 
