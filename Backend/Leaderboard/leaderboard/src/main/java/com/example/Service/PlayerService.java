@@ -19,7 +19,7 @@ public class PlayerService {
         List<Player> players = playerRepository.findAll();
 
         // Sort by rating in descending order
-        players.sort(Comparator.comparing(Player::getRating).reversed());
+        players.sort(Comparator.comparing(Player::getRating));
 
         // Limit to top 100 players
         return players.stream().limit(100).collect(Collectors.toList());
