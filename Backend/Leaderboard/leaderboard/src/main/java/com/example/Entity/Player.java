@@ -18,8 +18,8 @@ public class Player {
     @Column(name = "ID")
     @GeneratedValue
     private int id;
-    @Column(name = "USERNAME")
-    private String username;
+    @Column(name = "USERNAME", nullable = false)
+    private String username; // Make it final
     @Column(name = "RATING")
     private Integer rating;
     @Column(name = "CLUBNAME")

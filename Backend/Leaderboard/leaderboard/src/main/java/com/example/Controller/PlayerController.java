@@ -25,20 +25,12 @@ public class PlayerController {
         return playerService.addPlayer(player);
     }
 
-    // TODO add a player to the leader board(just generate id and set name)
-    // TODO delete a player from the leaderboard(post production this would delete from one database and they would exist on the other)
-    // TODO display top 100 and some stats :)
-
-    // TODO check demo-2 requirements
+    // TODO(DISCLAIMER) You cannot edit the username using the leaderboard controller.
     @PutMapping("/stats/{id}")
     public ResponseEntity<Player> updatePlayer(@PathVariable int id, @RequestBody Player player) {
-        // TODO make sure changing one stat doesn't make the rest go null
         Player existingUser = playerService.getUserById(id);
         if (existingUser == null) {
             return ResponseEntity.notFound().build();
-        }
-        if (player.getUsername() != null) { // TODO this is temporary you should not be able to change this later...
-            existingUser.setUsername(player.getUsername());
         }
         if (player.getRating() != null) {
             existingUser.setRating(player.getRating());
@@ -69,6 +61,5 @@ public class PlayerController {
         }
     }
 }
-    // TODO figure out how to merge
-    // TODO rewrite screen sketches for tables
+
 
