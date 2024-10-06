@@ -23,7 +23,7 @@ public class Player {
     @Column(name = "RATING")
     private Integer rating;
     @Column(name = "CLUBNAME")
-    private String clubName;
+    private String clubname;
     @Column(name = "WINS")
     private Integer wins;
     @Column(name = "LOSS")

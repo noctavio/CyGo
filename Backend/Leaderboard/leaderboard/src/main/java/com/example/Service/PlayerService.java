@@ -24,11 +24,24 @@ public class PlayerService {
         // Limit to top 100 players
         return players.stream().limit(100).collect(Collectors.toList());
     }
+    public Player addPlayer(Player player) {
+        return playerRepository.save(player);
+    }
+
     public Player getUserById(int id) {
-        
-        return playerRepository.findById(id).orElse(null);
+        return playerRepository.findById((long) id).orElse(null);
     }
     public Player updatePlayer(Player player) {
         return playerRepository.save(player);
     }
+    public boolean deleteUserById(int id) {
+
+        if (playerRepository.existsById((long) id)) {
+            playerRepository.deleteById((long) id);
+            return true;
+        }
+        return false;
+    }
+
+
 }
