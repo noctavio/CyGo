@@ -24,9 +24,10 @@ public class Player {
     private Integer rating;
     @Column(name = "CLUBNAME")
     private String clubname;
+    @Column(name = "GAMES")
+    private Integer gamesplayed;
     @Column(name = "WINS")
     private Integer wins;
     @Column(name = "LOSS")
     private Integer loss;
-
 }

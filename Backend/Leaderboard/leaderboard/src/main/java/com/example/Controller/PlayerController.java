@@ -32,6 +32,9 @@ public class PlayerController {
         if (existingUser == null) {
             return ResponseEntity.notFound().build();
         }
+        if (player.getGamesplayed() != null) {
+            existingUser.setGamesplayed(player.getWins() + player.getLoss());
+        }
         if (player.getRating() != null) {
             existingUser.setRating(player.getRating());
         }
