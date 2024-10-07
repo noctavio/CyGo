@@ -1,6 +1,13 @@
-package com.profile.User.entity;
+package com.profile.User.profiles;
+
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 
 public class profile {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
     private String USERNAME;
     private String PROFILE_PICTURE;
     private String CLUB;
@@ -12,6 +19,7 @@ public class profile {
 
 
     public profile(String name) {
+
         this.USERNAME = name;
         this.PROFILE_PICTURE = "default";
         this.CLUB = "NONE";
@@ -34,6 +42,14 @@ public class profile {
 
     public profile() {
     }
+    public int getId(){
+        return id;
+    }
+
+    public void setId(int id){
+        this.id = id;
+    }
+
     public String getUSERNAME(){
         return USERNAME;
     }
