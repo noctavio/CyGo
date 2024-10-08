@@ -16,11 +16,11 @@ import java.util.List;
 @RestController
 public class LeaderboardController {
     @Autowired
-    private LeaderboardService playerService;
+    private LeaderboardService leaderboardService;
 
     @GetMapping
     public List<Leaderboard> getLeaderboard() {
-        return playerService.getTop10Players();
+        return leaderboardService.getTop10Players();
     }
 
     /**
@@ -29,14 +29,14 @@ public class LeaderboardController {
      */
     @PostMapping("/refresh")
     public String createPlayersFromUsers() {
-        playerService.createPlayersFromUsers();
+        leaderboardService.createPlayersFromUsers();
         return "Player username's and ID's have been transferred to the leaderboard table.";
     }
 
     // TODO(DISCLAIMER) You cannot edit the username using the leaderboard controller.
     @PutMapping("/stats/{id}")
     public ResponseEntity<String> updatePlayer(@PathVariable int id, @RequestBody Leaderboard player) {
-        Leaderboard existingUser = playerService.getUserById(id);
+        Leaderboard existingUser = leaderboardService.getUserById(id);
 
         if (existingUser == null) {
             return ResponseEntity.notFound().build();
@@ -46,7 +46,7 @@ public class LeaderboardController {
             return ResponseEntity.badRequest().body("Wins and losses must be non-negative.");
         }
         if (!Arrays.asList(RankConstants.RANKS).contains(player.getRank())) {
-            return ResponseEntity.badRequest().body("Invalid rank input... please review Go ranks -> (30 dan - 1 dan) and (1 kyu - 9 kyu)");
+            return ResponseEntity.badRequest().body("Invalid rank input... please review Go ranks -> (30 kyu - 1 kyu) and (1 dan - 9 dan)");
         }
 
         existingUser.setRank(player.getRank());
@@ -61,13 +61,14 @@ public class LeaderboardController {
             existingUser.setLoss(player.getLoss());
         }
         existingUser.setGamesplayed();
+        leaderboardService.updatePlayer(existingUser);
 
         return ResponseEntity.ok("The user has been updated accordingly.");
     }
 
     @DeleteMapping("remove/{id}")
     public ResponseEntity<String> deletePlayer(@PathVariable int id) {
-        boolean isDeleted = playerService.deleteUserById(id);
+        boolean isDeleted = leaderboardService.deleteUserById(id);
         if (isDeleted) {
             return ResponseEntity.ok("User deleted successfully.");
         } else {

@@ -20,7 +20,7 @@ public class Leaderboard {
 
     @Column(name = "USERNAME")
     private String username;
-    @Column(name = "RATING")
+    @Column(name = "RANK")
     private String rank;
     @Column(name = "CLUBNAME")
     private String clubname;

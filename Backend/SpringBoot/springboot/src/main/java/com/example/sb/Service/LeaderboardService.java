@@ -14,14 +14,14 @@ import java.util.stream.Collectors;
 @Service
 public class LeaderboardService {
     @Autowired
-    private LeaderboardRepository playerRepository;
+    private LeaderboardRepository leaderboardService;
 
     @Autowired
     private UserRepository userRepository;
 
     public List<Leaderboard> getTop10Players() {
         // Fetch all players from database
-        List<Leaderboard> players = playerRepository.findAll();
+        List<Leaderboard> players = leaderboardService.findAll();
 
         // Sort by rank in descending order
         players.sort((player1, player2) -> {
@@ -36,11 +36,15 @@ public class LeaderboardService {
 
             // Compare by type first
             if (!type1.equals(type2)) {
-                return type1.equals("dan") ? 1 : -1; // "dan" should be lower than "kyu"
+                return type1.equals("dan") ? -1 : 1; // dan is higher than kyu
+            }
+            // For dan, higher values are better (9 dan > 1 dan)
+            if (type1.equals("dan")) {
+                return Integer.compare(value2, value1); // Higher dan values come first
             }
 
             // Compare by numeric value if types are the same
-            return Integer.compare(value2, value1); // Descending order
+            return Integer.compare(value1, value2); // Descending order
         });
 
         // Limit to top 10 players
@@ -50,30 +54,30 @@ public class LeaderboardService {
         List<User> users = userRepository.findAll(); // Fetch all users
 
         for (User user : users) {
-            if (!playerRepository.existsById((long) user.getId())) {
+            if (!leaderboardService.existsById((long) user.getId())) {
                 Leaderboard player = new Leaderboard();
                 player.setUsername(user.getUsername());
                 player.setClubname("-/-");
-                player.setRank("30 dan");
+                player.setRank("30 kyu");
                 player.setWins(0);
                 player.setLoss(0);
                 player.setGamesplayed(0);
 
-                playerRepository.save(player); // Save the Player
+                leaderboardService.save(player); // Save the Player
             }
         }
     }
 
     public Leaderboard getUserById(int id) {
-        return playerRepository.findById((long) id).orElse(null);
+        return leaderboardService.findById((long) id).orElse(null);
     }
     public Leaderboard updatePlayer(Leaderboard player) {
-        return playerRepository.save(player);
+        return leaderboardService.save(player);
     }
     public boolean deleteUserById(int id) {
 
-        if (playerRepository.existsById((long) id)) {
-            playerRepository.deleteById((long) id);
+        if (leaderboardService.existsById((long) id)) {
+            leaderboardService.deleteById((long) id);
             return true;
         }
         return false;
