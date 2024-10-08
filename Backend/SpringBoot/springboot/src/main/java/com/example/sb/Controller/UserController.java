@@ -33,7 +33,7 @@ public class UserController {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable int id, @RequestBody User user) {
+    public ResponseEntity<String> updateUser(@PathVariable int id, @RequestBody User user) {
         // TODO change this so you can change user/password separately without the other going null
         User existingUser = userService.getUserById(id);
         if (existingUser == null) {
@@ -51,9 +51,8 @@ public class UserController {
                 existingUser.setPassword(encoder.encode(newPassword));
             }
         }
-        User updatedUser = userService.updateUser(existingUser);
 
-        return ResponseEntity.ok(updatedUser);
+        return ResponseEntity.ok("User Has been updated accordingly.");
     }
 
     @GetMapping

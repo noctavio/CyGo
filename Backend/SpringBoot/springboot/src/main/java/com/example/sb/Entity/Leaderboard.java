@@ -21,7 +21,7 @@ public class Leaderboard {
     @Column(name = "USERNAME")
     private String username;
     @Column(name = "RATING")
-    private Integer rating;
+    private String rank;
     @Column(name = "CLUBNAME")
     private String clubname;
     @Column(name = "GAMES")
@@ -30,4 +30,8 @@ public class Leaderboard {
     private Integer wins;
     @Column(name = "LOSS")
     private Integer loss;
+
+    public void setGamesplayed() {
+        this.gamesplayed = (wins != null ? wins : 0) + (loss != null ? loss : 0);
+    }
 }
