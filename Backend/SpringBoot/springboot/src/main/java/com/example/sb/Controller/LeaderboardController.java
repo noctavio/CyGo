@@ -39,17 +39,21 @@ public class LeaderboardController {
         Leaderboard existingUser = leaderboardService.getUserById(id);
 
         if (existingUser == null) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.badRequest().body("User was not found");
         }
-        if (player.getWins() < 0 || player.getLoss() < 0) {
+        if ((player.getWins() != null && player.getWins() < 0) || (player.getLoss() != null && player.getLoss() < 0)) {
 
             return ResponseEntity.badRequest().body("Wins and losses must be non-negative.");
         }
-        if (!Arrays.asList(RankConstants.RANKS).contains(player.getRank())) {
-            return ResponseEntity.badRequest().body("Invalid rank input... please review Go ranks -> (30 kyu - 1 kyu) and (1 dan - 9 dan)");
+        if (player.getRank() != null) {
+            if (Arrays.asList(RankConstants.RANKS).contains(player.getRank())) {
+                existingUser.setRank(player.getRank());
+            }
+            else {
+                return ResponseEntity.badRequest().body("Invalid rank input... please review Go ranks -> (30 kyu - 1 kyu) and (1 dan - 9 dan)");
+            }
         }
 
-        existingUser.setRank(player.getRank());
 
         if (player.getClubname() != null) {
             existingUser.setClubname(player.getClubname());
