@@ -21,8 +21,14 @@ public class profileController {
 
     @PostMapping(path = "/Profile")
     String createPerson(@RequestBody profile profile){
-
+        System.out.println("Hello world");
         profileRepository.save(profile);
+        return "";
+    }
+
+    @PostMapping(path = "/Profilesss")
+    String d(){
+        System.out.println("Hello world");
         return "";
     }
 

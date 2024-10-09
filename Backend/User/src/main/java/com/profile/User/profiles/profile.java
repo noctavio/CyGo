@@ -1,21 +1,21 @@
 package com.profile.User.profiles;
 
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
+@Entity()
+@Table(name = "profile")
 public class profile {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
-    private String USERNAME;
-    private String PROFILE_PICTURE;
-    private String CLUB;
-    private String CLUB_PICTURE;
-    private int WINS;
-    private int LOSSES;
-    private int GAMES_PLAYED;
-    private int RATING;
+    public int id;
+    public String USERNAME;
+    public String PROFILE_PICTURE;
+    public String CLUB;
+    public String CLUB_PICTURE;
+    public int WINS;
+    public int LOSSES;
+    public int GAMES_PLAYED;
+    public int RATING;
 
 
     public profile(String name) {
@@ -29,8 +29,8 @@ public class profile {
         this.GAMES_PLAYED = 0;
         this.RATING = 800;
     }
-    public profile(String name, String PROFILE_PICTURE, String club, String club_picture) {
-        this.USERNAME = name;
+    public profile(String USERNAME, String PROFILE_PICTURE, String club, String club_picture) {
+        this.USERNAME = USERNAME;
         this.PROFILE_PICTURE = PROFILE_PICTURE;
         this.CLUB = club;
         this.CLUB_PICTURE = club_picture;
