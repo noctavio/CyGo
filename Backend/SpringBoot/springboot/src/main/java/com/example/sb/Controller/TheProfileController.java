@@ -46,5 +46,16 @@ public class TheProfileController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @DeleteMapping("/{USERNAME}")
+    public ResponseEntity<String> deleteByUSERNAME(@PathVariable String USERNAME) {
+        Profile profile = ProfileRepository.findByUSERNAME(USERNAME);
+        if (profile != null) {
+            ProfileRepository.delete(profile);
+            return ResponseEntity.ok("Club deleted successfully.");
+        } else {
+            return ResponseEntity.status(200).body("Club not found.");
+        }
+    }
 }
 
