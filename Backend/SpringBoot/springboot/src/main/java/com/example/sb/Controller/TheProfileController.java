@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-public class ProfileController {
+public class TheProfileController {
     @Autowired
     ProfileRepository ProfileRepository;
     @GetMapping(path = "/Profile")
