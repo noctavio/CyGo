@@ -1,8 +1,10 @@
 package com.example.sb.Controller;
 
+import com.example.sb.Entity.Club;
 import com.example.sb.Entity.Profile;
 import com.example.sb.Repository.ProfileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,23 +30,21 @@ public class TheProfileController {
         return "";
     }
 
-    @PutMapping("/Profile/{username}")
-    Profile updatePerson(@PathVariable String username, @RequestBody Profile request) {
-        Profile profile = ProfileRepository.findByUSERNAME(username);
-
-        if (profile == null) {
-            throw new RuntimeException("profile id does not exist");
-        }
-
-        ProfileRepository.save(request);
-        return ProfileRepository.findByUSERNAME(username);
-    }
-
     @PutMapping("/Profile/{USERNAME}")
-    String assignLaptopToPerson(@PathVariable String USERNAME) {
+    public ResponseEntity<Profile> updateClub(@PathVariable String USERNAME, @RequestBody Profile updatedProfile) {
         Profile profile = ProfileRepository.findByUSERNAME(USERNAME);
-        ProfileRepository.save(profile);
-        return "";
+        if (profile != null) {
+            // Update the fields of the retrieved entity
+            profile.setUSERNAME(updatedProfile.getUSERNAME());
+            profile.setCLUB(updatedProfile.getCLUB());
+            profile.setPROFILE_PICTURE(updatedProfile.getPROFILE_PICTURE());
+
+            // Save the updated entity to the database
+            Profile savedProfile = ProfileRepository.save(profile);
+            return ResponseEntity.ok(savedProfile);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }
 
