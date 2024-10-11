@@ -11,48 +11,39 @@ import java.util.List;
 public class TheProfileController {
     @Autowired
     ProfileRepository ProfileRepository;
+
     @GetMapping(path = "/Profile")
-    List<Profile> getAllPersons(){
+    List<Profile> getAllPProfiles() {
         return ProfileRepository.findAll();
     }
 
-    @GetMapping(path = "/Profile/{id}")
-    Profile getPersonById( @PathVariable int id){
-        return ProfileRepository.findById(id);
+    @GetMapping(path = "/Profile/{username}")
+    Profile getProfileByUsername(@PathVariable String username) {
+        return ProfileRepository.findByUSERNAME(username);
     }
 
     @PostMapping(path = "/Profile")
-    String createPerson(@RequestBody Profile profile){
-        System.out.println("Hello world");
+    String createPerson(@RequestBody Profile profile) {
         ProfileRepository.save(profile);
         return "";
     }
 
-    @PutMapping("/Profile/{id}")
-    Profile updatePerson(@PathVariable int id, @RequestBody Profile request){
-        Profile profile = ProfileRepository.findById(id);
+    @PutMapping("/Profile/{username}")
+    Profile updatePerson(@PathVariable String username, @RequestBody Profile request) {
+        Profile profile = ProfileRepository.findByUSERNAME(username);
 
-        if(profile == null) {
+        if (profile == null) {
             throw new RuntimeException("profile id does not exist");
-        }
-        else if (profile.getId() != id){
-            throw new RuntimeException("path variable id does not match Person request id");
         }
 
         ProfileRepository.save(request);
-        return ProfileRepository.findById(id);
+        return ProfileRepository.findByUSERNAME(username);
     }
 
-    @PutMapping("/Profile")
-    String assignLaptopToPerson(@PathVariable int ProfileId,@PathVariable int laptopId){
-        Profile profile = ProfileRepository.findById(ProfileId);
+    @PutMapping("/Profile/{USERNAME}")
+    String assignLaptopToPerson(@PathVariable String USERNAME) {
+        Profile profile = ProfileRepository.findByUSERNAME(USERNAME);
         ProfileRepository.save(profile);
-        return "";
-    }
-
-    @DeleteMapping(path = "/Profile/{id}")
-    String deletePerson(@PathVariable int id){
-        ProfileRepository.deleteById(id);
         return "";
     }
 }
