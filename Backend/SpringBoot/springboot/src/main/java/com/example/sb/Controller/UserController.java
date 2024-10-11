@@ -51,6 +51,7 @@ public class UserController {
                 existingUser.setPassword(encoder.encode(newPassword));
             }
         }
+        userService.updateUser(existingUser);
 
         return ResponseEntity.ok("User Has been updated accordingly.");
     }
