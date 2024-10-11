@@ -1,10 +1,10 @@
-package com.profile.User.profiles;
+package com.example.sb.Entity;
 
 import jakarta.persistence.*;
 
 @Entity()
 @Table(name = "profile")
-public class profile {
+public class Profile {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public int id;
@@ -18,7 +18,7 @@ public class profile {
     public int RATING;
 
 
-    public profile(String name) {
+    public Profile(String name) {
 
         this.USERNAME = name;
         this.PROFILE_PICTURE = "default";
@@ -29,7 +29,7 @@ public class profile {
         this.GAMES_PLAYED = 0;
         this.RATING = 800;
     }
-    public profile(String USERNAME, String PROFILE_PICTURE, String club, String club_picture) {
+    public Profile(String USERNAME, String PROFILE_PICTURE, String club, String club_picture) {
         this.USERNAME = USERNAME;
         this.PROFILE_PICTURE = PROFILE_PICTURE;
         this.CLUB = club;
@@ -40,7 +40,7 @@ public class profile {
         this.RATING = 800;
     }
 
-    public profile() {
+    public Profile() {
     }
     public int getId(){
         return id;

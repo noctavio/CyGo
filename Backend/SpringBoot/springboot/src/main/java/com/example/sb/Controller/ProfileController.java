@@ -1,4 +1,4 @@
-package com.profile.User.profiles;
+package com.example.sb.Controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -26,22 +26,6 @@ public class profileController {
         return "";
     }
 
-    @PostMapping(path = "/Profilesss")
-    String d(){
-        System.out.println("Hello world");
-        return "";
-    }
-
-    /* not safe to update */
-//    @PutMapping("/Persons/{id}")
-//    Person updatePerson(@PathVariable int id, @RequestBody Person request){
-//        Person Person = PersonRepository.findById(id);
-//        if(Person == null)
-//            return null;
-//        PersonRepository.save(request);
-//        return PersonRepository.findById(id);
-//    }
-
     @PutMapping("/Profile/{id}")
     profile updatePerson(@PathVariable int id, @RequestBody profile request){
         profile profile = profileRepository.findById(id);
@@ -64,7 +48,7 @@ public class profileController {
         return "";
     }
 
-    @DeleteMapping(path = "/Persons/{id}")
+    @DeleteMapping(path = "/Profile/{id}")
     String deletePerson(@PathVariable int id){
         profileRepository.deleteById(id);
         return "";
