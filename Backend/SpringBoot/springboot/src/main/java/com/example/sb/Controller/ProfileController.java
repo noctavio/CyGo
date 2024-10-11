@@ -6,29 +6,29 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-public class profileController {
+public class ProfileController {
     @Autowired
-    profileRepository profileRepository;
+    ProfileRepository ProfileRepository;
     @GetMapping(path = "/Profile")
-    List<profile> getAllPersons(){
-        return profileRepository.findAll();
+    List<Profile> getAllPersons(){
+        return ProfileRepository.findAll();
     }
 
     @GetMapping(path = "/Profile/{id}")
-    profile getPersonById( @PathVariable int id){
-        return profileRepository.findById(id);
+    Profile getPersonById( @PathVariable int id){
+        return ProfileRepository.findById(id);
     }
 
     @PostMapping(path = "/Profile")
-    String createPerson(@RequestBody profile profile){
+    String createPerson(@RequestBody Profile profile){
         System.out.println("Hello world");
-        profileRepository.save(profile);
+        ProfileRepository.save(profile);
         return "";
     }
 
     @PutMapping("/Profile/{id}")
-    profile updatePerson(@PathVariable int id, @RequestBody profile request){
-        profile profile = profileRepository.findById(id);
+    Profile updatePerson(@PathVariable int id, @RequestBody Profile request){
+        Profile profile = ProfileRepository.findById(id);
 
         if(profile == null) {
             throw new RuntimeException("profile id does not exist");
@@ -37,20 +37,20 @@ public class profileController {
             throw new RuntimeException("path variable id does not match Person request id");
         }
 
-        profileRepository.save(request);
+        ProfileRepository.save(request);
         return profileRepository.findById(id);
     }
 
     @PutMapping("/Profile")
     String assignLaptopToPerson(@PathVariable int ProfileId,@PathVariable int laptopId){
-        profile profile = profileRepository.findById(ProfileId);
-        profileRepository.save(profile);
+        Profile profile = profileRepository.findById(ProfileId);
+        ProfileRepository.save(profile);
         return "";
     }
 
     @DeleteMapping(path = "/Profile/{id}")
     String deletePerson(@PathVariable int id){
-        profileRepository.deleteById(id);
+        ProfileRepository.deleteById(id);
         return "";
     }
 }
