@@ -1,5 +1,7 @@
 package com.example.sb.Controller;
 
+import com.example.sb.Entity.Profile;
+import com.example.sb.Repository.ProfileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,12 +40,12 @@ public class ProfileController {
         }
 
         ProfileRepository.save(request);
-        return profileRepository.findById(id);
+        return ProfileRepository.findById(id);
     }
 
     @PutMapping("/Profile")
     String assignLaptopToPerson(@PathVariable int ProfileId,@PathVariable int laptopId){
-        Profile profile = profileRepository.findById(ProfileId);
+        Profile profile = ProfileRepository.findById(ProfileId);
         ProfileRepository.save(profile);
         return "";
     }
