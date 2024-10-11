@@ -14,14 +14,14 @@ import java.util.stream.Collectors;
 @Service
 public class LeaderboardService {
     @Autowired
-    private LeaderboardRepository leaderboardService;
+    private LeaderboardRepository leaderboardRepository;
 
     @Autowired
     private UserRepository userRepository;
 
     public List<Leaderboard> getTop10Players() {
         // Fetch all players from database
-        List<Leaderboard> players = leaderboardService.findAll();
+        List<Leaderboard> players = leaderboardRepository.findAll();
 
         // Sort by rank in descending order
         players.sort((player1, player2) -> {
@@ -54,7 +54,7 @@ public class LeaderboardService {
         List<User> users = userRepository.findAll(); // Fetch all users
 
         for (User user : users) {
-            if (!leaderboardService.existsById((long) user.getId())) {
+            if (!leaderboardRepository.existsById((long) user.getId())) {
                 Leaderboard player = new Leaderboard();
                 player.setUsername(user.getUsername());
                 player.setClubname("-/-");
@@ -63,21 +63,21 @@ public class LeaderboardService {
                 player.setLoss(0);
                 player.setGamesplayed(0);
 
-                leaderboardService.save(player); // Save the Player
+                leaderboardRepository.save(player); // Save the Player
             }
         }
     }
 
     public Leaderboard getUserById(int id) {
-        return leaderboardService.findById((long) id).orElse(null);
+        return leaderboardRepository.findById((long) id).orElse(null);
     }
     public Leaderboard updatePlayer(Leaderboard player) {
-        return leaderboardService.save(player);
+        return leaderboardRepository.save(player);
     }
     public boolean deleteUserById(int id) {
 
-        if (leaderboardService.existsById((long) id)) {
-            leaderboardService.deleteById((long) id);
+        if (leaderboardRepository.existsById((long) id)) {
+            leaderboardRepository.deleteById((long) id);
             return true;
         }
         return false;
