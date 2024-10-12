@@ -1,7 +1,6 @@
 package com.example.sb.Controller;
 
 import com.example.sb.Entity.User;
-import com.example.sb.Service.LeaderboardService;
 import com.example.sb.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -11,6 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RequestMapping("/users")
 @RestController
@@ -34,13 +34,17 @@ public class UserController {
         }
     }
 
-    @PutMapping("/update/{username}")
-    public ResponseEntity<String> updateUser(@PathVariable String username, @RequestBody User user) {
+    @PutMapping("/update/{id}")
+    public ResponseEntity<String> updateUser(@PathVariable Integer id, @RequestBody User user) {
         // TODO change this so you can change user/password separately without the other going null
-        User existingUser = userService.getByUsername(username);
-        if (existingUser == null) {
+        Optional<User> existingUserOptional = userService.getByUserID(id);
+
+        // Check if the user exists
+        if (existingUserOptional.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
+
+        User existingUser = existingUserOptional.get(); // Extract the User from Optional
 
         if (user.getUsername() != null) {
             existingUser.setUsername(user.getUsername());
@@ -54,7 +58,7 @@ public class UserController {
                 existingUser.setPassword(encoder.encode(newPassword));
             }
         }
-        userService.updateUser(existingUser);
+        userService.updateUser(Optional.of(existingUser));
         return ResponseEntity.ok("User has been updated accordingly.");
     }
 
@@ -71,12 +75,12 @@ public class UserController {
 
     /**
      * This deletes a user's account and will also remove them from all other tables.
-     * @param username username input
+     * @param id ID input
      * @return a status message
      */
-    @DeleteMapping("/hardDelete/{username}")
-    public ResponseEntity<String> deleteByUsername(@PathVariable String username) {
-        boolean isDeletedFromUsers = userService.deleteByUsername(username);
+    @DeleteMapping("/hardDelete/{id}")
+    public ResponseEntity<String> deleteByUsername(@PathVariable Integer id) {
+        boolean isDeletedFromUsers = userService.deleteByID(id);
 
         if (isDeletedFromUsers) {
             return ResponseEntity.ok("User deleted successfully.");

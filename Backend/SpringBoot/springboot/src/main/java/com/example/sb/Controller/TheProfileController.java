@@ -9,36 +9,40 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 import java.util.List;
-@RequestMapping("/profiles")
 @RestController
 public class TheProfileController {
 
     @Autowired
     private TheProfileService TheProfileService;
 
-    @GetMapping()
+    /**
+     * Returns a list of the top 10 players sorted by rank (highest to lowest)
+     * @return list
+     */
+    @GetMapping("/leaderboard")
+    public List<TheProfile> getLeaderboard() {
+        return TheProfileService.getTop10Players();
+    }
+
+    @GetMapping("/profiles")
     public List<TheProfile> getAllProfiles() {
         return TheProfileService.getAllProfiles();
     }
 
-    @GetMapping(path = "/{username}")
-    public TheProfile getProfileByUsername(@PathVariable String username) {
-        return TheProfileService.getProfileByUsername(username);
+    @GetMapping(path = "/profiles/{id}")
+    public TheProfile getProfileById(@PathVariable Integer id) {
+        return TheProfileService.getProfileByID(id);
     }
 
-    @PostMapping(path = "/create")
-    public TheProfile createProfile(@RequestBody TheProfile profile) {
-        return TheProfileService.createProfile(profile);
-    }
-    @PostMapping("/refresh")
+    @PostMapping("/profiles/refresh")
     public ResponseEntity<String> createProfilesFromUsers() {
         TheProfileService.updateProfileTable();
         return ResponseEntity.ok("Player username's and ID's have been transferred to the leaderboard table.");
     }
 
-    @PutMapping("/update/{username}")
-    public ResponseEntity<String> updateProfile(@PathVariable String username, @RequestBody TheProfile profileJSON) {
-        TheProfile existingUser = TheProfileService.getProfileByUsername(username);
+    @PutMapping("/profiles/update/{id}")
+    public ResponseEntity<String> updateProfile(@PathVariable Integer id, @RequestBody TheProfile profileJSON) {
+        TheProfile existingUser = TheProfileService.getProfileByID(id);
 
         if (existingUser == null) {
             return ResponseEntity.badRequest().body("Profile was not found");
@@ -83,7 +87,7 @@ public class TheProfileController {
 
         return ResponseEntity.ok("The user has been updated accordingly.");
     }
-    // TODO READ -> this controller does not require a delete method since you are only updating/overwriting data here, only deletes in club!
+    // TODO READ -> this controller does not require a delete method since you are only updating/overwriting data here, only deletes in club and using hardDelete method.
     //@DeleteMapping("/{username}")
     //public ResponseEntity<String> deleteSomethingByUsername(@PathVariable String username) {
     //    return ResponseEntity.ok("HEY YOU");

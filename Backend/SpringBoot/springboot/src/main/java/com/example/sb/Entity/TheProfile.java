@@ -1,9 +1,6 @@
 package com.example.sb.Entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 
@@ -21,9 +18,12 @@ public class TheProfile {
     @Id()
     @Column(name = "ID")
     @GeneratedValue
-    private int id;
-    @Column(name = "USERNAME")
-    private String username;
+    private int id; // this is a primary key as annotated by @Id() may change/delete in the future
+    // Foreign key mapping to (registered_users)
+    @OneToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "id")  // Foreign key pointing to User table
+    private User user; // Retrieves username AND row id's from (registered_users)
+
     @Column(name = "PROFILEPICTURE")
     private String profilepicture;
     @Column(name = "CLUBNAME")
