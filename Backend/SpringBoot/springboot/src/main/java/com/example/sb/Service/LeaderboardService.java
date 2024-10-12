@@ -1,13 +1,12 @@
 package com.example.sb.Service;
 
 import com.example.sb.Entity.Leaderboard;
-import com.example.sb.Entity.User;
+import com.example.sb.Entity.TheProfile;
 import com.example.sb.Repository.LeaderboardRepository;
-import com.example.sb.Repository.UserRepository;
+import com.example.sb.Repository.TheProfileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -15,9 +14,10 @@ import java.util.stream.Collectors;
 public class LeaderboardService {
     @Autowired
     private LeaderboardRepository leaderboardRepository;
-
     @Autowired
-    private UserRepository userRepository;
+    private TheProfileRepository theProfileRepository;
+    @Autowired
+    private TheProfileService theProfileService;
 
     public List<Leaderboard> getTop10Players() {
         // Fetch all players from database
@@ -38,6 +38,7 @@ public class LeaderboardService {
             if (!type1.equals(type2)) {
                 return type1.equals("dan") ? -1 : 1; // dan is higher than kyu
             }
+
             // For dan, higher values are better (9 dan > 1 dan)
             if (type1.equals("dan")) {
                 return Integer.compare(value2, value1); // Higher dan values come first
@@ -50,36 +51,50 @@ public class LeaderboardService {
         // Limit to top 10 players
         return players.stream().limit(10).collect(Collectors.toList());
     }
-    public void createPlayersFromUsers() {
-        List<User> users = userRepository.findAll(); // Fetch all users
 
-        for (User user : users) {
-            if (!leaderboardRepository.existsById((long) user.getId())) {
-                Leaderboard player = new Leaderboard();
-                player.setUsername(user.getUsername());
-                player.setClubname("-/-");
-                player.setRank("30 kyu");
-                player.setWins(0);
-                player.setLoss(0);
-                player.setGamesplayed(0);
+    /**
+     * This updates the leaderboard table, and profile table(all tables above it in hierarchy should be refreshed)
+     * this is in case a user accesses the leaderboard in case a new player registers.
+     * It pulls the data from Registered_Users, Updates Profiles, pulls the data from Profiles, and finally Updates the leaderboard.
+     */
+    public void updateLeaderboardTable() {
+        theProfileService.updateProfileTable();
 
-                leaderboardRepository.save(player); // Save the Player
+        List<TheProfile> userProfiles = theProfileRepository.findAll(); // Fetch all users
+        List<Leaderboard> leaderboardUsers = leaderboardRepository.findAll();
+
+        for (TheProfile profiles : userProfiles) {
+            Leaderboard existingPlayer = leaderboardRepository.findByUsername(profiles.getUsername());
+
+            if (leaderboardRepository.findByUsername(profiles.getUsername()) == null) {
+                Leaderboard newPlayer = new Leaderboard();
+                newPlayer.setUsername(profiles.getUsername());
+                newPlayer.setClubname(profiles.getClubname());
+                newPlayer.setRank(profiles.getRank());
+                newPlayer.setWins(profiles.getWins());
+                newPlayer.setLoss(profiles.getLoss());
+                newPlayer.setGamesplayed(profiles.getGames());
+
+                leaderboardRepository.save(newPlayer); // Save the Player
+            }
+            else {
+                existingPlayer.setUsername(profiles.getUsername());
+                existingPlayer.setClubname(profiles.getClubname());
+                existingPlayer.setRank(profiles.getRank());
+                existingPlayer.setWins(profiles.getWins());
+                existingPlayer.setLoss(profiles.getLoss());
+                existingPlayer.setGamesplayed(profiles.getGames());
+
+                leaderboardRepository.save(existingPlayer);
             }
         }
     }
 
-    public Leaderboard getUserById(int id) {
-        return leaderboardRepository.findById((long) id).orElse(null);
-    }
-    public Leaderboard updatePlayer(Leaderboard player) {
-        return leaderboardRepository.save(player);
-    }
-    public boolean deleteUserById(int id) {
+    //public Leaderboard getByUsername(String username) {
+    //    return leaderboardRepository.findByUsername(username);
+    //}
 
-        if (leaderboardRepository.existsById((long) id)) {
-            leaderboardRepository.deleteById((long) id);
-            return true;
-        }
-        return false;
-    }
+    //public void updatePlayer(Leaderboard player) {
+    //    leaderboardRepository.save(player);
+    //}
 }

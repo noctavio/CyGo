@@ -1,6 +1,7 @@
 package com.example.sb.Controller;
 
 import com.example.sb.Entity.User;
+import com.example.sb.Service.LeaderboardService;
 import com.example.sb.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,18 +28,20 @@ public class UserController {
         // Authenticate user
         if (userService.authenticateUser(username, password)) {
             return ResponseEntity.ok("Login successful");
-        } else {
+        }
+        else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
         }
     }
 
-    @PutMapping("/update/{id}")
-    public ResponseEntity<String> updateUser(@PathVariable int id, @RequestBody User user) {
+    @PutMapping("/update/{username}")
+    public ResponseEntity<String> updateUser(@PathVariable String username, @RequestBody User user) {
         // TODO change this so you can change user/password separately without the other going null
-        User existingUser = userService.getUserById(id);
+        User existingUser = userService.getByUsername(username);
         if (existingUser == null) {
             return ResponseEntity.notFound().build();
         }
+
         if (user.getUsername() != null) {
             existingUser.setUsername(user.getUsername());
         }
@@ -52,8 +55,7 @@ public class UserController {
             }
         }
         userService.updateUser(existingUser);
-
-        return ResponseEntity.ok("User Has been updated accordingly.");
+        return ResponseEntity.ok("User has been updated accordingly.");
     }
 
     @GetMapping
@@ -61,17 +63,25 @@ public class UserController {
         return userService.getAllUsers();
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable int id) {
-        User user = userService.getUserById(id);
+    @GetMapping("/{username}")
+    public ResponseEntity<User> getByUsername(@PathVariable String username) {
+        User user = userService.getByUsername(username);
         return user != null ? ResponseEntity.ok(user) : ResponseEntity.notFound().build();
     }
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteUserById(@PathVariable int id) {
-        boolean isDeleted = userService.deleteUserById(id);
-        if (isDeleted) {
+
+    /**
+     * This deletes a user's account and will also remove them from all other tables.
+     * @param username username input
+     * @return a status message
+     */
+    @DeleteMapping("/hardDelete/{username}")
+    public ResponseEntity<String> deleteByUsername(@PathVariable String username) {
+        boolean isDeletedFromUsers = userService.deleteByUsername(username);
+
+        if (isDeletedFromUsers) {
             return ResponseEntity.ok("User deleted successfully.");
-        } else {
+        }
+        else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
         }
     }

@@ -31,7 +31,4 @@ public class Leaderboard {
     @Column(name = "LOSS")
     private Integer loss;
 
-    public void setGamesplayed() {
-        this.gamesplayed = (wins != null ? wins : 0) + (loss != null ? loss : 0);
-    }
 }

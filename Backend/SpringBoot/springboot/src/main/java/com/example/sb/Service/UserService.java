@@ -1,6 +1,8 @@
 package com.example.sb.Service;
 
 import com.example.sb.Entity.User;
+import com.example.sb.Repository.LeaderboardRepository;
+import com.example.sb.Repository.TheProfileRepository;
 import com.example.sb.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -13,6 +15,10 @@ import java.util.List;
 public class UserService {
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private LeaderboardRepository leaderboardRepository;
+    @Autowired
+    private TheProfileRepository theProfileRepository;
 
     private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -23,28 +29,37 @@ public class UserService {
 
         return userRepository.save(user);
     }
+
     public Boolean authenticateUser(String username, String password) {
-        User user = userRepository.findByusername(username);
+        User user = userRepository.findByUsername(username);
         if (user != null && passwordEncoder.matches(password, user.getPassword())) {
             return true;
         }
         return false;
     }
 
-
-    public User updateUser(User user) {
-        return userRepository.save(user);
+    public void updateUser(User user) {
+        userRepository.save(user);
     }
 
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
-    public User getUserById(int id) {
-        return userRepository.findById(id).orElse(null);
+
+    public User getByUsername(String username) {
+        return userRepository.findByUsername(username);
     }
-    public boolean deleteUserById(int id) {
-        if (userRepository.existsById(id)) {
-            userRepository.deleteById(id);
+
+    /**
+     * This should be the method to delete from ALLLLLLLL Repositories you should import here and deleteByUsername!
+     * @param username username
+     * @return boolean
+     */
+    public boolean deleteByUsername(String username) {
+        if (userRepository.findByUsername(username) != null) {
+            userRepository.deleteByUsername(username);
+            leaderboardRepository.deleteByUsername(username);
+            theProfileRepository.deleteByUsername(username);
             return true;
         }
         return false;
