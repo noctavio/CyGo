@@ -6,7 +6,7 @@ import org.springframework.data.annotation.Id;
 
 @Entity
 @Data
-@Table(name = "profile")
+@Table(name = "profiles")
 
 @AllArgsConstructor
 @NoArgsConstructor

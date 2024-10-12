@@ -37,7 +37,7 @@ public class TheProfileController {
     @PostMapping("/profiles/refresh")
     public ResponseEntity<String> createProfilesFromUsers() {
         TheProfileService.updateProfileTable();
-        return ResponseEntity.ok("Player username's and ID's have been transferred to the leaderboard table.");
+        return ResponseEntity.ok("Player username's and ID's have been transferred to the profiles table.");
     }
 
     @PutMapping("/profiles/update/{id}")
