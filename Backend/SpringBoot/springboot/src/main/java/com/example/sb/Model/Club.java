@@ -1,14 +1,16 @@
 package com.example.sb.Model;
 
 import com.example.sb.Entity.User;
-import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 
+@Entity
+@Data
+@Table(name = "clubs")
+
+@AllArgsConstructor
+@NoArgsConstructor
 public class
 Club {
 
