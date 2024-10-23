@@ -1,10 +1,7 @@
 package com.example.sb.Service;
 
 import com.example.sb.Entity.Club;
-import com.example.sb.Entity.TheProfile;
-import com.example.sb.Entity.User;
 import com.example.sb.Repository.ClubRepository;
-import com.example.sb.Repository.TheProfileRepository;
 import com.example.sb.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
@@ -12,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class ClubService {
@@ -39,9 +35,21 @@ public class ClubService {
         return clubRepository.findByName(club.getclubname());
     }
 
-    public void updateProfile(Club club) {
+    public void updateClub(Club club) {
         clubRepository.save(club);
     }
+
+    public boolean deleteByCLUB(Club club) {
+
+        if (clubRepository.findById(club.getid()).isPresent()){
+            clubRepository.delete(club);
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
 }
+
 
 

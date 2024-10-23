@@ -28,52 +28,107 @@ public class TheProfileController {
     public Club getClubById(@PathVariable Integer id) {
         return clubService.getClubByID(id);
     }
-    
+
 
     @PutMapping("/profiles/update/{id}")
-    public ResponseEntity<String> updateProfile(@PathVariable Integer id, @RequestBody TheProfile profileJSON) {
-        TheProfile existingUser = TheProfileService.getProfileByID(id);
+    public ResponseEntity<String> updateClub(@PathVariable Integer id, @RequestBody Club clubJSON) {
+        Club existingClub = clubService.getClubByID(id);
 
-        if (existingUser == null) {
-            return ResponseEntity.badRequest().body("Profile was not found");
+        if (existingClub == null) {
+            return ResponseEntity.badRequest().body("Club was not found");
         }
 
-        if ((profileJSON.getWins() != null && profileJSON.getWins() < 0) || (profileJSON.getLoss() != null && profileJSON.getLoss() < 0)) {
 
-            return ResponseEntity.badRequest().body("Wins and losses must be non-negative.");
+
+        if (clubJSON.getclubname() == null) {
+                return ResponseEntity.badRequest().body("Invalid club name input");
+
         }
 
-        if (profileJSON.getRank() != null) {
-            if (Arrays.asList(RankConstants.RANKS).contains(profileJSON.getRank())) {
-                existingUser.setRank(profileJSON.getRank());
-            }
-            else {
-                return ResponseEntity.badRequest().body("Invalid rank input... please review Go ranks -> (30 kyu - 1 kyu) and (1 dan - 9 dan)");
-            }
+
+
+        if (clubJSON.getProfilepicture() != null) {
+            existingClub.setProfilepicture(clubJSON.getProfilepicture());
         }
 
-        if (profileJSON.getClubpicture() != null) {
-            existingUser.setClubpicture(profileJSON.getClubpicture());
+        if (clubJSON.getmember1() != null) {
+            existingClub.setmember1(clubJSON.getmember1());
         }
 
-        if (profileJSON.getProfilepicture() != null) {
-            existingUser.setProfilepicture(profileJSON.getProfilepicture());
+        if (clubJSON.getmember2() != null) {
+            existingClub.setmember2(clubJSON.getmember2());
         }
 
-        if (profileJSON.getClubname() != null) {
-            existingUser.setClubname(profileJSON.getClubname());
+        if (clubJSON.getmember3() != null) {
+            existingClub.setmember3(clubJSON.getmember3());
         }
 
-        if (profileJSON.getWins() != null) {
-            existingUser.setWins(profileJSON.getWins());
+        if (clubJSON.getmember4() != null) {
+            existingClub.setmember4(clubJSON.getmember4());
+        }
+        if (clubJSON.getmember5() != null) {
+            existingClub.setmember5(clubJSON.getmember5());
         }
 
-        if (profileJSON.getLoss() != null) {
-            existingUser.setLoss(profileJSON.getLoss());
+        if (clubJSON.getmember6() != null) {
+            existingClub.setmember6(clubJSON.getmember6());
         }
 
-        existingUser.setGamesplayed();
-        TheProfileService.updateProfile(existingUser);
+        if (clubJSON.getmember7() != null) {
+            existingClub.setmember7(clubJSON.getmember7());
+        }
+
+        if (clubJSON.getmember8() != null) {
+            existingClub.setmember8(clubJSON.getmember8());
+        }
+        if (clubJSON.getmember9() != null) {
+            existingClub.setmember9(clubJSON.getmember9());
+        }
+
+        if (clubJSON.getmember10() != null) {
+            existingClub.setmember10(clubJSON.getmember10());
+        }
+
+        if (clubJSON.getmember11() != null) {
+            existingClub.setmember11(clubJSON.getmember11());
+        }
+
+        if (clubJSON.getmember12() != null) {
+            existingClub.setmember12(clubJSON.getmember12());
+        }
+        if (clubJSON.getmember13() != null) {
+            existingClub.setmember13(clubJSON.getmember13());
+        }
+
+        if (clubJSON.getmember14() != null) {
+            existingClub.setmember14(clubJSON.getmember14());
+        }
+
+        if (clubJSON.getmember15() != null) {
+            existingClub.setmember15(clubJSON.getmember15());
+        }
+
+        if (clubJSON.getmember16() != null) {
+            existingClub.setmember16(clubJSON.getmember16());
+        }
+        if (clubJSON.getmember17() != null) {
+            existingClub.setmember17(clubJSON.getmember17());
+        }
+
+        if (clubJSON.getmember18() != null) {
+            existingClub.setmember18(clubJSON.getmember18());
+        }
+
+        if (clubJSON.getmember19() != null) {
+            existingClub.setmember19(clubJSON.getmember19());
+        }
+
+        if (clubJSON.getMember20() != null) {
+            existingClub.setMember20(clubJSON.getMember20());
+        }
+
+
+        clubService.updateClub(existingClub);
 
         return ResponseEntity.ok("The user has been updated accordingly.");
     }
