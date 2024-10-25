@@ -1,46 +1,23 @@
 package com.example.sb.Model;
 
-public class Player {
-    // Getters and Setters
+import java.util.List;
 
-    private int playerId;
+import lombok.Getter;
+import lombok.Setter;
+@Getter
+@Setter
+public class Player {
+
+    private int playerId; //TODO probably necessary to be unique and primary key.
     private String username;
     private Boolean isReady;
     private String rank;
     private String clubname;
+    private List<Player> mutedPlayers;
+    private int individualScore;
 
     public Player(int playerId) {
         this.playerId = playerId;
         this.isReady = false;  // Players are not ready when they join
-    }
-    public int getPlayerId() {
-        return playerId;
-    }
-    public void setPlayerId(int playerId) {
-        this.playerId = playerId;
-    }
-    public String getUsername() {
-        return username;
-    }
-    public void setUsername(String username) {
-        this.username = username;
-    }
-    public Boolean isReady() {
-        return isReady;
-    }
-    public void setReady(boolean ready) {
-        isReady = ready;
-    }
-    public String getRank() {
-        return rank;
-    }
-    public void setRank(String rank) {
-        this.rank = rank;
-    }
-    public String getClubname() {
-        return clubname;
-    }
-    public void setClubname(String clubname) {
-        this.clubname = clubname;
     }
 }
