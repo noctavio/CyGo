@@ -21,7 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 @Controller      // this is needed for this to be an endpoint to springboot
-@ServerEndpoint(value = "/chat/{username}")  // this is Websocket url
+@ServerEndpoint(value = "/gamechat/{username}")  // this is Websocket url
 public class ChatController {
 
     // cannot autowire static directly (instead we do it by the below
@@ -57,28 +57,29 @@ public class ChatController {
         usernameSessionMap.put(username, session);
 
         //Send chat history to the newly connected user
-        sendMessageToPArticularUser(username, getChatHistory());
+        sendMsgToUser(username, getChatHistory());
 
         // broadcast that new user joined
-        String message = "User:" + username + " has Joined the Chat";
+        String message = username + " has joined";
         broadcast(message);
     }
 
-
     @OnMessage
     public void onMessage(Session session, String message) throws IOException {
-
         // Handle new messages
         logger.info("Entered into Message: Got Message:" + message);
         String username = sessionUsernameMap.get(session);
 
-        // Direct message to a user using the format "@username <message>"
-        if (message.startsWith("@")) {
-            String destUsername = message.split(" ")[0].substring(1);
+        // Direct message to a user using the format "/whipser username <message>"
+        if (message.startsWith("/whisper")) {
+            String[] parts = message.split(" ", 3); // Split into 3 parts: ["/whisper", "username", "message"]
 
-            // send the message to the sender and receiver
-            sendMessageToPArticularUser(destUsername, "[DM] " + username + ": " + message);
-            sendMessageToPArticularUser(username, "[DM] " + username + ": " + message);
+            String otherUser = parts[1]; // Get the username
+            String whisperMessage = parts.length > 2 ? parts[2] : ""; // Get the rest of the message or empty string if no message
+
+            // send message to target, and display for sender
+            sendMsgToUser(otherUser, "From @" + username + ": " + whisperMessage);
+            sendMsgToUser(username, "To @" +  otherUser + ": " +  whisperMessage);
 
         }
         else { // broadcast
@@ -88,7 +89,6 @@ public class ChatController {
         // Saving chat history to repository
         msgRepo.save(new Message(username, message));
     }
-
 
     @OnClose
     public void onClose(Session session) throws IOException {
@@ -104,7 +104,6 @@ public class ChatController {
         broadcast(message);
     }
 
-
     @OnError
     public void onError(Session session, Throwable throwable) {
         // Do error handling here
@@ -112,8 +111,7 @@ public class ChatController {
         throwable.printStackTrace();
     }
 
-
-    private void sendMessageToPArticularUser(String username, String message) {
+    private void sendMsgToUser(String username, String message) {
         try {
             usernameSessionMap.get(username).getBasicRemote().sendText(message);
         }
@@ -122,7 +120,6 @@ public class ChatController {
             e.printStackTrace();
         }
     }
-
 
     private void broadcast(String message) {
         sessionUsernameMap.forEach((session, username) -> {
@@ -135,9 +132,7 @@ public class ChatController {
             }
 
         });
-
     }
-
 
     // Gets the Chat history from the repository
     private String getChatHistory() {
@@ -145,12 +140,11 @@ public class ChatController {
 
         // convert the list to a string
         StringBuilder sb = new StringBuilder();
-        if(messages != null && messages.size() != 0) {
+        if (messages != null && messages.size() != 0) {
             for (Message message : messages) {
                 sb.append(message.getUserName() + ": " + message.getContent() + "\n");
             }
         }
         return sb.toString();
     }
-
-} // end of Class
+}

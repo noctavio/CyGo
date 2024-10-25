@@ -14,11 +14,13 @@ import jakarta.persistence.TemporalType;
 
 import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Table(name = "messages")
 @Data
+@NoArgsConstructor
 public class Message {
 
     @Getter
@@ -36,10 +38,6 @@ public class Message {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "sent")
     private Date sent = new Date();
-
-
-    public Message() {
-    }
 
     public Message(String userName, String content) {
         this.userName = userName;
