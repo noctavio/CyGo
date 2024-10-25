@@ -130,7 +130,6 @@ public class ChatController {
                 logger.info("Exception: " + e.getMessage().toString());
                 e.printStackTrace();
             }
-
         });
     }
 
