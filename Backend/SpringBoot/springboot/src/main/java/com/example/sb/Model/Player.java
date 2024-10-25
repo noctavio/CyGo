@@ -13,11 +13,23 @@ public class Player {
     private Boolean isReady;
     private String rank;
     private String clubname;
-    private List<Player> mutedPlayers;
+    private List<String> mutedPlayers;
     private int individualScore;
 
     public Player(int playerId) {
         this.playerId = playerId;
         this.isReady = false;  // Players are not ready when they join
+    }
+
+    public void muteAPlayer(String muteTarget) {
+        mutedPlayers.add(muteTarget);
+    }
+
+    public void muteAllEnemies(List<String> enemyTeam) {
+        this.mutedPlayers.addAll(enemyTeam); // Add all at once
+    }
+
+    public void muteAll(List<String> all) {
+        this.mutedPlayers.addAll(all);
     }
 }
