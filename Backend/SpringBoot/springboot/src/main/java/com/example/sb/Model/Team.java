@@ -1,7 +1,11 @@
 package com.example.sb.Model;
+import jakarta.persistence.Column;
+import jakarta.persistence.GeneratedValue;
+import lombok.*;
+
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.annotation.Id;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,14 +14,22 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 public class Team {
+
+    @jakarta.persistence.Id
+    @Id()
+    @Column(name = "ID")
+    @GeneratedValue
     private int id; //TODO probably necessary to be unique and primary key.
+    @Column
     private boolean isBlack;
-    private String name;
-    private List<Player> team;
+    @Column
+    private String teamName;
+    @Column
+    private List<Player> teamList;
+    @Column
     private int teamScore;
-    private int teamCount;
 
     public Team(List<Player> team) {
-        this.team = new ArrayList<>(team);
+        this.teamList = new ArrayList<>(team);
     }
 }

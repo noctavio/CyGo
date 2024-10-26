@@ -4,9 +4,16 @@ import java.io.IOException;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
+import com.example.sb.Entity.Player;
+import com.example.sb.Entity.TheProfile;
+import com.example.sb.Entity.User;
 import com.example.sb.Repository.MessageRepository;
 import com.example.sb.Entity.Message;
+import com.example.sb.Repository.PlayerRepository;
+import com.example.sb.Repository.TheProfileRepository;
+import com.example.sb.Repository.UserRepository;
 import jakarta.websocket.OnClose;
 import jakarta.websocket.OnError;
 import jakarta.websocket.OnMessage;
@@ -27,6 +34,13 @@ public class ChatController {
     // cannot autowire static directly (instead we do it by the below
     // method
     private static MessageRepository msgRepo;
+
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private TheProfileRepository profileRepository;
+    @Autowired
+    private PlayerRepository playerRepository;
 
     /*
      * Grabs the MessageRepository singleton from the Spring Application
@@ -68,26 +82,26 @@ public class ChatController {
     public void onMessage(Session session, String message) throws IOException {
         // Handle new messages
         logger.info("Entered into Message: Got Message:" + message);
-        String username = sessionUsernameMap.get(session);
+        String senderName = sessionUsernameMap.get(session);
 
         // Direct message to a user using the format "/whipser username <message>"
         if (message.startsWith("/whisper")) {
             String[] parts = message.split(" ", 3); // Split into 3 parts: ["/whisper", "username", "message"]
 
-            String otherUser = parts[1]; // Get the username
+            String recipientName = parts[1]; // Get the recipient's name
             String whisperMessage = parts.length > 2 ? parts[2] : ""; // Get the rest of the message or empty string if no message
 
             // send message to target, and display for sender
-            sendMsgToUser(otherUser, "From @" + username + ": " + whisperMessage);
-            sendMsgToUser(username, "To @" +  otherUser + ": " +  whisperMessage);
+            sendMsgToUser(recipientName, "From @" + senderName + ": " + whisperMessage);
+            sendMsgToUser(senderName, "To @" +  recipientName + ": " +  whisperMessage);
 
         }
         else { // broadcast
-            broadcast(username + ": " + message);
+            broadcast(senderName + ": " + message);
         }
 
         // Saving chat history to repository
-        msgRepo.save(new Message(username, message));
+        msgRepo.save(new Message(senderName, message));
     }
 
     @OnClose
@@ -122,8 +136,19 @@ public class ChatController {
     }
 
     private void broadcast(String message) {
-        sessionUsernameMap.forEach((session, username) -> {
+        sessionUsernameMap.forEach((session, recipient) -> {
             try {
+                Player currentRecipient = playerRepository.findByUsername(recipient);
+
+                int colonIndex = message.indexOf(':');
+
+                // Extract the name before the hard code colon.
+                String senderName = message.substring(0, colonIndex).trim();
+
+                if (currentRecipient.getMuted().contains(senderName)) {
+                    return;
+                }
+
                 session.getBasicRemote().sendText(message);
             }
             catch (IOException e) {
