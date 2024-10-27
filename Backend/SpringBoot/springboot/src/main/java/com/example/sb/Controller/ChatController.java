@@ -35,12 +35,11 @@ public class ChatController {
     // method
     private static MessageRepository msgRepo;
 
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private TheProfileRepository profileRepository;
-    @Autowired
-    private PlayerRepository playerRepository;
+    private static UserRepository userRepository;
+
+    private static TheProfileRepository profileRepository;
+
+    private static PlayerRepository playerRepository;
 
     /*
      * Grabs the MessageRepository singleton from the Spring Application
@@ -50,8 +49,12 @@ public class ChatController {
      * easiest.
      */
     @Autowired
-    public void setMessageRepository(MessageRepository repo) {
-        msgRepo = repo;  // we are setting the static variable
+    public void setMessageRepository(MessageRepository repo, UserRepository userRepo, TheProfileRepository profileRepo, PlayerRepository playerRepo) {
+        // we are setting the static variable
+        msgRepo = repo;
+        userRepository = userRepo;
+        profileRepository = profileRepo;
+        playerRepository = playerRepo;
     }
 
     // Store all socket session and their corresponding username.
@@ -61,8 +64,7 @@ public class ChatController {
     private final Logger logger = LoggerFactory.getLogger(ChatController.class);
 
     @OnOpen
-    public void onOpen(Session session, @PathParam("username") String username)
-            throws IOException {
+    public void onOpen(Session session, @PathParam("username") String username) throws IOException {
 
         logger.info("Entered into Open");
 
@@ -74,7 +76,7 @@ public class ChatController {
         sendMsgToUser(username, getChatHistory());
 
         // broadcast that new user joined
-        String message = username + " has joined";
+        String message = username + "-" + "has joined";
         broadcast(message);
     }
 
@@ -86,18 +88,18 @@ public class ChatController {
 
         // Direct message to a user using the format "/whipser username <message>"
         if (message.startsWith("/whisper")) {
-            String[] parts = message.split(" ", 3); // Split into 3 parts: ["/whisper", "username", "message"]
+            String[] parts = message.split(" ", 3); // Split into 3 parts ["/whisper", "username", "message"]
 
             String recipientName = parts[1]; // Get the recipient's name
             String whisperMessage = parts.length > 2 ? parts[2] : ""; // Get the rest of the message or empty string if no message
 
             // send message to target, and display for sender
-            sendMsgToUser(recipientName, "From @" + senderName + ": " + whisperMessage);
-            sendMsgToUser(senderName, "To @" +  recipientName + ": " +  whisperMessage);
+            sendMsgToUser(recipientName, "From @" + senderName + " - " + whisperMessage);
+            sendMsgToUser(senderName, "To @" +  recipientName + " - " +  whisperMessage);
 
         }
         else { // broadcast
-            broadcast(senderName + ": " + message);
+            broadcast(senderName + "- " + message);
         }
 
         // Saving chat history to repository
@@ -114,7 +116,7 @@ public class ChatController {
         usernameSessionMap.remove(username);
 
         // broadcast that the user disconnected
-        String message = username + " disconnected";
+        String message = username + "-" +" disconnected";
         broadcast(message);
     }
 
@@ -138,12 +140,21 @@ public class ChatController {
     private void broadcast(String message) {
         sessionUsernameMap.forEach((session, recipient) -> {
             try {
-                Player currentRecipient = playerRepository.findByUsername(recipient);
+                User user = userRepository.findByUsername(recipient);
+                if (user == null) {
+                    throw new RuntimeException("User not found");
+                }
 
-                int colonIndex = message.indexOf(':');
+                // Retrieve the Profile associated with the User
+                TheProfile profile = profileRepository.findByUser(Optional.of(user));
+                if (profile == null) {
+                    throw new RuntimeException("Profile not found for specified user ");
+                }
+                Player currentRecipient = playerRepository.findByProfile(profile);
 
-                // Extract the name before the hard code colon.
-                String senderName = message.substring(0, colonIndex).trim();
+                int colonIndex = message.indexOf('-');
+
+                String senderName = message.substring(0, colonIndex).trim(); // Extract the name before the hard code colon.
 
                 if (currentRecipient.getMuted().contains(senderName)) {
                     return;
@@ -166,7 +177,7 @@ public class ChatController {
         StringBuilder sb = new StringBuilder();
         if (messages != null && messages.size() != 0) {
             for (Message message : messages) {
-                sb.append(message.getUserName() + ": " + message.getContent() + "\n");
+                sb.append(message.getUserName() + "- " + message.getContent() + "\n");
             }
         }
         return sb.toString();

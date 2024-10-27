@@ -19,12 +19,11 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "Messages")
-@Data
 @NoArgsConstructor
+@Getter
+@Setter
 public class Message {
 
-    @Getter
-    @Setter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
