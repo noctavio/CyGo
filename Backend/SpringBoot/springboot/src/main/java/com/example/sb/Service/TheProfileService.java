@@ -1,7 +1,7 @@
 package com.example.sb.Service;
 
-import com.example.sb.Entity.TheProfile;
-import com.example.sb.Entity.User;
+import com.example.sb.Model.TheProfile;
+import com.example.sb.Model.User;
 import com.example.sb.Repository.TheProfileRepository;
 import com.example.sb.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;

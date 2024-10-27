@@ -1,12 +1,14 @@
 package com.example.sb.Service;
 
-import com.example.sb.Entity.*;
+import com.example.sb.Model.*;
 import com.example.sb.Repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,6 +29,17 @@ public class LobbyService {
         return lobbyRepository.findAll();
     }
 
+    public List<Team> getTeams(Integer lobbyId) {
+        Optional<Lobby> lobbyOptional = lobbyRepository.findById(lobbyId);
+        if (lobbyOptional.isPresent()) {
+            Lobby specificLobby = lobbyOptional.get();
+            Team team1 = specificLobby.getTeam1();
+            Team team2 = specificLobby.getTeam2();
+            return Arrays.asList(team1, team2);
+        }
+        return Collections.emptyList();
+    }
+
     public void createFriendlyLobby(Integer id) {
         Optional<User> user = userRepository.findById(id);
         if (user.isEmpty()) {
@@ -41,8 +54,8 @@ public class LobbyService {
 
         // Create a new Player associated with the existing Profile
         Lobby lobby = new Lobby(profile.getUsername());
-        Team team1 = new Team(profile.getClubname());
-        Team emptyTeam2 = new Team("-/-");
+        Team team1 = new Team(profile.getClubname(), true);
+        Team emptyTeam2 = new Team("-/-", false);
         Player newPlayer = new Player(profile);
 
         lobby.setTeam1(team1);
@@ -84,11 +97,13 @@ public class LobbyService {
             // if team 1 has an open spot
             if (team1.getTeamList().size() < 2) {
                 newPlayer.setLobby(lobbyToJoin);
+                newPlayer.setTeam(team1);
                 lobbyToJoin.getTeam1().addPlayer(newPlayer);
             }
 
             else if (team2.getTeamList().size() < 2) {
                 newPlayer.setLobby(lobbyToJoin);
+                newPlayer.setTeam(team2);
                 lobbyToJoin.getTeam2().addPlayer(newPlayer);
             }
 
@@ -108,7 +123,8 @@ public class LobbyService {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Lobby not found!");
         }
     }
-    // TODO this only works when the lobby has one player/is the host ONLY.
+
+    // TODO this only works when the lobby has two players testing more?
     public ResponseEntity<String> deleteLobbyById(Integer lobbyId) {
         Optional<Lobby> lobbyOptional = lobbyRepository.findById(lobbyId);
         if (lobbyOptional.isPresent()) {
@@ -120,7 +136,5 @@ public class LobbyService {
         }
         return ResponseEntity.ok("Lobby deleted!");
     }
-    //public ResponseEntity<String> removeUserFromLobby (Integer userId, Integer lobbyId) {
-    //
-    //}
+
 }

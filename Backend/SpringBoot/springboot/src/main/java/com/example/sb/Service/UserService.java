@@ -1,6 +1,6 @@
 package com.example.sb.Service;
 
-import com.example.sb.Entity.User;
+import com.example.sb.Model.User;
 import com.example.sb.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;

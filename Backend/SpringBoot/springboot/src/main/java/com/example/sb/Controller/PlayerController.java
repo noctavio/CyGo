@@ -1,15 +1,12 @@
 package com.example.sb.Controller;
 
-import com.example.sb.Entity.Lobby;
-import com.example.sb.Entity.Player;
-import com.example.sb.Entity.User;
+import com.example.sb.Model.Player;
 import com.example.sb.Service.PlayerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RequestMapping("/lobby/players")
 @RestController

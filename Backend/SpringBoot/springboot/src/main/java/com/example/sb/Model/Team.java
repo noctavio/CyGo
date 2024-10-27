@@ -1,4 +1,4 @@
-package com.example.sb.Entity;
+package com.example.sb.Model;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -22,9 +22,10 @@ public class Team {
     @OneToMany(mappedBy = "team", cascade = CascadeType.ALL)
     private List<Player> teamList;
 
-    public Team(String teamName) {
+    public Team(String teamName, boolean isBlack) {
         this.teamList = new ArrayList<>();
         this.teamName = teamName;
+        this.isBlack = isBlack;
     }
 
     public void addPlayer(Player player) {
