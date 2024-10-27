@@ -1,66 +1,62 @@
-package com.example.sb.Model;
+package com.example.sb.Entity;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import com.example.sb.Entity.TheProfile;
-import com.example.sb.Entity.User;
-import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.annotation.Id;
 
 @Getter
 @Setter
+@Entity
+@NoArgsConstructor
+@Table(name = "Players")
 public class Player {
 
-    @jakarta.persistence.Id
-    @Id()
-    @Column(name = "ID")
+    @Id
     @GeneratedValue
-    private int id; //TODO probably necessary to be unique and primary key.
-
-    @OneToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id")  // Foreign key pointing to User table
-    private TheProfile profile; // Retrieves username, row id's, rank, clubname, and much more from (profile_table)
-
-    @Column
+    private Integer player_id;
     private Boolean isReady;
-    @Column
-    private List<String> mutedPlayers;
-    @Column
     private int individualScore;
 
-    public Player(int playerId) {
-        this.id = playerId;
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinColumn(name = "profile_id", referencedColumnName = "profile_id")
+    private TheProfile profile;
+
+    @ManyToOne
+    @JsonIgnore
+    @JoinColumn(name = "lobby_id", referencedColumnName = "lobby_id")
+    private Lobby lobby;
+
+    @ManyToOne
+    @JsonIgnore
+    @JoinColumn(name = "team_id", referencedColumnName = "team_id")
+    private Team team;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "muted_players", joinColumns = @JoinColumn(name = "player_id")) // Join to Players table
+    @Column(name = "muted_type") // Column name in the muted_players table
+    private List<String> muted; // TODO this might be better as a hashMap :)
+
+    public Player(TheProfile profile) {
+        this.profile = profile;
         this.isReady = false;  // Players are not ready when they join
-        this.mutedPlayers = new ArrayList<>();
+        this.muted = new ArrayList<>();
     }
 
-    public void muteAPlayer(String muteTarget) {
-        mutedPlayers.add(muteTarget);
+    public void mute(String muteType) {
+        muted.add(muteType);
     }
 
-    public void unmuteAPlayer(String unmuteTarget) {
-        mutedPlayers.remove(unmuteTarget);
+    public void unmute(String unmuteType) {
+        muted.remove(unmuteType);
     }
 
-    public void muteAllEnemies(List<String> enemyTeam) {
-        this.mutedPlayers.addAll(enemyTeam); // Add all at once
-    }
-
-    public void unMuteAllEnemies(List<String> enemyTeam) {
-        this.mutedPlayers.removeAll(enemyTeam); // Add all at once
-    }
-
-    public void muteAll(List<String> all) {
-        this.mutedPlayers.addAll(all);
-    }
-
-    public void unMuteAll(List<String> all) {
-        this.mutedPlayers.removeAll(all);
+    public String getUsername() {
+        return profile != null ? profile.getUsername() : null;
     }
 }

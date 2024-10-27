@@ -14,6 +14,8 @@ import java.util.Optional;
 public class UserService {
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private TheProfileService theProfileService;
 
     private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -22,10 +24,11 @@ public class UserService {
 
         user.setPassword(passwordEncoder.encode(secret));
 
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        theProfileService.updateProfileTable();
+        return savedUser;
     }
 
-    // TODO DO NOT DELETE username here VVVVVVVVVV
     public Boolean authenticateUser(String username, String password) {
         User user = userRepository.findByUsername(username);
 

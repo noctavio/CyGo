@@ -1,11 +1,6 @@
-package com.example.sb.Model;
-import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
+package com.example.sb.Entity;
+import jakarta.persistence.*;
 import lombok.*;
-
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.data.annotation.Id;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,23 +8,29 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
+@Entity
+@Table(name = "Teams")
 public class Team {
 
-    @jakarta.persistence.Id
     @Id()
-    @Column(name = "ID")
     @GeneratedValue
-    private int id; //TODO probably necessary to be unique and primary key.
-    @Column
+    private Integer team_id; //TODO probably necessary to be unique and primary key.
     private boolean isBlack;
-    @Column
     private String teamName;
-    @Column
-    private List<Player> teamList;
-    @Column
     private int teamScore;
 
-    public Team(List<Player> team) {
-        this.teamList = new ArrayList<>(team);
+    @OneToMany(mappedBy = "team", cascade = CascadeType.ALL)
+    private List<Player> teamList;
+
+    public Team(String teamName) {
+        this.teamList = new ArrayList<>();
+        this.teamName = teamName;
+    }
+
+    public void addPlayer(Player player) {
+        teamList.add(player);
+    }
+    public void removePlayer(Player player) {
+        teamList.remove(player);
     }
 }

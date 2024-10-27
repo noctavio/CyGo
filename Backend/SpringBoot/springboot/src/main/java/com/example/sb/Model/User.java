@@ -1,28 +1,19 @@
 package com.example.sb.Entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.annotation.Id;
 
 @Entity
-@Data
 @Table(name = "REGISTERED_USERS")
 @NoArgsConstructor
-@AllArgsConstructor
+@Getter
+@Setter
 public class User {
 
-    @Getter
-    @Setter
-    @jakarta.persistence.Id
     @Id()
-    @Column(name = "ID")
     @GeneratedValue
-    private int id;
-    @Column(unique = true, name = "USERNAME")
+    private Integer user_id;
+    @Column(unique = true)
     private String username;
-    @Column(name = "PASSWORD")
     private String password;
 }
