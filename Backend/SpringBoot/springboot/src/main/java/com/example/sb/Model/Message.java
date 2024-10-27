@@ -1,4 +1,4 @@
-package com.example.sb.Entity;
+package com.example.sb.Model;
 
 import java.util.Date;
 
@@ -12,7 +12,6 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

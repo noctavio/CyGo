@@ -1,11 +1,10 @@
-package com.example.sb.Entity;
+package com.example.sb.Model;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.time.Duration;
 
 @Getter
 @Setter
@@ -17,7 +16,7 @@ public class Lobby {
     @GeneratedValue
     private int lobby_id;
     private String hostName;
-    private int gameTime;
+    private Integer gameTime;
     private boolean isFriendly;
     private final String boardSize = "9x9";
 
@@ -33,6 +32,7 @@ public class Lobby {
     //private List<String> invitedPlayers;
 
     public Lobby(String hostname) {
+        this.gameTime = 40;
         this.hostName = hostname;
         this.isFriendly = true;
         //this.invitedPlayers = new ArrayList<>();

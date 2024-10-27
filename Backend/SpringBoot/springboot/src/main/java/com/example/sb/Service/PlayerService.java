@@ -1,9 +1,8 @@
 package com.example.sb.Service;
 
-import com.example.sb.Entity.Lobby;
-import com.example.sb.Entity.Player;
-import com.example.sb.Entity.Team;
-import com.example.sb.Entity.User;
+import com.example.sb.Model.Lobby;
+import com.example.sb.Model.Player;
+import com.example.sb.Model.Team;
 import com.example.sb.Repository.LobbyRepository;
 import com.example.sb.Repository.PlayerRepository;
 import org.springframework.beans.factory.annotation.Autowired;

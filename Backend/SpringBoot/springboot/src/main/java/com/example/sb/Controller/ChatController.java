@@ -6,11 +6,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import com.example.sb.Entity.Player;
-import com.example.sb.Entity.TheProfile;
-import com.example.sb.Entity.User;
+import com.example.sb.Model.Player;
+import com.example.sb.Model.TheProfile;
+import com.example.sb.Model.User;
 import com.example.sb.Repository.MessageRepository;
-import com.example.sb.Entity.Message;
+import com.example.sb.Model.Message;
 import com.example.sb.Repository.PlayerRepository;
 import com.example.sb.Repository.TheProfileRepository;
 import com.example.sb.Repository.UserRepository;
@@ -31,8 +31,8 @@ import org.springframework.stereotype.Controller;
 @ServerEndpoint(value = "/gamechat/{username}")  // this is Websocket url
 public class ChatController {
 
-    // cannot autowire static directly (instead we do it by the below
-    // method
+    // cannot autowire static, must be done in static method otherwise you can't access the Repo's at all
+    // This is because @ServerEndpoint is not part of springboot so it won't auto-detect beans.
     private static MessageRepository msgRepo;
 
     private static UserRepository userRepository;
