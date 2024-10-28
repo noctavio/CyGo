@@ -94,8 +94,8 @@ public class ChatController {
             String whisperMessage = parts.length > 2 ? parts[2] : ""; // Get the rest of the message or empty string if no message
 
             // send message to target, and display for sender
-            sendMsgToUser(recipientName, "From @" + senderName + " - " + whisperMessage);
-            sendMsgToUser(senderName, "To @" +  recipientName + " - " +  whisperMessage);
+            sendMsgToUser(recipientName, "From @" + senderName + "- " + whisperMessage);
+            sendMsgToUser(senderName, "To @" +  recipientName + "- " +  whisperMessage);
 
         }
         else { // broadcast

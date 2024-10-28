@@ -30,4 +30,19 @@ public class PlayerController {
         return playerService.updatePlayerTable(id, playerJSON);
     }
 
+    /**
+     * Adds one player or multiple to a targets mute list, by giving JSON data of literal username, "enemies", or "all" commands
+     * @param id Player who is muting others
+     * @param playerJSON JSON containing the list of players you want to mute.
+     * @return
+     */
+    @PutMapping("/muteFor/{id}")
+    public ResponseEntity<String> addToMuteList(@PathVariable Integer id, @RequestBody Player playerJSON) {
+        return playerService.mute(id, playerJSON);
+    }
+
+    @DeleteMapping("/unmuteFor/{id}")
+    public ResponseEntity<String> removeFromMuteList(@PathVariable Integer id, @RequestBody Player playerJSON) {
+        return playerService.unmute(id, playerJSON);
+    }
 }
