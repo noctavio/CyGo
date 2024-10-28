@@ -6,31 +6,64 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
 import java.util.List;
+
 @RestController
-public class TheProfileController {
+@RequestMapping("/clubs") // Base URL for the controller
+public class ClubController {
 
     @Autowired
     private ClubService clubService;
 
-    /**
-     * Returns a list of the top 10 players sorted by rank (highest to lowest)
-     * @return list
-     */
-
-    @GetMapping("/clubs")
+    @GetMapping
     public List<Club> getAllClubs() {
         return clubService.getAllClubs();
     }
 
-    @GetMapping(path = "/clubs/{id}")
+    @GetMapping("/{id}")
     public Club getClubById(@PathVariable Integer id) {
         return clubService.getClubByID(id);
     }
 
+    @PostMapping("/{id}/members")
+    public ResponseEntity<String> addMember(@PathVariable Integer id, @RequestBody String memberName) {
+        clubService.addMemberToClub(id, memberName); // Add a member to the specified club
+        return ResponseEntity.ok("Member added successfully.");
+    }
 
-    @PutMapping("/profiles/update/{id}")
+    @DeleteMapping("/{id}/members/{memberName}")
+    public ResponseEntity<String> removeMember(@PathVariable Integer id, @PathVariable String memberName) {
+        if (clubService.removeMemberFromClub(id, memberName)) {
+            return ResponseEntity.ok("Member removed successfully.");
+        } else {
+            return ResponseEntity.badRequest().body("Member not found in the club.");
+        }
+    }
+
+    @PutMapping("/{id}/members")
+    public ResponseEntity<String> updateMembers(@PathVariable Integer id, @RequestBody List<String> newMembers) {
+        clubService.updateClubMembers(id, newMembers);
+        return ResponseEntity.ok("Club members updated successfully.");
+    }
+
+    @PutMapping("/{id}/members/{oldMemberName}")
+    public ResponseEntity<String> updateMember(
+            @PathVariable Integer id,
+            @PathVariable String oldMemberName,
+            @RequestBody String newMemberName) {
+        if (clubService.updateMemberInClub(id, oldMemberName, newMemberName)) {
+            return ResponseEntity.ok("Member updated successfully.");
+        } else {
+            return ResponseEntity.badRequest().body("Member not found.");
+        }
+    }
+
+    @GetMapping("/{id}/members")
+    public List<String> getMembers(@PathVariable Integer id) {
+        return clubService.getMembersOfClub(id); // Retrieve the members of the specified club
+    }
+
+    @PutMapping("/update/{id}")
     public ResponseEntity<String> updateClub(@PathVariable Integer id, @RequestBody Club clubJSON) {
         Club existingClub = clubService.getClubByID(id);
 
@@ -38,104 +71,16 @@ public class TheProfileController {
             return ResponseEntity.badRequest().body("Club was not found");
         }
 
-
-
-        if (clubJSON.getclubname() == null) {
-                return ResponseEntity.badRequest().body("Invalid club name input");
-
+        if (clubJSON.getClubName() != null) {
+            existingClub.setClubName(clubJSON.getClubName());
         }
 
-
-
-        if (clubJSON.getProfilepicture() != null) {
-            existingClub.setProfilepicture(clubJSON.getProfilepicture());
+        if (clubJSON.getClubPicture() != null) {
+            existingClub.setClubPicture(clubJSON.getClubPicture());
         }
-
-        if (clubJSON.getmember1() != null) {
-            existingClub.setmember1(clubJSON.getmember1());
-        }
-
-        if (clubJSON.getmember2() != null) {
-            existingClub.setmember2(clubJSON.getmember2());
-        }
-
-        if (clubJSON.getmember3() != null) {
-            existingClub.setmember3(clubJSON.getmember3());
-        }
-
-        if (clubJSON.getmember4() != null) {
-            existingClub.setmember4(clubJSON.getmember4());
-        }
-        if (clubJSON.getmember5() != null) {
-            existingClub.setmember5(clubJSON.getmember5());
-        }
-
-        if (clubJSON.getmember6() != null) {
-            existingClub.setmember6(clubJSON.getmember6());
-        }
-
-        if (clubJSON.getmember7() != null) {
-            existingClub.setmember7(clubJSON.getmember7());
-        }
-
-        if (clubJSON.getmember8() != null) {
-            existingClub.setmember8(clubJSON.getmember8());
-        }
-        if (clubJSON.getmember9() != null) {
-            existingClub.setmember9(clubJSON.getmember9());
-        }
-
-        if (clubJSON.getmember10() != null) {
-            existingClub.setmember10(clubJSON.getmember10());
-        }
-
-        if (clubJSON.getmember11() != null) {
-            existingClub.setmember11(clubJSON.getmember11());
-        }
-
-        if (clubJSON.getmember12() != null) {
-            existingClub.setmember12(clubJSON.getmember12());
-        }
-        if (clubJSON.getmember13() != null) {
-            existingClub.setmember13(clubJSON.getmember13());
-        }
-
-        if (clubJSON.getmember14() != null) {
-            existingClub.setmember14(clubJSON.getmember14());
-        }
-
-        if (clubJSON.getmember15() != null) {
-            existingClub.setmember15(clubJSON.getmember15());
-        }
-
-        if (clubJSON.getmember16() != null) {
-            existingClub.setmember16(clubJSON.getmember16());
-        }
-        if (clubJSON.getmember17() != null) {
-            existingClub.setmember17(clubJSON.getmember17());
-        }
-
-        if (clubJSON.getmember18() != null) {
-            existingClub.setmember18(clubJSON.getmember18());
-        }
-
-        if (clubJSON.getmember19() != null) {
-            existingClub.setmember19(clubJSON.getmember19());
-        }
-
-        if (clubJSON.getMember20() != null) {
-            existingClub.setMember20(clubJSON.getMember20());
-        }
-
 
         clubService.updateClub(existingClub);
 
-        return ResponseEntity.ok("The user has been updated accordingly.");
+        return ResponseEntity.ok("The club has been updated accordingly.");
     }
-    // TODO READ -> this controller does not require a delete method since you are only updating/overwriting data here, only deletes in club and using hardDelete method.
-    //@DeleteMapping("/{username}")
-    //public ResponseEntity<String> deleteSomethingByUsername(@PathVariable String username) {
-    //    return ResponseEntity.ok("HEY YOU");
-    //}
 }
-
