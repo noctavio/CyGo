@@ -3,6 +3,7 @@ package com.example.sb.Service;
 import com.example.sb.Model.Lobby;
 import com.example.sb.Model.Player;
 import com.example.sb.Model.Team;
+import com.example.sb.Model.TheProfile;
 import com.example.sb.Repository.LobbyRepository;
 import com.example.sb.Repository.PlayerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,9 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class PlayerService {
@@ -20,6 +19,8 @@ public class PlayerService {
     private PlayerRepository playerRepository;
     @Autowired
     private LobbyRepository lobbyRepository;
+    @Autowired
+    private UserService userService;
 
     public ResponseEntity<String> updatePlayerTable(Integer id, Player playerJSON) {
         Optional<Player> playerOptional = playerRepository.findById(id);
@@ -79,5 +80,44 @@ public class PlayerService {
 
     public List<Player> getAllPlayers() {
         return playerRepository.findAll();
+    }
+
+    public ResponseEntity<String> mute(Integer id, Player playerJSON) {
+        Player player = userService.findPlayerById(id);
+
+        Map<String, Boolean> mutedMap = new HashMap<>();
+        List<String> mutedList = playerJSON.getMuted();
+        for (String mutedPlayer : mutedList) {
+            mutedMap.put(mutedPlayer, true);
+        }
+        //if (mutedMap.containsKey("all")) {
+            // TODO make team list work otherwise enemies and all won't !
+        //}
+
+        if (mutedMap.containsKey("Dummy4")) {
+            player.mute("Dummy4");
+        }
+
+        System.out.println(playerJSON.getMuted());
+        playerRepository.save(player);
+
+        return ResponseEntity.ok("Player(s) have been muted");
+    }
+    public ResponseEntity<String> unmute(Integer id, Player playerJSON) {
+        Player player = userService.findPlayerById(id);
+
+        Map<String, Boolean> mutedMap = new HashMap<>();
+        List<String> mutedList = playerJSON.getMuted();
+
+        for (String mutedPlayer : mutedList) {
+            mutedMap.put(mutedPlayer, true);
+        }
+        if (mutedMap.containsKey("Dummy4")) {
+            player.unmute("Dummy4");
+        }
+
+        System.out.println(player.getMuted());
+        playerRepository.save(player);
+        return ResponseEntity.ok("Player(s) have been unmuted");
     }
 }

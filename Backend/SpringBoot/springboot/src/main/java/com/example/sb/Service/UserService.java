@@ -1,6 +1,10 @@
 package com.example.sb.Service;
 
+import com.example.sb.Model.Player;
+import com.example.sb.Model.TheProfile;
 import com.example.sb.Model.User;
+import com.example.sb.Repository.PlayerRepository;
+import com.example.sb.Repository.TheProfileRepository;
 import com.example.sb.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -16,6 +20,10 @@ public class UserService {
     private UserRepository userRepository;
     @Autowired
     private TheProfileService theProfileService;
+    @Autowired
+    private TheProfileRepository profileRepository;
+    @Autowired
+    private PlayerRepository playerRepository;
 
     private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -69,5 +77,29 @@ public class UserService {
             return true;
         }
        return false;
+    }
+
+    public TheProfile findProfileById(Integer id) {
+        Optional<User> user = userRepository.findById(id);
+        if (user.isEmpty()) {
+            throw new RuntimeException("User not found");
+        }
+
+        // Retrieve the Profile associated with the User
+        TheProfile profile = profileRepository.findByUser(user);
+        if (profile == null) {
+            throw new RuntimeException("Profile not found for specified user ");
+        }
+        return profile;
+    }
+
+    public Player findPlayerById(Integer id) {
+        TheProfile profile = findProfileById(id);
+
+        Player player = playerRepository.findByProfile(profile);
+        if (player == null) {
+            throw new RuntimeException("Player not found for specified profile ");
+        }
+        return player;
     }
 }

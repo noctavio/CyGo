@@ -49,11 +49,11 @@ public class Player {
     }
 
     public void mute(String muteType) {
-        muted.add(muteType);
+        this.muted.add(muteType);
     }
 
     public void unmute(String unmuteType) {
-        muted.remove(unmuteType);
+        this.muted.remove(unmuteType);
     }
 
     public String getUsername() {

@@ -24,6 +24,8 @@ public class LobbyService {
     private UserRepository userRepository;
     @Autowired
     private TheProfileRepository profileRepository;
+    @Autowired
+    private UserService userService;
 
     public List<Lobby> getAllLobbies() {
         return lobbyRepository.findAll();
@@ -40,17 +42,8 @@ public class LobbyService {
         return Collections.emptyList();
     }
 
-    public void createFriendlyLobby(Integer id) {
-        Optional<User> user = userRepository.findById(id);
-        if (user.isEmpty()) {
-            throw new RuntimeException("User not found");
-        }
-
-        // Retrieve the Profile associated with the User
-        TheProfile profile = profileRepository.findByUser(user);
-        if (profile == null) {
-            throw new RuntimeException("Profile not found for specified user ");
-        }
+    public void createFriendlyLobby(Integer userId) {
+        TheProfile profile = userService.findProfileById(userId);
 
         // Create a new Player associated with the existing Profile
         Lobby lobby = new Lobby(profile.getUsername());
@@ -74,17 +67,8 @@ public class LobbyService {
         Lobby lobby = new Lobby();
     }
 
-    public ResponseEntity<String> updateLobby(Integer playerId, Integer lobbyId) {
-        Optional<User> user = userRepository.findById(playerId);
-        if (user.isEmpty()) {
-            throw new RuntimeException("User not found");
-        }
-
-        // Retrieve the Profile associated with the User
-        TheProfile profile = profileRepository.findByUser(user);
-        if (profile == null) {
-            throw new RuntimeException("Profile not found for specified user ");
-        }
+    public ResponseEntity<String> updateLobby(Integer userId, Integer lobbyId) {
+        TheProfile profile = userService.findProfileById(userId);
 
         Optional<Lobby> lobbyOptional = lobbyRepository.findById(lobbyId);
         if (lobbyOptional.isPresent()) {
