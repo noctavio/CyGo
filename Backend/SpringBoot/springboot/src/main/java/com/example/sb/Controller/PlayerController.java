@@ -14,15 +14,14 @@ public class PlayerController {
     @Autowired
     private PlayerService playerService;
 
-    // TODO true scope needs to be realized, this only adds thing, we need a separate one to update?
-    //@PostMapping("/refresh")
-    //public ResponseEntity<String> refreshPlayers() {
-    //    playerService.updatePlayerTable();
-    //    return ResponseEntity.ok("-> Player(s) should have updated.");
-    //}
     @GetMapping
     public List<Player> getAllPlayers() {
         return playerService.getAllPlayers();
+    }
+
+    @GetMapping("/mutedList/{id}")
+    public List<String> getSomePlayersMutedList(@PathVariable Integer id) {
+        return playerService.getMutedList(id);
     }
 
     @PutMapping("/update/{id}")

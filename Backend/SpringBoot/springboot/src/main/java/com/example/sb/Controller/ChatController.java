@@ -28,7 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 @Controller      // this is needed for this to be an endpoint to springboot
-@ServerEndpoint(value = "/gamechat/{username}")  // this is Websocket url
+@ServerEndpoint(value = "/gamechat/{username}/join")  // this is Websocket url
 public class ChatController {
 
     // cannot autowire static, must be done in static method otherwise you can't access the Repo's at all
