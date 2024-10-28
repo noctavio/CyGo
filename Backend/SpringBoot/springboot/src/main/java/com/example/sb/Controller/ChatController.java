@@ -93,10 +93,24 @@ public class ChatController {
             String recipientName = parts[1]; // Get the recipient's name
             String whisperMessage = parts.length > 2 ? parts[2] : ""; // Get the rest of the message or empty string if no message
 
-            // send message to target, and display for sender
-            sendMsgToUser(recipientName, "From @" + senderName + "- " + whisperMessage);
-            sendMsgToUser(senderName, "To @" +  recipientName + "- " +  whisperMessage);
+            User user = userRepository.findByUsername(recipientName);
+            if (user == null) {
+                throw new RuntimeException("User not found");
+            }
 
+            TheProfile profile = profileRepository.findByUser(Optional.of(user));
+            if (profile == null) {
+                throw new RuntimeException("Profile not found for specified user ");
+            }
+            Player currentRecipient = playerRepository.findByProfile(profile);
+
+            if (currentRecipient.getMuted().contains(senderName)) {
+                sendMsgToUser(senderName,"[ALERT] Message not sent, you were muted by " + recipientName);
+            }
+            else {
+                sendMsgToUser(recipientName, "From @" + senderName + "- " + whisperMessage);
+                sendMsgToUser(senderName, "To @" +  recipientName + "- " +  whisperMessage);
+            }
         }
         else { // broadcast
             broadcast(senderName + "- " + message);
