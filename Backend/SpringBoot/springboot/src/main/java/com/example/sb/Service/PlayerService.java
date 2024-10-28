@@ -22,102 +22,95 @@ public class PlayerService {
     @Autowired
     private UserService userService;
 
-    public ResponseEntity<String> updatePlayerTable(Integer id, Player playerJSON) {
+    public ResponseEntity<String> updatePlayer(Integer id, Player playerJSON) {
         Optional<Player> playerOptional = playerRepository.findById(id);
         if (playerOptional.isPresent()) {
             Player player = playerOptional.get();
-            // If the player wants to mute additional players
-            Lobby lobby = player.getLobby();
-            Team team1 = lobby.getTeam1();
-            Team team2 = lobby.getTeam2();
-
-            Team playerTeam;
-            Team oppositeTeam;
-
-            if (team1.getTeamList().contains(player)) {
-                playerTeam = team1;
-                oppositeTeam = team2;
-            } else if (team2.getTeamList().contains(player)) {
-                oppositeTeam = team1;
-                playerTeam = team2;
-            } else {
-                throw new IllegalStateException("Player is not in either team.");
-            }
-            // TODO fix this works for now, infact make helper methods
-            if (!playerJSON.getMuted().isEmpty()) {
-                if (playerJSON.getMuted().get(0).equals("enemies")) {
-                    for (int i = 0; i < oppositeTeam.getTeamList().size(); i++) {
-                        player.mute(oppositeTeam.getTeamList().get(i).getProfile().getUser().getUsername());
-                    }
-                }
-                if (playerJSON.getMuted().get(0).equals("all")) {
-                    for (int i = 0; i < oppositeTeam.getTeamList().size(); i++) {
-                        player.mute(oppositeTeam.getTeamList().get(i).getProfile().getUser().getUsername());
-                    }
-                    for (int i = 0; i < playerTeam.getTeamList().size(); i++) {
-                        if (!playerTeam.getTeamList().get(i).equals(player)) {
-                            player.mute(playerTeam.getTeamList().get(i).getProfile().getUser().getUsername());
-                        }
-                    }
-                }
-                else {
-                    player.mute(playerJSON.getMuted().get(0));
-                }
-            }
-
-            // if the player said unmute in some way shape or form update the unmute list
-            if (playerJSON.getMuted().get(0).equals("unmute all")) {
-                player.setMuted(new ArrayList<>()); // TODO this is temp unmutes ALL players
-            }
-
-            playerRepository.save(player);
-            return ResponseEntity.ok("Player has been updated!");
         }
-        else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Player not found!");
-        }
+        return ResponseEntity.ok("method not complete!");
     }
 
     public List<Player> getAllPlayers() {
         return playerRepository.findAll();
     }
 
-    public ResponseEntity<String> mute(Integer id, Player playerJSON) {
-        Player player = userService.findPlayerById(id);
+    public ResponseEntity<String> mute(Integer id, String target) {
+        Player playerUpdatingMuteList = userService.findPlayerById(id);
+        List<String> currentMuted = playerUpdatingMuteList.getMuted();
 
-        Map<String, Boolean> mutedMap = new HashMap<>();
-        List<String> mutedList = playerJSON.getMuted();
-        for (String mutedPlayer : mutedList) {
-            mutedMap.put(mutedPlayer, true);
+        Lobby lobby = playerUpdatingMuteList.getLobby();
+        List<Player> playersInLobby = lobby.getPlayersInLobby();
+
+        if (target.equals("all")) {
+            for (Player currentPlayer : playersInLobby) {
+                if (currentPlayer == playerUpdatingMuteList) {
+                    continue;
+                }
+                if (currentMuted.contains(currentPlayer.getUsername())) {
+                    continue;
+                }
+                playerUpdatingMuteList.mute(currentPlayer.getUsername());
+            }
         }
-        //if (mutedMap.containsKey("all")) {
-            // TODO make team list work otherwise enemies and all won't !
-        //}
-
-        if (mutedMap.containsKey("Dummy4")) {
-            player.mute("Dummy4");
+        else if (target.equals("enemies")) {
+            for (Player currentPlayer : playersInLobby) {
+                if (currentPlayer.getTeam().equals(playerUpdatingMuteList.getTeam())) {
+                    continue;
+                }
+                if (currentMuted.contains(currentPlayer.getUsername())) {
+                    continue;
+                }
+                playerUpdatingMuteList.mute(currentPlayer.getUsername());
+            }
+        }
+        else {
+            if (playerUpdatingMuteList.getUsername().equals(target)) {
+                return ResponseEntity.ok("You can't mute yourself...");
+            }
+            playerUpdatingMuteList.mute(target);
         }
 
-        System.out.println(playerJSON.getMuted());
-        playerRepository.save(player);
-
+        playerRepository.save(playerUpdatingMuteList);
         return ResponseEntity.ok("Player(s) have been muted");
     }
-    public ResponseEntity<String> unmute(Integer id, Player playerJSON) {
-        Player player = userService.findPlayerById(id);
 
-        Map<String, Boolean> mutedMap = new HashMap<>();
-        List<String> mutedList = playerJSON.getMuted();
+    public ResponseEntity<String> unmute(Integer id, String target) {
+        Player playerUpdatingMuteList = userService.findPlayerById(id);
+        List<String> currentMuted = playerUpdatingMuteList.getMuted();
 
-        for (String mutedPlayer : mutedList) {
-            mutedMap.put(mutedPlayer, true);
+        Lobby lobby = playerUpdatingMuteList.getLobby();
+        List<Player> playersInLobby = lobby.getPlayersInLobby();
+
+        if (target.equals("all")) {
+            for (Player currentPlayer : playersInLobby) {
+                if (currentPlayer == playerUpdatingMuteList) {
+                    continue;
+                }
+                if (currentMuted.contains(currentPlayer.getUsername())) {
+                    playerUpdatingMuteList.unmute(currentPlayer.getUsername());
+                }
+
+            }
         }
-        if (mutedMap.containsKey("Dummy4")) {
-            player.unmute("Dummy4");
+        else if (target.equals("enemies")) {
+            for (Player currentPlayer : playersInLobby) {
+                if (currentPlayer.getTeam().equals(playerUpdatingMuteList.getTeam())) {
+                    continue;
+                }
+                if (currentMuted.contains(currentPlayer.getUsername())) {
+                    playerUpdatingMuteList.unmute(currentPlayer.getUsername());
+                }
+            }
+        }
+        else {
+            if (playerUpdatingMuteList.getUsername().equals(target)) {
+                return ResponseEntity.ok("You can't unmute yourself...");
+            }
+            playerUpdatingMuteList.unmute(target);
         }
 
-        System.out.println(player.getMuted());
-        playerRepository.save(player);
+        System.out.println(target);
+        playerRepository.save(playerUpdatingMuteList);
         return ResponseEntity.ok("Player(s) have been unmuted");
     }
 }

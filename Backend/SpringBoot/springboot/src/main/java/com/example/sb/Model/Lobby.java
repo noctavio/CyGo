@@ -5,6 +5,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 @Getter
 @Setter
@@ -20,11 +23,11 @@ public class Lobby {
     private boolean isFriendly;
     private final String boardSize = "9x9";
 
-    @OneToOne(cascade = CascadeType.ALL) // Use CascadeType if needed
-    @JoinColumn(name = "team1_id", referencedColumnName = "team_id") // Foreign key referencing Team
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "team1_id", referencedColumnName = "team_id")
     private Team team1;
 
-    @OneToOne(cascade = CascadeType.ALL) // Use CascadeType if needed
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "team2_id", referencedColumnName = "team_id")
     private Team team2;
 
@@ -39,5 +42,37 @@ public class Lobby {
     }
     public Lobby() {
         this.isFriendly = false;
+    }
+
+    public List<Player> getPlayersInLobby() {
+        List<Player> players = new ArrayList<>();
+        // Check if each player is non-null and add to the list
+        if (team1.getPlayer1() != null) {
+            players.add(team1.getPlayer1());
+        }
+        if (team1.getPlayer2() != null) {
+            players.add(team1.getPlayer2());
+        }
+        if (team2.getPlayer1() != null) {
+            players.add(team2.getPlayer1());
+        }
+        if (team2.getPlayer2() != null) {
+            players.add(team2.getPlayer2());
+        }
+        return players;
+
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Lobby lobby = (Lobby) o;
+        return lobby_id == lobby.lobby_id && isFriendly == lobby.isFriendly && Objects.equals(hostName, lobby.hostName) && Objects.equals(gameTime, lobby.gameTime) && Objects.equals(boardSize, lobby.boardSize) && Objects.equals(team1, lobby.team1) && Objects.equals(team2, lobby.team2);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(lobby_id, hostName, gameTime, isFriendly, boardSize, team1, team2);
     }
 }

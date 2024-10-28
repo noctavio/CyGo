@@ -79,13 +79,25 @@ public class LobbyService {
             Team team2 = lobbyToJoin.getTeam2();
 
             // if team 1 has an open spot
-            if (team1.getTeamList().size() < 2) {
+            if (team1.getPlayer1() == null) {
                 newPlayer.setLobby(lobbyToJoin);
                 newPlayer.setTeam(team1);
                 lobbyToJoin.getTeam1().addPlayer(newPlayer);
             }
 
-            else if (team2.getTeamList().size() < 2) {
+            else if (team1.getPlayer2() == null) {
+                newPlayer.setLobby(lobbyToJoin);
+                newPlayer.setTeam(team1);
+                lobbyToJoin.getTeam1().addPlayer(newPlayer);
+            }
+
+            else if (team2.getPlayer1() == null) {
+                newPlayer.setLobby(lobbyToJoin);
+                newPlayer.setTeam(team2);
+                lobbyToJoin.getTeam2().addPlayer(newPlayer);
+            }
+
+            else if (team2.getPlayer2() == null) {
                 newPlayer.setLobby(lobbyToJoin);
                 newPlayer.setTeam(team2);
                 lobbyToJoin.getTeam2().addPlayer(newPlayer);
@@ -108,7 +120,6 @@ public class LobbyService {
         }
     }
 
-    // TODO this only works when the lobby has two players testing more?
     public ResponseEntity<String> deleteLobbyById(Integer lobbyId) {
         Optional<Lobby> lobbyOptional = lobbyRepository.findById(lobbyId);
         if (lobbyOptional.isPresent()) {

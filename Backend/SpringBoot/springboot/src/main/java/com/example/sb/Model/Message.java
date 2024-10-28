@@ -1,6 +1,7 @@
 package com.example.sb.Model;
 
 import java.util.Date;
+import java.util.Objects;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -40,5 +41,18 @@ public class Message {
     public Message(String userName, String content) {
         this.userName = userName;
         this.content = content;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Message message = (Message) o;
+        return Objects.equals(id, message.id) && Objects.equals(userName, message.userName) && Objects.equals(content, message.content) && Objects.equals(sent, message.sent);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, userName, content, sent);
     }
 }
