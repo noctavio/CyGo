@@ -34,6 +34,11 @@ public class PlayerService {
         return playerRepository.findAll();
     }
 
+    public List<String> getMutedList(Integer id) {
+        Player player = userService.findPlayerById(id);
+        return player.getMuted();
+    }
+
     public ResponseEntity<String> mute(Integer id, String target) {
         Player playerUpdatingMuteList = userService.findPlayerById(id);
         List<String> currentMuted = playerUpdatingMuteList.getMuted();
