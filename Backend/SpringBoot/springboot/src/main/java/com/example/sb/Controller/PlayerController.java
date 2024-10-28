@@ -27,22 +27,22 @@ public class PlayerController {
 
     @PutMapping("/update/{id}")
     public ResponseEntity<String> updatePlayer(@PathVariable Integer id, @RequestBody Player playerJSON) {
-        return playerService.updatePlayerTable(id, playerJSON);
+        return playerService.updatePlayer(id, playerJSON);
     }
 
     /**
      * Adds one player or multiple to a targets mute list, by giving JSON data of literal username, "enemies", or "all" commands
      * @param id Player who is muting others
-     * @param playerJSON JSON containing the list of players you want to mute.
-     * @return
+     * @param target JSON containing the list of players you want to mute.
+     * @return String message
      */
-    @PutMapping("/muteFor/{id}")
-    public ResponseEntity<String> addToMuteList(@PathVariable Integer id, @RequestBody Player playerJSON) {
-        return playerService.mute(id, playerJSON);
+    @PutMapping("{id}/mute/{target}")
+    public ResponseEntity<String> addToMuteList(@PathVariable Integer id, @PathVariable String target) {
+        return playerService.mute(id, target);
     }
 
-    @DeleteMapping("/unmuteFor/{id}")
-    public ResponseEntity<String> removeFromMuteList(@PathVariable Integer id, @RequestBody Player playerJSON) {
-        return playerService.unmute(id, playerJSON);
+    @DeleteMapping("{id}/unmute/{target}")
+    public ResponseEntity<String> removeFromMuteList(@PathVariable Integer id, @PathVariable String target) {
+        return playerService.unmute(id, target);
     }
 }

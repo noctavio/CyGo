@@ -2,6 +2,7 @@ package com.example.sb.Model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -58,5 +59,18 @@ public class Player {
 
     public String getUsername() {
         return profile != null ? profile.getUsername() : null;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Player player = (Player) o;
+        return individualScore == player.individualScore && Objects.equals(player_id, player.player_id) && Objects.equals(isReady, player.isReady) && Objects.equals(profile, player.profile) && Objects.equals(lobby, player.lobby) && Objects.equals(team, player.team) && Objects.equals(muted, player.muted);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(player_id, isReady, individualScore, profile, lobby, team, muted);
     }
 }

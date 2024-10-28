@@ -3,6 +3,8 @@ package com.example.sb.Model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.Objects;
+
 @Entity
 @Table(name = "profiles")
 
@@ -35,5 +37,18 @@ public class TheProfile {
 
     public String getUsername() {
         return user != null ? user.getUsername() : null;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TheProfile profile = (TheProfile) o;
+        return Objects.equals(profile_id, profile.profile_id) && Objects.equals(user, profile.user) && Objects.equals(profilepicture, profile.profilepicture) && Objects.equals(clubname, profile.clubname) && Objects.equals(clubpicture, profile.clubpicture) && Objects.equals(wins, profile.wins) && Objects.equals(loss, profile.loss) && Objects.equals(games, profile.games) && Objects.equals(rank, profile.rank);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(profile_id, user, profilepicture, clubname, clubpicture, wins, loss, games, rank);
     }
 }
