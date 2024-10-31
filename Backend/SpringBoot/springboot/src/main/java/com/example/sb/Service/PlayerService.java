@@ -76,7 +76,7 @@ public class PlayerService {
         }
 
         playerRepository.save(playerUpdatingMuteList);
-        return ResponseEntity.ok("Player(s) have been muted");
+        return ResponseEntity.ok(target + " muted");
     }
 
     public ResponseEntity<String> unmute(Integer id, String target) {
@@ -94,7 +94,6 @@ public class PlayerService {
                 if (currentMuted.contains(currentPlayer.getUsername())) {
                     playerUpdatingMuteList.unmute(currentPlayer.getUsername());
                 }
-
             }
         }
         else if (target.equals("enemies")) {
@@ -116,6 +115,6 @@ public class PlayerService {
 
         System.out.println(target);
         playerRepository.save(playerUpdatingMuteList);
-        return ResponseEntity.ok("Player(s) have been unmuted");
+        return ResponseEntity.ok(target + " unmuted");
     }
 }
