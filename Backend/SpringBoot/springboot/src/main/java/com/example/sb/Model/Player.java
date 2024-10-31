@@ -40,8 +40,8 @@ public class Player {
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "muted_list", joinColumns = @JoinColumn(name = "player_id")) // Join to Players table
-    @Column(name = "muted_type") // Column name in the muted_players table
-    private List<String> muted; // TODO this might be better as a hashMap :)
+    @Column(name = "muted_type")
+    private List<String> muted;
 
     public Player(TheProfile profile) {
         this.profile = profile;
