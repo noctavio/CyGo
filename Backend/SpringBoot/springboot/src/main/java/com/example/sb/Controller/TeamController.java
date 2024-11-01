@@ -17,14 +17,13 @@ public class TeamController {
         return teamService.joinTeam(userId, teamId);
     }
 
-    @PutMapping("/updateTeamName/{userId}")
+    @PutMapping("/{userId}/updateTeamName")
     public ResponseEntity<String> updateTeamName(@PathVariable Integer userId, @RequestBody Team teamJSON) {
         return teamService.updateTeamName(userId, teamJSON);
     }
 
-    // TODO this does not work!
-    @PutMapping("/{userId}/leaveTeam/{teamId}")
-    public ResponseEntity<String> leaveTeam(@PathVariable Integer userId, @PathVariable Integer teamId) {
-        return teamService.leaveTeam(userId, teamId);
+    @PutMapping("/{userId}/leaveTeam")
+    public ResponseEntity<String> leaveTeam(@PathVariable Integer userId) {
+        return teamService.leaveTeam(userId);
     }
 }

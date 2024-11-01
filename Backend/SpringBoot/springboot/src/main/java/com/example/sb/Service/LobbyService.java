@@ -40,7 +40,7 @@ public class LobbyService {
         return Collections.emptyList();
     }
 
-    public void createFriendlyLobby(Integer userId) {
+    public ResponseEntity<String> createFriendlyLobby(Integer userId) {
         TheProfile profile = userService.findProfileById(userId);
 
         // Initializes lobby with host
@@ -58,6 +58,9 @@ public class LobbyService {
         teamRepository.save(team1);
         teamRepository.save(emptyTeam2);
         playerRepository.save(newPlayer);
+
+        return ResponseEntity.ok("Friendly lobby created with, host: " + profile.getUsername());
+
     }
 
     public void createRankedLobby() {
@@ -108,18 +111,15 @@ public class LobbyService {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Lobby not found!");
         }
     }
-    public ResponseEntity<String> leaveLobby(Integer userId, Integer lobbyId) {
-        TheProfile profile = userService.findProfileById(userId);
 
-        Optional<Lobby> lobbyOptional = lobbyRepository.findById(lobbyId);
-        if (lobbyOptional.isPresent()) {
-            // Retrieve the Lobby instance
-            Player deserter = playerRepository.findByProfile(profile);
-            if (deserter != null) {
-                playerRepository.delete(deserter);
-                return ResponseEntity.ok(profile.getUsername() + " left the lobby!");
-            }
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Deserter not found!");
+    public ResponseEntity<String> leaveLobby(Integer userId) {
+        TheProfile profile = userService.findProfileById(userId);
+        Player deserter = playerRepository.findByProfile(profile);
+        Lobby lobby = deserter.getLobby();
+
+        if (lobby != null) {
+            playerRepository.delete(deserter);
+            return ResponseEntity.ok(profile.getUsername() + " left the lobby!");
         }
         else {
             // Handles lobby is not found
@@ -127,16 +127,44 @@ public class LobbyService {
         }
     }
 
-    public ResponseEntity<String> deleteLobbyById(Integer lobbyId) {
-        Optional<Lobby> lobbyOptional = lobbyRepository.findById(lobbyId);
-        if (lobbyOptional.isPresent()) {
-            Lobby lobbyToDelete = lobbyOptional.get();
+    public ResponseEntity<String> deleteLobby(Integer userId) {
+        TheProfile profile = userService.findProfileById(userId);
+        Player potentiallyHost = playerRepository.findByProfile(profile);
+        Lobby lobbyToDelete = potentiallyHost.getLobby();
+
+        if (potentiallyHost.getUsername().equals(lobbyToDelete.getHostName())) {
             lobbyRepository.delete(lobbyToDelete);
+            return ResponseEntity.ok("Lobby deleted!");
         }
         else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Lobby not found or hostId is wrong!");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(potentiallyHost.getUsername() + " is not host, cannot delete lobby.");
         }
-        return ResponseEntity.ok("Lobby deleted!");
+    }
+
+    public ResponseEntity<String> updateHostOrGameTime(Integer userId, Lobby lobbyJSON) {
+        TheProfile potentiallyHost = userService.findProfileById(userId);
+
+        Player player = playerRepository.findByProfile(potentiallyHost);
+        Lobby lobby = player.getLobby();
+        if (lobby.getTeam1() != null) {
+
+            if (potentiallyHost.getUsername().equals(lobby.getHostName())) {
+                if (lobbyJSON.getGameTime() != null) {
+                    lobby.setGameTime(lobbyJSON.getGameTime());
+                }
+                if (lobbyJSON.getHostName() != null) {
+                    lobby.setHostName(lobbyJSON.getHostName());
+                }
+            }
+            else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(potentiallyHost.getUsername() + " is not host, cannot update lobby.");
+            }
+            lobbyRepository.save(lobby);
+        }
+        else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Specified lobby not found");
+        }
+        return ResponseEntity.ok("Lobby updated!");
     }
 
 }

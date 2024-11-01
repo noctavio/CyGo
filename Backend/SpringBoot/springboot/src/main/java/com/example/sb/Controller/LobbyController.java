@@ -18,15 +18,14 @@ public class LobbyController {
 
     @PostMapping("/createFriendly/{userId}")
     public ResponseEntity<String> createFriendlyLobby(@PathVariable Integer userId) {
-        lobbyService.createFriendlyLobby(userId);
-        return ResponseEntity.ok("-> Friendly Lobby should have been created.");
+        return lobbyService.createFriendlyLobby(userId);
     }
 
-    // TODO implement???
+    // TODO implement maybe...
     @PostMapping("/createRanked")
     public ResponseEntity<String> createRankedLobby() {
         lobbyService.createRankedLobby();
-        return ResponseEntity.ok("-> Ranked Lobby should have been created.");
+        return ResponseEntity.ok("-> method incomplete.");
     }
 
     @GetMapping
@@ -39,27 +38,32 @@ public class LobbyController {
         return lobbyService.getTeams(lobbyId);
     }
 
-    // TODO implement
+    // TODO implement maybe...
     @PutMapping("/invite/players/{userId}")
     public ResponseEntity<String> invitePlayers(@PathVariable Integer userId, @RequestBody Lobby lobbyJSON) {
 
        return ResponseEntity.ok("-> method incomplete.");
     }
 
-    //TODO when i add the 2nd player it gives a massive error perhaps ask TA. should work for now
-    @PutMapping("{userId}/join/{lobbyId}")
+    //TODO when i add the 2nd player it gives a duplicate perhaps ask TA. should work for now
+    @PutMapping("/{userId}/join/{lobbyId}")
     public ResponseEntity<String> joinLobby(@PathVariable Integer userId ,@PathVariable Integer lobbyId) {
         return lobbyService.joinLobby(userId, lobbyId);
     }
 
-    @PutMapping("{userId}/leave/{lobbyId}")
-    public ResponseEntity<String> leaveLobby(@PathVariable Integer lobbyId ,@PathVariable Integer userId) {
-        return lobbyService.leaveLobby(userId, lobbyId);
+    @PutMapping("/{userId}/leave")
+    public ResponseEntity<String> leaveLobby(@PathVariable Integer userId) {
+        return lobbyService.leaveLobby(userId);
     }
 
-    @DeleteMapping("/kill/{lobbyId}")
-    public ResponseEntity<String> killLobby(@PathVariable Integer lobbyId) {
-        return lobbyService.deleteLobbyById(lobbyId);
+    @PutMapping("/{userId}/updateHostOrTime")
+    public ResponseEntity<String> updateGameHostOrGameTime(@PathVariable Integer userId, @RequestBody Lobby lobbyJSON) {
+        return lobbyService.updateHostOrGameTime(userId, lobbyJSON);
+    }
+
+    @DeleteMapping("/{userId}/killLobby")
+    public ResponseEntity<String> killLobby(@PathVariable Integer userId) {
+        return lobbyService.deleteLobby(userId);
     }
 
 }

@@ -57,14 +57,13 @@ public class TeamService {
         return ResponseEntity.ok("Specified team does not exist.");
     }
 
-    public ResponseEntity<String> leaveTeam(Integer userId, Integer teamId) {
-        Optional<Team> team = teamRepository.findById(teamId);
+    public ResponseEntity<String> leaveTeam(Integer userId) {
+        TheProfile profile = userService.findProfileById(userId);
+        Player player = playerRepository.findByProfile(profile);
 
-        if (team.isPresent()) {
-            Team targetTeam = team.get();
-            TheProfile profile = userService.findProfileById(userId);
-            Player player = playerRepository.findByProfile(profile);
+        Team targetTeam = player.getTeam();
 
+        if (targetTeam != null) {
             if (targetTeam.getPlayer1().equals(player)) {
                 targetTeam.setPlayer1(null);
             }
