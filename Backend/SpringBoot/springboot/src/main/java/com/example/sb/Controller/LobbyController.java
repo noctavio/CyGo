@@ -47,13 +47,13 @@ public class LobbyController {
     //TODO when i add the 2nd player it gives a massive error perhaps ask TA. should work for now
     @PutMapping("{userId}/join/{lobbyId}")
     public ResponseEntity<String> joinLobby(@PathVariable Integer userId ,@PathVariable Integer lobbyId) {
-        return lobbyService.updateLobby(userId, lobbyId);
+        return lobbyService.joinLobby(userId, lobbyId);
     }
 
     // TODO implement
     @DeleteMapping("{userId}/leave/{lobbyId}")
     public ResponseEntity<String> leaveLobby(@PathVariable Integer lobbyId ,@PathVariable Integer userId) {
-        return ResponseEntity.ok("-> method incomplete.");
+        return lobbyService.leaveLobby(userId, lobbyId);
     }
 
     @DeleteMapping("/kill/{lobbyId}")

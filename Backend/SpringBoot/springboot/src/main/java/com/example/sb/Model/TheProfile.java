@@ -29,6 +29,17 @@ public class TheProfile {
     private Integer games;
     private String rank;
 
+    public TheProfile(User user) {
+        this.user = user;
+        this.profilepicture = "-/-";
+        this.clubname = "-/-";
+        this.clubpicture = "-/-";
+        this.rank = "30 kyu";
+        this.wins = 0;
+        this.loss = 0;
+        setGamesplayed();
+    }
+
     // This is scary to read but all it does is check if the values are null and if they are it should internally save
     // games played as 0 + 0 to display 0 on the leaderboard.
     public void setGamesplayed() {

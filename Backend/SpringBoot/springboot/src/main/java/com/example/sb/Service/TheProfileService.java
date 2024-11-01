@@ -83,16 +83,7 @@ public class TheProfileService {
             // TODO dynamically update table to delete(nvm already done in hard delete??)
             if (existingProfile == null) {
                 // If no profile exists, create a new profile
-                TheProfile newProfile = new TheProfile();
-                newProfile.setUser(user);  // Set the User entity as the foreign key
-                newProfile.setProfilepicture("-/-");
-                newProfile.setClubname("-/-");
-                newProfile.setClubpicture("-/-");
-                newProfile.setRank("30 kyu");
-                newProfile.setWins(0);
-                newProfile.setLoss(0);
-                newProfile.setGamesplayed();
-
+                TheProfile newProfile = new TheProfile(user);
                 theProfileRepository.save(newProfile);  // Save new profile
             }
             else {

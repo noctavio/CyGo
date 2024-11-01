@@ -22,7 +22,7 @@ public class Player {
     @GeneratedValue
     private Integer player_id;
     private Boolean isReady;
-    private int individualScore;
+    private Integer individualScore;
 
     @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "profile_id", referencedColumnName = "profile_id")
@@ -43,8 +43,11 @@ public class Player {
     @Column(name = "muted_type")
     private List<String> muted;
 
-    public Player(TheProfile profile) {
+    public Player(TheProfile profile, Team team, Lobby lobby) {
+        this.individualScore = 0;
         this.profile = profile;
+        this.team = team;
+        this.lobby = lobby;
         this.isReady = false;  // Players are not ready when they join
         this.muted = new ArrayList<>();
     }
@@ -66,7 +69,9 @@ public class Player {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Player player = (Player) o;
-        return individualScore == player.individualScore && Objects.equals(player_id, player.player_id) && Objects.equals(isReady, player.isReady) && Objects.equals(profile, player.profile) && Objects.equals(lobby, player.lobby) && Objects.equals(team, player.team) && Objects.equals(muted, player.muted);
+        return individualScore == player.individualScore && Objects.equals(player_id, player.player_id)
+                && Objects.equals(isReady, player.isReady) && Objects.equals(profile, player.profile)
+                && Objects.equals(lobby, player.lobby) && Objects.equals(team, player.team) && Objects.equals(muted, player.muted);
     }
 
     @Override

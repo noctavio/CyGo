@@ -33,27 +33,35 @@ public class Team {
     public Team(String teamName, boolean isBlack) {
         this.teamName = teamName;
         this.isBlack = isBlack;
-        updatePlayerCount();
+        setPlayerCount();
+        setTeamScore();
     }
 
-    public void updatePlayerCount() {
+    public void setPlayerCount() {
         if (this.player1 == null && this.player2 == null) {
             this.playerCount = 0;
-        } else if (this.player1 != null && this.player2 != null) {
+        }
+        else if (this.player1 != null && this.player2 != null) {
             this.playerCount = 2;
-        } else {
+        }
+        else {
             this.playerCount = 1;
         }
+    }
+
+    public void setTeamScore() {
+        teamScore = (player1.getIndividualScore() != null ? player1.getIndividualScore() : 0) +
+                (player2.getIndividualScore() != null ? player2.getIndividualScore() : 0);
     }
 
     public void addPlayer(Player player) {
         if (this.player1 == null) {
             this.player1 = player;
-            updatePlayerCount();
+            setPlayerCount();
         }
         else if (this.player2 == null) {
             this.player2 = player;
-            updatePlayerCount();
+            setPlayerCount();
         }
         else {
             throw new IllegalStateException("Team is full, cannot add more than 2 players.");
@@ -64,11 +72,11 @@ public class Team {
     public void removePlayer(Player player) {
         if (this.player1 != null && this.player1.equals(player)) {
             this.player1 = null;
-            updatePlayerCount();
+            setPlayerCount();
         }
         else if (this.player2 != null && this.player2.equals(player)) {
             this.player2 = null;
-            updatePlayerCount();
+            setPlayerCount();
         }
     }
 

@@ -45,17 +45,16 @@ public class LobbyService {
     public void createFriendlyLobby(Integer userId) {
         TheProfile profile = userService.findProfileById(userId);
 
-        // Create a new Player associated with the existing Profile
+        // Initializes lobby with host
         Lobby lobby = new Lobby(profile.getUsername());
         Team team1 = new Team(profile.getClubname(), true);
-        Team emptyTeam2 = new Team("-/-", false);
-        Player newPlayer = new Player(profile);
-
         lobby.setTeam1(team1);
+
+        Team emptyTeam2 = new Team("-/-", false);
         lobby.setTeam2(emptyTeam2);
+
+        Player newPlayer = new Player(profile, team1, lobby);
         team1.addPlayer(newPlayer);
-        newPlayer.setLobby(lobby);
-        newPlayer.setTeam(team1);
 
         lobbyRepository.save(lobby);
         teamRepository.save(team1);
@@ -67,7 +66,7 @@ public class LobbyService {
         Lobby lobby = new Lobby();
     }
 
-    public ResponseEntity<String> updateLobby(Integer userId, Integer lobbyId) {
+    public ResponseEntity<String> joinLobby(Integer userId, Integer lobbyId) {
         TheProfile profile = userService.findProfileById(userId);
 
         Optional<Lobby> lobbyOptional = lobbyRepository.findById(lobbyId);
@@ -113,6 +112,22 @@ public class LobbyService {
             lobbyRepository.save(lobbyToJoin);
 
             return ResponseEntity.ok("Player joined the lobby!");
+        }
+        else {
+            // Handles lobby is not found
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Lobby not found!");
+        }
+    }
+    public ResponseEntity<String> leaveLobby(Integer userId, Integer lobbyId) {
+        TheProfile profile = userService.findProfileById(userId);
+
+        Optional<Lobby> lobbyOptional = lobbyRepository.findById(lobbyId);
+        if (lobbyOptional.isPresent()) {
+            // Retrieve the Lobby instance
+            Player deserter = playerRepository.findByProfile(profile);
+
+            playerRepository.delete(deserter);
+            return ResponseEntity.ok(profile.getUsername() + " left the lobby!");
         }
         else {
             // Handles lobby is not found
