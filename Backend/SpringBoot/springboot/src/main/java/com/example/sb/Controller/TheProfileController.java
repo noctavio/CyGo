@@ -36,14 +36,14 @@ public class TheProfileController {
         return TheProfileService.getAllProfiles();
     }
 
-    @GetMapping(path = "/profiles/{id}")
-    public TheProfile getProfileById(@PathVariable Integer id) {
-        return TheProfileService.getProfileByID(id);
+    @GetMapping(path = "/profiles/{userId}")
+    public TheProfile getProfileById(@PathVariable Integer userId) {
+        return TheProfileService.getProfileByID(userId);
     }
 
-    @PutMapping("/profiles/update/{id}")
-    public ResponseEntity<String> updateProfile(@PathVariable Integer id, @RequestBody TheProfile profileJSON) {
-        TheProfile existingUser = TheProfileService.getProfileByID(id);
+    @PutMapping("/profiles/update/{userId}")
+    public ResponseEntity<String> updateProfile(@PathVariable Integer userId, @RequestBody TheProfile profileJSON) {
+        TheProfile existingUser = TheProfileService.getProfileByID(userId);
 
         if (existingUser == null) {
             return ResponseEntity.badRequest().body("Profile was not found");

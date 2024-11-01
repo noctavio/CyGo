@@ -22,11 +22,8 @@ public class PlayerService {
     @Autowired
     private UserService userService;
 
-    public ResponseEntity<String> updatePlayer(Integer id, Player playerJSON) {
-        Optional<Player> playerOptional = playerRepository.findById(id);
-        if (playerOptional.isPresent()) {
-            Player player = playerOptional.get();
-        }
+    public ResponseEntity<String> updatePlayer(Integer userId, Player playerJSON) {
+
         return ResponseEntity.ok("method not complete!");
     }
 
@@ -34,13 +31,13 @@ public class PlayerService {
         return playerRepository.findAll();
     }
 
-    public List<String> getMutedList(Integer id) {
-        Player player = userService.findPlayerById(id);
+    public List<String> getMutedList(Integer userId) {
+        Player player = userService.findPlayerById(userId);
         return player.getMuted();
     }
 
-    public ResponseEntity<String> mute(Integer id, String target) {
-        Player playerUpdatingMuteList = userService.findPlayerById(id);
+    public ResponseEntity<String> mute(Integer userId, String target) {
+        Player playerUpdatingMuteList = userService.findPlayerById(userId);
         List<String> currentMuted = playerUpdatingMuteList.getMuted();
 
         Lobby lobby = playerUpdatingMuteList.getLobby();
@@ -54,7 +51,7 @@ public class PlayerService {
                 if (currentMuted.contains(currentPlayer.getUsername())) {
                     continue;
                 }
-                playerUpdatingMuteList.mute(currentPlayer.getUsername());
+                playerUpdatingMuteList.getMuted().add(currentPlayer.getUsername());
             }
         }
         else if (target.equals("enemies")) {
@@ -65,22 +62,22 @@ public class PlayerService {
                 if (currentMuted.contains(currentPlayer.getUsername())) {
                     continue;
                 }
-                playerUpdatingMuteList.mute(currentPlayer.getUsername());
+                playerUpdatingMuteList.getMuted().add(currentPlayer.getUsername());
             }
         }
         else {
             if (playerUpdatingMuteList.getUsername().equals(target)) {
                 return ResponseEntity.ok("You can't mute yourself...");
             }
-            playerUpdatingMuteList.mute(target);
+            playerUpdatingMuteList.getMuted().add(target);
         }
 
         playerRepository.save(playerUpdatingMuteList);
         return ResponseEntity.ok(target + " muted");
     }
 
-    public ResponseEntity<String> unmute(Integer id, String target) {
-        Player playerUpdatingMuteList = userService.findPlayerById(id);
+    public ResponseEntity<String> unmute(Integer userId, String target) {
+        Player playerUpdatingMuteList = userService.findPlayerById(userId);
         List<String> currentMuted = playerUpdatingMuteList.getMuted();
 
         Lobby lobby = playerUpdatingMuteList.getLobby();
@@ -92,7 +89,7 @@ public class PlayerService {
                     continue;
                 }
                 if (currentMuted.contains(currentPlayer.getUsername())) {
-                    playerUpdatingMuteList.unmute(currentPlayer.getUsername());
+                    playerUpdatingMuteList.getMuted().remove(currentPlayer.getUsername());
                 }
             }
         }
@@ -102,7 +99,7 @@ public class PlayerService {
                     continue;
                 }
                 if (currentMuted.contains(currentPlayer.getUsername())) {
-                    playerUpdatingMuteList.unmute(currentPlayer.getUsername());
+                    playerUpdatingMuteList.getMuted().remove(currentPlayer.getUsername());
                 }
             }
         }
@@ -110,11 +107,23 @@ public class PlayerService {
             if (playerUpdatingMuteList.getUsername().equals(target)) {
                 return ResponseEntity.ok("You can't unmute yourself...");
             }
-            playerUpdatingMuteList.unmute(target);
+            playerUpdatingMuteList.getMuted().remove(target);
         }
 
         System.out.println(target);
         playerRepository.save(playerUpdatingMuteList);
         return ResponseEntity.ok(target + " unmuted");
+    }
+
+    public ResponseEntity<String> toggleReady(Integer userId) {
+        Player player = userService.findPlayerById(userId);
+        if (player != null) {
+            player.setIsReady(!player.getIsReady());
+
+            playerRepository.save(player);
+            String statusMessage = player.getIsReady() ? "Ready" : "Not Ready";
+            return ResponseEntity.ok("Player is now: " + statusMessage);
+        }
+        return ResponseEntity.ok("Player not found");
     }
 }

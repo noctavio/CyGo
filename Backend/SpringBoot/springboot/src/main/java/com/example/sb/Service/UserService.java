@@ -59,8 +59,8 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public Optional<User> getByUserID(Integer id) {
-        return userRepository.findById(id);
+    public Optional<User> getByUserID(Integer userId) {
+        return userRepository.findById(userId);
     }
 
     public User getByUsername(String username) {
@@ -69,19 +69,19 @@ public class UserService {
 
     /**
      * This should be the method to delete from ALLLLLLLL Repositories, rows should cascade delete so set the query please!
-     * @param id user id
+     * @param userId user id
      * @return boolean
      */
-    public boolean deleteByID(Integer id) {
-        if (userRepository.findById(id).isPresent()) {
-            userRepository.deleteById(id);
+    public boolean deleteByID(Integer userId) {
+        if (userRepository.findById(userId).isPresent()) {
+            userRepository.deleteById(userId);
             return true;
         }
        return false;
     }
 
-    public TheProfile findProfileById(Integer id) {
-        Optional<User> user = userRepository.findById(id);
+    public TheProfile findProfileById(Integer userId) {
+        Optional<User> user = userRepository.findById(userId);
         if (user.isEmpty()) {
             throw new RuntimeException("User not found");
         }
@@ -94,8 +94,8 @@ public class UserService {
         return profile;
     }
 
-    public Player findPlayerById(Integer id) {
-        TheProfile profile = findProfileById(id);
+    public Player findPlayerById(Integer userId) {
+        TheProfile profile = findProfileById(userId);
 
         Player player = playerRepository.findByProfile(profile);
         if (player == null) {

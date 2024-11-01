@@ -50,34 +50,8 @@ public class Team {
     }
 
     public void setTeamScore() {
-        teamScore = (player1.getIndividualScore() != null ? player1.getIndividualScore() : 0) +
-                (player2.getIndividualScore() != null ? player2.getIndividualScore() : 0);
-    }
-
-    public void addPlayer(Player player) {
-        if (this.player1 == null) {
-            this.player1 = player;
-            setPlayerCount();
-        }
-        else if (this.player2 == null) {
-            this.player2 = player;
-            setPlayerCount();
-        }
-        else {
-            throw new IllegalStateException("Team is full, cannot add more than 2 players.");
-        }
-    }
-
-    // TODO players need to be stowed and not completed deleted when removed from a team AND NOT a lobby!
-    public void removePlayer(Player player) {
-        if (this.player1 != null && this.player1.equals(player)) {
-            this.player1 = null;
-            setPlayerCount();
-        }
-        else if (this.player2 != null && this.player2.equals(player)) {
-            this.player2 = null;
-            setPlayerCount();
-        }
+        teamScore = (player1 != null && player1.getIndividualScore() != null ? player1.getIndividualScore() : 0) +
+                (player2 != null && player2.getIndividualScore() != null ? player2.getIndividualScore() : 0);
     }
 
     @Override

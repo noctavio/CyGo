@@ -21,11 +21,9 @@ public class LobbyService {
     @Autowired
     private TeamRepository teamRepository;
     @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private TheProfileRepository profileRepository;
-    @Autowired
     private UserService userService;
+    @Autowired
+    private TeamService teamService;
 
     public List<Lobby> getAllLobbies() {
         return lobbyRepository.findAll();
@@ -54,7 +52,7 @@ public class LobbyService {
         lobby.setTeam2(emptyTeam2);
 
         Player newPlayer = new Player(profile, team1, lobby);
-        team1.addPlayer(newPlayer);
+        teamService.joinTeam(userId, team1.getTeam_id());
 
         lobbyRepository.save(lobby);
         teamRepository.save(team1);
@@ -73,35 +71,27 @@ public class LobbyService {
         if (lobbyOptional.isPresent()) {
             // Retrieve the Lobby instance
             Lobby lobbyToJoin = lobbyOptional.get();
-            Player newPlayer = new Player(profile);
             Team team1 = lobbyToJoin.getTeam1();
             Team team2 = lobbyToJoin.getTeam2();
+            Player newPlayer;
 
             // if team 1 has an open spot
             if (team1.getPlayer1() == null) {
-                newPlayer.setLobby(lobbyToJoin);
-                newPlayer.setTeam(team1);
-                lobbyToJoin.getTeam1().addPlayer(newPlayer);
+                newPlayer = new Player(profile, team1, lobbyToJoin);
+                teamService.joinTeam(userId, team1.getTeam_id());
             }
-
             else if (team1.getPlayer2() == null) {
-                newPlayer.setLobby(lobbyToJoin);
-                newPlayer.setTeam(team1);
-                lobbyToJoin.getTeam1().addPlayer(newPlayer);
+                newPlayer = new Player(profile, team1, lobbyToJoin);
+                teamService.joinTeam(userId, team1.getTeam_id());
             }
-
             else if (team2.getPlayer1() == null) {
-                newPlayer.setLobby(lobbyToJoin);
-                newPlayer.setTeam(team2);
-                lobbyToJoin.getTeam2().addPlayer(newPlayer);
+                newPlayer = new Player(profile, team2, lobbyToJoin);
+                teamService.joinTeam(userId, team2.getTeam_id());
             }
-
             else if (team2.getPlayer2() == null) {
-                newPlayer.setLobby(lobbyToJoin);
-                newPlayer.setTeam(team2);
-                lobbyToJoin.getTeam2().addPlayer(newPlayer);
+                newPlayer = new Player(profile, team2, lobbyToJoin);
+                teamService.joinTeam(userId, team2.getTeam_id());
             }
-
             else {
                 return ResponseEntity.ok("Lobby is full.");
             }
@@ -125,9 +115,11 @@ public class LobbyService {
         if (lobbyOptional.isPresent()) {
             // Retrieve the Lobby instance
             Player deserter = playerRepository.findByProfile(profile);
-
-            playerRepository.delete(deserter);
-            return ResponseEntity.ok(profile.getUsername() + " left the lobby!");
+            if (deserter != null) {
+                playerRepository.delete(deserter);
+                return ResponseEntity.ok(profile.getUsername() + " left the lobby!");
+            }
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Deserter not found!");
         }
         else {
             // Handles lobby is not found

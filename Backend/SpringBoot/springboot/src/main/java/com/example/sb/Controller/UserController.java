@@ -45,10 +45,10 @@ public class UserController {
         return user != null ? ResponseEntity.ok(user) : ResponseEntity.notFound().build();
     }
 
-    @PutMapping("/update/{id}")
-    public ResponseEntity<String> updateUser(@PathVariable Integer id, @RequestBody User user) {
+    @PutMapping("/update/{userId}")
+    public ResponseEntity<String> updateUser(@PathVariable Integer userId, @RequestBody User user) {
         // TODO change this so you can change user/password separately without the other going null
-        Optional<User> existingUserOptional = userService.getByUserID(id);
+        Optional<User> existingUserOptional = userService.getByUserID(userId);
 
         // Check if the user exists
         if (existingUserOptional.isEmpty()) {

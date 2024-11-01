@@ -52,14 +52,6 @@ public class Player {
         this.muted = new ArrayList<>();
     }
 
-    public void mute(String muteType) {
-        this.muted.add(muteType);
-    }
-
-    public void unmute(String unmuteType) {
-        this.muted.remove(unmuteType);
-    }
-
     public String getUsername() {
         return profile != null ? profile.getUsername() : null;
     }

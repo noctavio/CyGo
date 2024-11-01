@@ -22,6 +22,7 @@ public class LobbyController {
         return ResponseEntity.ok("-> Friendly Lobby should have been created.");
     }
 
+    // TODO implement???
     @PostMapping("/createRanked")
     public ResponseEntity<String> createRankedLobby() {
         lobbyService.createRankedLobby();
@@ -39,19 +40,19 @@ public class LobbyController {
     }
 
     // TODO implement
-    @PutMapping("/invite/players/{id}")
-    public ResponseEntity<String> invitePlayers(@PathVariable Integer id, @RequestBody Lobby lobbyJSON) {
+    @PutMapping("/invite/players/{userId}")
+    public ResponseEntity<String> invitePlayers(@PathVariable Integer userId, @RequestBody Lobby lobbyJSON) {
 
        return ResponseEntity.ok("-> method incomplete.");
     }
+
     //TODO when i add the 2nd player it gives a massive error perhaps ask TA. should work for now
     @PutMapping("{userId}/join/{lobbyId}")
     public ResponseEntity<String> joinLobby(@PathVariable Integer userId ,@PathVariable Integer lobbyId) {
         return lobbyService.joinLobby(userId, lobbyId);
     }
 
-    // TODO implement
-    @DeleteMapping("{userId}/leave/{lobbyId}")
+    @PutMapping("{userId}/leave/{lobbyId}")
     public ResponseEntity<String> leaveLobby(@PathVariable Integer lobbyId ,@PathVariable Integer userId) {
         return lobbyService.leaveLobby(userId, lobbyId);
     }

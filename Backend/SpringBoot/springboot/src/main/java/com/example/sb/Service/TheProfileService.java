@@ -56,13 +56,13 @@ public class TheProfileService {
         return theProfileRepository.findAll();
     }
 
-    public TheProfile getProfileByID(Integer id) {
+    public TheProfile getProfileByID(Integer userId) {
         // Retrieve the user by username
-        Optional<User> user = userRepository.findById(id); // This should return the User object
+        Optional<User> user = userRepository.findById(userId); // This should return the User object
 
         // If user is not found, handle it appropriately
-        if (user == null) {
-            throw new ResourceNotFoundException("User not found with id: " + id);
+        if (user.isEmpty()) {
+            throw new ResourceNotFoundException("User not found with id: " + userId);
         }
 
         // Retrieve the profile using the User object
