@@ -35,7 +35,7 @@ public class Lobby {
     //private List<String> invitedPlayers;
 
     public Lobby(String hostname) {
-        this.gameTime = 40;
+        this.gameTime = 20;
         this.hostName = hostname;
         this.isFriendly = true;
         //this.invitedPlayers = new ArrayList<>();
