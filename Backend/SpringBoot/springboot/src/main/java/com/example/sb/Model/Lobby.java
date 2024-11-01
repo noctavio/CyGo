@@ -17,10 +17,10 @@ public class Lobby {
 
     @Id()
     @GeneratedValue
-    private int lobby_id;
+    private Integer lobby_id;
     private String hostName;
     private Integer gameTime;
-    private boolean isFriendly;
+    private Boolean isFriendly;
     private final String boardSize = "9x9";
 
     @OneToOne(cascade = CascadeType.ALL)

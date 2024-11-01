@@ -12,7 +12,7 @@ public class TeamController {
     @Autowired
     private TeamService teamService;
 
-    @PostMapping("/{userId}/joinTeam/{teamId}")
+    @PostMapping("/{userId}/join/{teamId}")
     public ResponseEntity<String> joinTeam(@PathVariable Integer userId, @PathVariable Integer teamId) {
         return teamService.joinTeam(userId, teamId);
     }
@@ -22,7 +22,7 @@ public class TeamController {
         return teamService.updateTeamName(userId, teamJSON);
     }
 
-    @PutMapping("/{userId}/leaveTeam")
+    @PutMapping("/{userId}/leave")
     public ResponseEntity<String> leaveTeam(@PathVariable Integer userId) {
         return teamService.leaveTeam(userId);
     }

@@ -40,10 +40,12 @@ public class TeamService {
             Player player = playerRepository.findByProfile(profile);
             if (targetTeam.getPlayer1() == null) {
                 targetTeam.setPlayer1(player);
+                player.setTeam(targetTeam);
             }
 
             else if (targetTeam.getPlayer2() == null) {
                 targetTeam.setPlayer2(player);
+                player.setTeam(targetTeam);
             }
 
             else {
@@ -51,6 +53,7 @@ public class TeamService {
             }
 
             targetTeam.setPlayerCount();
+            playerRepository.save(player);
             teamRepository.save(targetTeam);
             return ResponseEntity.ok(profile.getUsername() + " joined team: " + targetTeam.getTeamName());
         }
@@ -66,10 +69,12 @@ public class TeamService {
         if (targetTeam != null) {
             if (targetTeam.getPlayer1().equals(player)) {
                 targetTeam.setPlayer1(null);
+                player.setTeam(null);
             }
 
             else if (targetTeam.getPlayer2().equals(player)) {
                 targetTeam.setPlayer2(null);
+                player.setTeam(null);
             }
 
             else {
@@ -82,6 +87,7 @@ public class TeamService {
                 targetTeam.setTeamName("-/-");
             }
 
+            playerRepository.save(player);
             teamRepository.save(targetTeam);
             return ResponseEntity.ok(profile.getUsername() + " left team: " + targetTeam.getTeamName());
         }

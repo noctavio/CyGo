@@ -126,4 +126,15 @@ public class PlayerService {
         }
         return ResponseEntity.ok("Player not found");
     }
+    public ResponseEntity<String> toggleBlackVote(Integer userId) {
+        Player player = userService.findPlayerById(userId);
+        if (player != null) {
+            player.setCastBlackVote(!player.getCastBlackVote());
+
+            playerRepository.save(player);
+            String statusMessage = player.getCastBlackVote() ? "in favor of switching teams colors" : "against switching team colors";
+            return ResponseEntity.ok("Player voted "  + statusMessage);
+        }
+        return ResponseEntity.ok("Player not found");
+    }
 }

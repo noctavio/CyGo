@@ -63,4 +63,8 @@ public class PlayerController {
     public ResponseEntity<String> toggleReady(@PathVariable Integer userId) {
         return playerService.toggleReady(userId);
     }
+    @PutMapping("/{userId}/toggleBlackVote")
+    public ResponseEntity<String> toggleBlackVote(@PathVariable Integer userId) {
+        return playerService.toggleBlackVote(userId);
+    }
 }

@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import javax.swing.plaf.synth.SynthTextAreaUI;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -51,16 +52,16 @@ public class LobbyService {
         Team emptyTeam2 = new Team("-/-", false);
         lobby.setTeam2(emptyTeam2);
 
-        Player newPlayer = new Player(profile, team1, lobby);
-        teamService.joinTeam(userId, team1.getTeam_id());
+        Player hostPlayer = new Player(profile, team1, lobby);
+        team1.setPlayer1(hostPlayer);
+        team1.setPlayerCount();
 
         lobbyRepository.save(lobby);
         teamRepository.save(team1);
         teamRepository.save(emptyTeam2);
-        playerRepository.save(newPlayer);
+        playerRepository.save(hostPlayer);
 
         return ResponseEntity.ok("Friendly lobby created with, host: " + profile.getUsername());
-
     }
 
     public void createRankedLobby() {
@@ -81,23 +82,25 @@ public class LobbyService {
             // if team 1 has an open spot
             if (team1.getPlayer1() == null) {
                 newPlayer = new Player(profile, team1, lobbyToJoin);
-                teamService.joinTeam(userId, team1.getTeam_id());
+                team1.setPlayer1(newPlayer);
             }
             else if (team1.getPlayer2() == null) {
                 newPlayer = new Player(profile, team1, lobbyToJoin);
-                teamService.joinTeam(userId, team1.getTeam_id());
+                team1.setPlayer2(newPlayer);
             }
             else if (team2.getPlayer1() == null) {
                 newPlayer = new Player(profile, team2, lobbyToJoin);
-                teamService.joinTeam(userId, team2.getTeam_id());
+                team2.setPlayer1(newPlayer);
             }
             else if (team2.getPlayer2() == null) {
                 newPlayer = new Player(profile, team2, lobbyToJoin);
-                teamService.joinTeam(userId, team2.getTeam_id());
+                team2.setPlayer2(newPlayer);
             }
             else {
                 return ResponseEntity.ok("Lobby is full.");
             }
+            team1.setPlayerCount();
+            team2.setPlayerCount();
 
             teamRepository.save(team1);
             teamRepository.save(team2);

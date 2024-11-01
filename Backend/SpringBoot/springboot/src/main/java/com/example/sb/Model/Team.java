@@ -16,7 +16,7 @@ public class Team {
     @Id()
     @GeneratedValue
     private Integer team_id; //TODO probably necessary to be unique and primary key.
-    private boolean isBlack;
+    private Boolean isBlack;
     private String teamName;
     private Integer teamScore;
     private Integer playerCount;

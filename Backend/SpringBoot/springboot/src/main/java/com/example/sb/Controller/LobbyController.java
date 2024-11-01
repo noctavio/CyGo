@@ -16,17 +16,17 @@ public class LobbyController {
     @Autowired
     private LobbyService lobbyService;
 
-    @PostMapping("/createFriendly/{userId}")
+    @PostMapping("/{userId}/create")
     public ResponseEntity<String> createFriendlyLobby(@PathVariable Integer userId) {
         return lobbyService.createFriendlyLobby(userId);
     }
 
-    // TODO implement maybe...
-    @PostMapping("/createRanked")
-    public ResponseEntity<String> createRankedLobby() {
-        lobbyService.createRankedLobby();
-        return ResponseEntity.ok("-> method incomplete.");
-    }
+    //// TODO implement maybe...
+    //@PostMapping("/createRanked")
+    //public ResponseEntity<String> createRankedLobby() {
+    //    lobbyService.createRankedLobby();
+    //    return ResponseEntity.ok("-> method incomplete.");
+    //}
 
     @GetMapping
     public List<Lobby> getAllLobbies() {
@@ -65,5 +65,4 @@ public class LobbyController {
     public ResponseEntity<String> killLobby(@PathVariable Integer userId) {
         return lobbyService.deleteLobby(userId);
     }
-
 }
