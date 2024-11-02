@@ -56,9 +56,9 @@ public class LobbyController {
         return lobbyService.leaveLobby(userId);
     }
 
-    @PutMapping("/{userId}/updateHostOrTime")
-    public ResponseEntity<String> updateGameHostOrGameTime(@PathVariable Integer userId, @RequestBody Lobby lobbyJSON) {
-        return lobbyService.updateHostOrGameTime(userId, lobbyJSON);
+    @PutMapping("/{userId}/updateConfig")
+    public ResponseEntity<String> updateConfig(@PathVariable Integer userId, @RequestBody Lobby lobbyJSON) {
+        return lobbyService.updateConfig(userId, lobbyJSON);
     }
 
     @DeleteMapping("/{userId}/killLobby")

@@ -126,6 +126,7 @@ public class PlayerService {
         }
         return ResponseEntity.ok("Player not found");
     }
+
     public ResponseEntity<String> toggleBlackVote(Integer userId) {
         Player player = userService.findPlayerById(userId);
         if (player != null) {

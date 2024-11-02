@@ -49,6 +49,7 @@ public class UserService {
     public void updateUser(Optional<User> user) {
         // Check if the Optional contains a value
         if (user.isPresent()) {
+            theProfileService.updateProfileTable();
             userRepository.save(user.get());  // Save the User if present
         } else {
             throw new IllegalArgumentException("User must be present to update."); // Handle the absence of User

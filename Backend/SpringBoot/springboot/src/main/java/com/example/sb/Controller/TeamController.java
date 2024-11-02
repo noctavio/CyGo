@@ -26,4 +26,9 @@ public class TeamController {
     public ResponseEntity<String> leaveTeam(@PathVariable Integer userId) {
         return teamService.leaveTeam(userId);
     }
+    @PutMapping("/{userId}/updateTeamScore/{score}")
+    public ResponseEntity<String> updateTeamScore(@PathVariable Integer userId, @PathVariable Integer score) {
+        return teamService.updateTeamScore(userId, score);
+    }
+
 }

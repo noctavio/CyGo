@@ -48,6 +48,7 @@ public class PlayerController {
     public ResponseEntity<String> addToMuteList(@PathVariable Integer userId, @PathVariable String target) {
         return playerService.mute(userId, target);
     }
+
     /**
      * REMOVES one or multiple players to a targets mute list, by providing input via mapping
      * @param userId Player who is muting others
@@ -63,6 +64,7 @@ public class PlayerController {
     public ResponseEntity<String> toggleReady(@PathVariable Integer userId) {
         return playerService.toggleReady(userId);
     }
+
     @PutMapping("/{userId}/toggleBlackVote")
     public ResponseEntity<String> toggleBlackVote(@PathVariable Integer userId) {
         return playerService.toggleBlackVote(userId);

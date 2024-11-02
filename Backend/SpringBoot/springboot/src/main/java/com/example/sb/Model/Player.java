@@ -22,7 +22,6 @@ public class Player {
     @GeneratedValue
     private Integer player_id;
     private Boolean isReady;
-    private Integer individualScore;
     private Boolean castBlackVote;
 
     @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
@@ -45,7 +44,6 @@ public class Player {
     private List<String> muted;
 
     public Player(TheProfile profile, Team team, Lobby lobby) {
-        this.individualScore = 0;
         this.profile = profile;
         this.team = team;
         this.lobby = lobby;
@@ -63,13 +61,13 @@ public class Player {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Player player = (Player) o;
-        return individualScore == player.individualScore && Objects.equals(player_id, player.player_id)
+        return Objects.equals(player_id, player.player_id)
                 && Objects.equals(isReady, player.isReady) && Objects.equals(profile, player.profile)
                 && Objects.equals(lobby, player.lobby) && Objects.equals(team, player.team) && Objects.equals(muted, player.muted);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(player_id, isReady, individualScore, profile, lobby, team, muted);
+        return Objects.hash(player_id, isReady, profile, lobby, team, muted);
     }
 }

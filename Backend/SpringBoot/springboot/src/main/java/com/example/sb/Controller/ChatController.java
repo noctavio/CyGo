@@ -51,6 +51,7 @@ public class ChatController {
     private final Logger logger = LoggerFactory.getLogger(ChatController.class);
 
     private static final long COOLDOWN_PERIOD_MS = 1000; // 1 second in milliseconds
+
     // Map to store player ID and their last message timestamp
     private static ConcurrentHashMap<String, Instant> playerLastMessageTime = new ConcurrentHashMap<>();
 

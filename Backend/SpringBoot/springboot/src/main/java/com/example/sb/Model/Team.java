@@ -33,8 +33,8 @@ public class Team {
     public Team(String teamName, boolean isBlack) {
         this.teamName = teamName;
         this.isBlack = isBlack;
+        teamScore = 0;
         setPlayerCount();
-        setTeamScore();
     }
 
     public void setPlayerCount() {
@@ -47,11 +47,6 @@ public class Team {
         else {
             this.playerCount = 1;
         }
-    }
-
-    public void setTeamScore() {
-        teamScore = (player1 != null && player1.getIndividualScore() != null ? player1.getIndividualScore() : 0) +
-                (player2 != null && player2.getIndividualScore() != null ? player2.getIndividualScore() : 0);
     }
 
     @Override

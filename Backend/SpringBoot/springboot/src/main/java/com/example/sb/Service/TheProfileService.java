@@ -77,10 +77,9 @@ public class TheProfileService {
         List<User> users = userRepository.findAll(); // Fetch all users
 
         for (User user : users) {
-            // Fetch the profile by current username from theProfileRepository
+            // Fetch the profile by current user from theProfileRepository
             TheProfile existingProfile = theProfileRepository.findByUser(Optional.ofNullable(user));
 
-            // TODO dynamically update table to delete(nvm already done in hard delete??)
             if (existingProfile == null) {
                 // If no profile exists, create a new profile
                 TheProfile newProfile = new TheProfile(user);

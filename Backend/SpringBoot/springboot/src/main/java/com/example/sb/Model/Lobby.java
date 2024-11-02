@@ -2,6 +2,7 @@ package com.example.sb.Model;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.Duration;
@@ -9,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+@NoArgsConstructor
 @Getter
 @Setter
 @Entity
@@ -39,9 +41,6 @@ public class Lobby {
         this.hostName = hostname;
         this.isFriendly = true;
         //this.invitedPlayers = new ArrayList<>();
-    }
-    public Lobby() {
-        this.isFriendly = false;
     }
 
     public List<Player> getPlayersInLobby() {

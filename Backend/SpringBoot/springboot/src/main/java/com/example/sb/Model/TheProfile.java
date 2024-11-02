@@ -14,7 +14,7 @@ import java.util.Objects;
 public class TheProfile {
 
     @Id()
-    @GeneratedValue
+    @GeneratedValue()
     private Integer profile_id;
 
     @OneToOne(cascade = CascadeType.ALL)

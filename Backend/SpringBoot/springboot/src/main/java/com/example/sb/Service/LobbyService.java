@@ -2,16 +2,14 @@ package com.example.sb.Service;
 
 import com.example.sb.Model.*;
 import com.example.sb.Repository.*;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import javax.swing.plaf.synth.SynthTextAreaUI;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class LobbyService {
@@ -23,8 +21,6 @@ public class LobbyService {
     private TeamRepository teamRepository;
     @Autowired
     private UserService userService;
-    @Autowired
-    private TeamService teamService;
 
     public List<Lobby> getAllLobbies() {
         return lobbyRepository.findAll();
@@ -64,10 +60,7 @@ public class LobbyService {
         return ResponseEntity.ok("Friendly lobby created with, host: " + profile.getUsername());
     }
 
-    public void createRankedLobby() {
-        Lobby lobby = new Lobby();
-    }
-
+    @Transactional
     public ResponseEntity<String> joinLobby(Integer userId, Integer lobbyId) {
         TheProfile profile = userService.findProfileById(userId);
 
@@ -99,15 +92,15 @@ public class LobbyService {
             else {
                 return ResponseEntity.ok("Lobby is full.");
             }
+
             team1.setPlayerCount();
             team2.setPlayerCount();
 
             teamRepository.save(team1);
             teamRepository.save(team2);
             playerRepository.save(newPlayer);
-            lobbyRepository.save(lobbyToJoin);
 
-            return ResponseEntity.ok("Player joined the lobby!");
+            return ResponseEntity.ok(profile.getUsername() + " joined the lobby!");
         }
         else {
             // Handles lobby is not found
@@ -136,6 +129,7 @@ public class LobbyService {
         Lobby lobbyToDelete = potentiallyHost.getLobby();
 
         if (potentiallyHost.getUsername().equals(lobbyToDelete.getHostName())) {
+
             lobbyRepository.delete(lobbyToDelete);
             return ResponseEntity.ok("Lobby deleted!");
         }
@@ -144,7 +138,7 @@ public class LobbyService {
         }
     }
 
-    public ResponseEntity<String> updateHostOrGameTime(Integer userId, Lobby lobbyJSON) {
+    public ResponseEntity<String> updateConfig(Integer userId, Lobby lobbyJSON) {
         TheProfile potentiallyHost = userService.findProfileById(userId);
 
         Player player = playerRepository.findByProfile(potentiallyHost);
@@ -157,6 +151,9 @@ public class LobbyService {
                 }
                 if (lobbyJSON.getHostName() != null) {
                     lobby.setHostName(lobbyJSON.getHostName());
+                }
+                if (lobbyJSON.getIsFriendly() != null) {
+                    lobby.setIsFriendly(lobbyJSON.getIsFriendly());
                 }
             }
             else {
