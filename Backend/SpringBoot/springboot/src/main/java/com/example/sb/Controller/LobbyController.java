@@ -21,39 +21,27 @@ public class LobbyController {
         return lobbyService.createFriendlyLobby(userId);
     }
 
-    //// TODO implement maybe...
-    //@PostMapping("/createRanked")
-    //public ResponseEntity<String> createRankedLobby() {
-    //    lobbyService.createRankedLobby();
-    //    return ResponseEntity.ok("-> method incomplete.");
-    //}
-
     @GetMapping
     public List<Lobby> getAllLobbies() {
         return lobbyService.getAllLobbies();
     }
 
-    @GetMapping("/teams/{lobbyId}")
-    public List<Team> getTeamsFromLobby(@PathVariable Integer lobbyId) {
-        return lobbyService.getTeams(lobbyId);
-    }
-
     // TODO implement maybe...
-    @PutMapping("/invite/players/{userId}")
-    public ResponseEntity<String> invitePlayers(@PathVariable Integer userId, @RequestBody Lobby lobbyJSON) {
+    //@PutMapping("/invite/players/{userId}")
+    //public ResponseEntity<String> invitePlayers(@PathVariable Integer userId, @RequestBody Lobby lobbyJSON) {
+    //
+    //   return ResponseEntity.ok("-> method incomplete.");
+    //}
 
-       return ResponseEntity.ok("-> method incomplete.");
+    @PutMapping("/{hostUserId}/updateConfig")
+    public ResponseEntity<String> updateConfig(@PathVariable Integer hostUserId, @RequestBody Lobby lobbyJSON) {
+        return lobbyService.updateConfig(hostUserId, lobbyJSON);
     }
 
-    //TODO when i add the 2nd player it gives a duplicate perhaps ask TA. should work for now
+    //TODO when i add the 2nd player it gives a 'duplicate key' error but it saves anyway, ignore the error it works!(could not fix)
     @PutMapping("/{userId}/join/{lobbyId}")
     public ResponseEntity<String> joinLobby(@PathVariable Integer userId ,@PathVariable Integer lobbyId) {
         return lobbyService.joinLobby(userId, lobbyId);
-    }
-
-    @DeleteMapping("/{hostUserId}/kick/{userId}")
-    public ResponseEntity<String> kickPlayerFromLobby(@PathVariable Integer hostUserId, @PathVariable Integer userId) {
-        return lobbyService.kickPlayer(hostUserId, userId);
     }
 
     @DeleteMapping("/{userId}/leave")
@@ -61,9 +49,9 @@ public class LobbyController {
         return lobbyService.leaveLobby(userId);
     }
 
-    @PutMapping("/{hostUserId}/updateConfig")
-    public ResponseEntity<String> updateConfig(@PathVariable Integer hostUserId, @RequestBody Lobby lobbyJSON) {
-        return lobbyService.updateConfig(hostUserId, lobbyJSON);
+    @DeleteMapping("/{hostUserId}/kick/{userId}")
+    public ResponseEntity<String> kickPlayerFromLobby(@PathVariable Integer hostUserId, @PathVariable Integer userId) {
+        return lobbyService.kickPlayer(hostUserId, userId);
     }
 
     @DeleteMapping("/{hostUserId}/killLobby")

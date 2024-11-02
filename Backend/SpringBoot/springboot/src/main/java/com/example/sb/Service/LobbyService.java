@@ -26,16 +26,6 @@ public class LobbyService {
         return lobbyRepository.findAll();
     }
 
-    public List<Team> getTeams(Integer lobbyId) {
-        Optional<Lobby> lobbyOptional = lobbyRepository.findById(lobbyId);
-        if (lobbyOptional.isPresent()) {
-            Lobby specificLobby = lobbyOptional.get();
-            Team team1 = specificLobby.getTeam1();
-            Team team2 = specificLobby.getTeam2();
-            return Arrays.asList(team1, team2);
-        }
-        return Collections.emptyList();
-    }
 
     public ResponseEntity<String> createFriendlyLobby(Integer userId) {
         TheProfile profile = userService.findProfileById(userId);

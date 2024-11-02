@@ -6,6 +6,7 @@ import com.example.sb.Model.Team;
 import com.example.sb.Model.TheProfile;
 import com.example.sb.Repository.LobbyRepository;
 import com.example.sb.Repository.PlayerRepository;
+import com.example.sb.Repository.TeamRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,17 +19,25 @@ public class PlayerService {
     @Autowired
     private PlayerRepository playerRepository;
     @Autowired
-    private LobbyRepository lobbyRepository;
+    private TeamRepository teamRepository;
     @Autowired
     private UserService userService;
 
-    public ResponseEntity<String> updatePlayer(Integer userId, Player playerJSON) {
+    public List<Player> getAllPlayersFromTeam(Integer teamId) {
+        Optional<Team> targetTeam = teamRepository.findById(teamId);
+        if (targetTeam.isPresent()) {
+            Team team = targetTeam.get();
+            List<Player> players = new ArrayList<>();
+            if (team.getPlayer1() != null) {
+                players.add(team.getPlayer1());
+            }
+            if (team.getPlayer2() != null) {
+                players.add(team.getPlayer2());
+            }
 
-        return ResponseEntity.ok("method not complete!");
-    }
-
-    public List<Player> getAllPlayers() {
-        return playerRepository.findAll();
+            return players;
+        }
+        return null;
     }
 
     public List<String> getMutedList(Integer userId) {

@@ -18,9 +18,9 @@ public class PlayerController {
      * Returns a list of all players saved across all lobbies(not practical for testing only)
      * @return List of ALL players saved in the repository
      */
-    @GetMapping
-    public List<Player> getAllPlayers() {
-        return playerService.getAllPlayers();
+    @GetMapping("/{teamId}")
+    public List<Player> getPlayersFromTeam(@PathVariable Integer teamId) {
+        return playerService.getAllPlayersFromTeam(teamId);
     }
 
     /**
@@ -31,11 +31,6 @@ public class PlayerController {
     @GetMapping("/mutedList/{userId}")
     public List<String> getSomePlayersMutedList(@PathVariable Integer userId) {
         return playerService.getMutedList(userId);
-    }
-
-    @PutMapping("/update/{userId}")
-    public ResponseEntity<String> updatePlayer(@PathVariable Integer userId, @RequestBody Player playerJSON) {
-        return playerService.updatePlayer(userId, playerJSON);
     }
 
     /**

@@ -1,8 +1,10 @@
 package com.example.sb.Service;
 
+import com.example.sb.Model.Lobby;
 import com.example.sb.Model.Player;
 import com.example.sb.Model.Team;
 import com.example.sb.Model.TheProfile;
+import com.example.sb.Repository.LobbyRepository;
 import com.example.sb.Repository.PlayerRepository;
 import com.example.sb.Repository.TeamRepository;
 import com.example.sb.Repository.TheProfileRepository;
@@ -10,6 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -20,6 +25,8 @@ public class TeamService {
     private UserService userService;
     @Autowired
     private PlayerRepository playerRepository;
+    @Autowired
+    private LobbyRepository lobbyRepository;
 
     public ResponseEntity<String> updateTeamName(Integer userId, Team teamJSON) {
         TheProfile profile = userService.findProfileById(userId);
@@ -104,6 +111,17 @@ public class TeamService {
             return ResponseEntity.ok("Team score updated: " + targetTeam.getTeamScore());
         }
         return ResponseEntity.ok("Player team does not exist.");
+    }
+
+    public List<Team> getTeams(Integer lobbyId) {
+        Optional<Lobby> lobbyOptional = lobbyRepository.findById(lobbyId);
+        if (lobbyOptional.isPresent()) {
+            Lobby specificLobby = lobbyOptional.get();
+            Team team1 = specificLobby.getTeam1();
+            Team team2 = specificLobby.getTeam2();
+            return Arrays.asList(team1, team2);
+        }
+        return Collections.emptyList();
     }
 
 }
