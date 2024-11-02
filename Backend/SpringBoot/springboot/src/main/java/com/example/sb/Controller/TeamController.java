@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@RequestMapping("/lobby/team")
+@RequestMapping("/lobby/teams")
 @RestController
 public class TeamController {
     @Autowired
