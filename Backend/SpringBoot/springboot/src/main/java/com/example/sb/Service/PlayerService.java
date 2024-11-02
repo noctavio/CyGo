@@ -40,7 +40,7 @@ public class PlayerService {
         Player playerUpdatingMuteList = userService.findPlayerById(userId);
         List<String> currentMuted = playerUpdatingMuteList.getMuted();
 
-        Lobby lobby = playerUpdatingMuteList.getLobby();
+        Lobby lobby = playerUpdatingMuteList.getTeam().getLobby();
         List<Player> playersInLobby = lobby.getPlayersInLobby();
 
         if (target.equals("all")) {
@@ -80,7 +80,7 @@ public class PlayerService {
         Player playerUpdatingMuteList = userService.findPlayerById(userId);
         List<String> currentMuted = playerUpdatingMuteList.getMuted();
 
-        Lobby lobby = playerUpdatingMuteList.getLobby();
+        Lobby lobby = playerUpdatingMuteList.getTeam().getLobby();
         List<Player> playersInLobby = lobby.getPlayersInLobby();
 
         if (target.equals("all")) {

@@ -53,8 +53,8 @@ public class TeamService {
             }
 
             targetTeam.setPlayerCount();
-            playerRepository.save(player);
             teamRepository.save(targetTeam);
+            playerRepository.save(player);
             return ResponseEntity.ok(profile.getUsername() + " joined team: " + targetTeam.getTeamName());
         }
         return ResponseEntity.ok("Specified team does not exist.");
@@ -87,8 +87,8 @@ public class TeamService {
                 targetTeam.setTeamName("-/-");
             }
 
-            playerRepository.save(player);
             teamRepository.save(targetTeam);
+            playerRepository.save(player);
             return ResponseEntity.ok(profile.getUsername() + " left team: " + targetTeam.getTeamName());
         }
         return ResponseEntity.ok("Specified team does not exist.");

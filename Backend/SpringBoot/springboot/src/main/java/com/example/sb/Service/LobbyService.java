@@ -42,13 +42,13 @@ public class LobbyService {
 
         // Initializes lobby with host
         Lobby lobby = new Lobby(profile.getUsername());
-        Team team1 = new Team(profile.getClubname(), true);
+        Team team1 = new Team(lobby, profile.getClubname(), true);
         lobby.setTeam1(team1);
 
-        Team emptyTeam2 = new Team("-/-", false);
+        Team emptyTeam2 = new Team(lobby,"-/-", false);
         lobby.setTeam2(emptyTeam2);
 
-        Player hostPlayer = new Player(profile, team1, lobby);
+        Player hostPlayer = new Player(profile, team1);
         team1.setPlayer1(hostPlayer);
         team1.setPlayerCount();
 
@@ -60,7 +60,6 @@ public class LobbyService {
         return ResponseEntity.ok("Friendly lobby created with, host: " + profile.getUsername());
     }
 
-    @Transactional
     public ResponseEntity<String> joinLobby(Integer userId, Integer lobbyId) {
         TheProfile profile = userService.findProfileById(userId);
 
@@ -74,19 +73,19 @@ public class LobbyService {
 
             // if team 1 has an open spot
             if (team1.getPlayer1() == null) {
-                newPlayer = new Player(profile, team1, lobbyToJoin);
+                newPlayer = new Player(profile, team1);
                 team1.setPlayer1(newPlayer);
             }
             else if (team1.getPlayer2() == null) {
-                newPlayer = new Player(profile, team1, lobbyToJoin);
+                newPlayer = new Player(profile, team1);
                 team1.setPlayer2(newPlayer);
             }
             else if (team2.getPlayer1() == null) {
-                newPlayer = new Player(profile, team2, lobbyToJoin);
+                newPlayer = new Player(profile, team2);
                 team2.setPlayer1(newPlayer);
             }
             else if (team2.getPlayer2() == null) {
-                newPlayer = new Player(profile, team2, lobbyToJoin);
+                newPlayer = new Player(profile, team2);
                 team2.setPlayer2(newPlayer);
             }
             else {
@@ -110,11 +109,20 @@ public class LobbyService {
 
     public ResponseEntity<String> leaveLobby(Integer userId) {
         TheProfile profile = userService.findProfileById(userId);
-        Player deserter = playerRepository.findByProfile(profile);
-        Lobby lobby = deserter.getLobby();
+        Player leavingPlayer = playerRepository.findByProfile(profile);
+        Team teamBeingLeft = leavingPlayer.getTeam();
+        Lobby lobby = teamBeingLeft.getLobby();
 
         if (lobby != null) {
-            playerRepository.delete(deserter);
+            //TODO I couldn't get cascade to work here manually set to null to delete.
+            if (teamBeingLeft.getPlayer1().equals(leavingPlayer)) {
+                teamBeingLeft.setPlayer1(null);
+            }
+            else if (teamBeingLeft.getPlayer2().equals(leavingPlayer)) {
+                teamBeingLeft.setPlayer2(null);
+            }
+            teamRepository.save(teamBeingLeft);
+            playerRepository.delete(leavingPlayer);
             return ResponseEntity.ok(profile.getUsername() + " left the lobby!");
         }
         else {
@@ -123,10 +131,10 @@ public class LobbyService {
         }
     }
 
-    public ResponseEntity<String> deleteLobby(Integer userId) {
-        TheProfile profile = userService.findProfileById(userId);
+    public ResponseEntity<String> deleteLobby(Integer hostUserId) {
+        TheProfile profile = userService.findProfileById(hostUserId);
         Player potentiallyHost = playerRepository.findByProfile(profile);
-        Lobby lobbyToDelete = potentiallyHost.getLobby();
+        Lobby lobbyToDelete = potentiallyHost.getTeam().getLobby();
 
         if (potentiallyHost.getUsername().equals(lobbyToDelete.getHostName())) {
 
@@ -138,11 +146,11 @@ public class LobbyService {
         }
     }
 
-    public ResponseEntity<String> updateConfig(Integer userId, Lobby lobbyJSON) {
-        TheProfile potentiallyHost = userService.findProfileById(userId);
+    public ResponseEntity<String> updateConfig(Integer hostUserId, Lobby lobbyJSON) {
+        TheProfile potentiallyHost = userService.findProfileById(hostUserId);
 
         Player player = playerRepository.findByProfile(potentiallyHost);
-        Lobby lobby = player.getLobby();
+        Lobby lobby = player.getTeam().getLobby();
         if (lobby.getTeam1() != null) {
 
             if (potentiallyHost.getUsername().equals(lobby.getHostName())) {
@@ -165,6 +173,36 @@ public class LobbyService {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Specified lobby not found");
         }
         return ResponseEntity.ok("Lobby updated!");
+    }
+
+    public ResponseEntity<String> kickPlayer(Integer hostUserId, Integer userId) {
+
+        TheProfile profile = userService.findProfileById(userId);
+        TheProfile potentiallyHost = userService.findProfileById(hostUserId);
+
+        Player playerBeingKicked = playerRepository.findByProfile(profile);
+        Team targetTeam = playerBeingKicked.getTeam();
+        Lobby lobby = targetTeam.getLobby();
+
+        if (lobby != null) {
+            if (lobby.getHostName().equals(potentiallyHost.getUsername())) {
+
+                if (targetTeam.getPlayer1().equals(playerBeingKicked)) {
+                    targetTeam.setPlayer1(null);
+                }
+                else if (targetTeam.getPlayer2().equals(playerBeingKicked)) {
+                    targetTeam.setPlayer2(null);
+                }
+                teamRepository.save(targetTeam);
+                playerRepository.delete(playerBeingKicked);
+                return ResponseEntity.ok(profile.getUsername() + " was kicked from the lobby!");
+            }
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cannot kick player as you are not host.");
+        }
+        else {
+            // Handles lobby is not found
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Lobby not found!");
+        }
     }
 
 }

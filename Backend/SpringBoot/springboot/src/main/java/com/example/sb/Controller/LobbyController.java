@@ -51,18 +51,23 @@ public class LobbyController {
         return lobbyService.joinLobby(userId, lobbyId);
     }
 
-    @PutMapping("/{userId}/leave")
+    @DeleteMapping("/{hostUserId}/kick/{userId}")
+    public ResponseEntity<String> kickPlayerFromLobby(@PathVariable Integer hostUserId, @PathVariable Integer userId) {
+        return lobbyService.kickPlayer(hostUserId, userId);
+    }
+
+    @DeleteMapping("/{userId}/leave")
     public ResponseEntity<String> leaveLobby(@PathVariable Integer userId) {
         return lobbyService.leaveLobby(userId);
     }
 
-    @PutMapping("/{userId}/updateConfig")
-    public ResponseEntity<String> updateConfig(@PathVariable Integer userId, @RequestBody Lobby lobbyJSON) {
-        return lobbyService.updateConfig(userId, lobbyJSON);
+    @PutMapping("/{hostUserId}/updateConfig")
+    public ResponseEntity<String> updateConfig(@PathVariable Integer hostUserId, @RequestBody Lobby lobbyJSON) {
+        return lobbyService.updateConfig(hostUserId, lobbyJSON);
     }
 
-    @DeleteMapping("/{userId}/killLobby")
-    public ResponseEntity<String> killLobby(@PathVariable Integer userId) {
-        return lobbyService.deleteLobby(userId);
+    @DeleteMapping("/{hostUserId}/killLobby")
+    public ResponseEntity<String> killLobby(@PathVariable Integer hostUserId) {
+        return lobbyService.deleteLobby(hostUserId);
     }
 }

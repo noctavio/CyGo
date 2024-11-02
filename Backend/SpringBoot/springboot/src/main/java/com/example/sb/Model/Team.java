@@ -1,4 +1,5 @@
 package com.example.sb.Model;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,6 +22,11 @@ public class Team {
     private Integer teamScore;
     private Integer playerCount;
 
+    @ManyToOne
+    @JsonIgnore
+    @JoinColumn(name = "lobby_id", referencedColumnName = "lobby_id")
+    private Lobby lobby;
+
     // Two distinct player references instead of a list
     @OneToOne(cascade = CascadeType.ALL) // or use @OneToOne depending on your player-team relationship
     @JoinColumn(name = "player1_id", referencedColumnName = "player_id")
@@ -30,7 +36,8 @@ public class Team {
     @JoinColumn(name = "player2_id", referencedColumnName = "player_id")
     private Player player2;
 
-    public Team(String teamName, boolean isBlack) {
+    public Team(Lobby lobby, String teamName, boolean isBlack) {
+        this.lobby = lobby;
         this.teamName = teamName;
         this.isBlack = isBlack;
         teamScore = 0;

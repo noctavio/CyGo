@@ -28,12 +28,7 @@ public class Player {
     @JoinColumn(name = "profile_id", referencedColumnName = "profile_id")
     private TheProfile profile;
 
-    @ManyToOne
-    @JsonIgnore
-    @JoinColumn(name = "lobby_id", referencedColumnName = "lobby_id")
-    private Lobby lobby;
-
-    @ManyToOne
+    @ManyToOne()
     @JsonIgnore
     @JoinColumn(name = "team_id", referencedColumnName = "team_id")
     private Team team;
@@ -43,10 +38,9 @@ public class Player {
     @Column(name = "muted_type")
     private List<String> muted;
 
-    public Player(TheProfile profile, Team team, Lobby lobby) {
+    public Player(TheProfile profile, Team team) {
         this.profile = profile;
         this.team = team;
-        this.lobby = lobby;
         this.castBlackVote = false;
         this.isReady = false;  // Players are not ready when they join
         this.muted = new ArrayList<>();
@@ -63,11 +57,11 @@ public class Player {
         Player player = (Player) o;
         return Objects.equals(player_id, player.player_id)
                 && Objects.equals(isReady, player.isReady) && Objects.equals(profile, player.profile)
-                && Objects.equals(lobby, player.lobby) && Objects.equals(team, player.team) && Objects.equals(muted, player.muted);
+                && Objects.equals(team, player.team) && Objects.equals(muted, player.muted);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(player_id, isReady, profile, lobby, team, muted);
+        return Objects.hash(player_id, isReady, profile, team, muted);
     }
 }
