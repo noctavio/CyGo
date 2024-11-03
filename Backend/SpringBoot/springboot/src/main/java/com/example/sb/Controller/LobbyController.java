@@ -2,7 +2,9 @@ package com.example.sb.Controller;
 
 import com.example.sb.Model.Lobby;
 import com.example.sb.Model.Team;
+import com.example.sb.Service.GobanService;
 import com.example.sb.Service.LobbyService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +17,14 @@ import java.util.List;
 public class LobbyController {
     @Autowired
     private LobbyService lobbyService;
+
+    @Autowired
+    private GobanService gobanService;
+
+    @PostMapping("/{hostId}/initialize/game")
+    public ResponseEntity<String> initializeGame(@PathVariable Integer hostId) throws JsonProcessingException {
+        return gobanService.initializeGame(hostId);
+    }
 
     @PostMapping("/{userId}/create")
     public ResponseEntity<String> createFriendlyLobby(@PathVariable Integer userId) {
