@@ -16,6 +16,8 @@ public class GobanService {
     private PlayerRepository playerRepository;
     @Autowired
     private UserService userService;
+    @Autowired
+    private GobanRepository gobanRepository;
 
     public ResponseEntity<String> initializeGame(Integer hostId) throws JsonProcessingException {
         TheProfile profile = userService.findProfileById(hostId);
@@ -24,7 +26,8 @@ public class GobanService {
 
         if (potentiallyHost.getUsername().equals(lobby.getHostName())) {
             Goban goban = new Goban(lobby);
-            System.out.println(goban);
+            System.out.println(goban.getBoardState());
+            gobanRepository.save(goban);
             return ResponseEntity.ok("Game has been initialized, player order is ->");
         }
         return ResponseEntity.ok("Player cannot initialize the game as they are not host!");

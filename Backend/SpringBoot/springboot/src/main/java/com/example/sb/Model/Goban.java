@@ -16,7 +16,7 @@ public class Goban {
     @Id()
     @GeneratedValue
     private Integer board_id;
-    @Column(name = "board_state")
+    @Column(name = "board_state", length = 1000)
     private String boardState;
     @Transient
     private Stone[][] board;
