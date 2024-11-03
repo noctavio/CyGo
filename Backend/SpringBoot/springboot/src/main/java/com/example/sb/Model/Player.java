@@ -1,46 +1,67 @@
 package com.example.sb.Model;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@Entity
+@NoArgsConstructor
+@Table(name = "Players")
 public class Player {
-    // Getters and Setters
 
-    private int playerId;
-    private String username;
+    @Id
+    @GeneratedValue
+    private Integer player_id;
     private Boolean isReady;
-    private String rank;
-    private String clubname;
+    private Boolean castBlackVote;
 
-    public Player(int playerId) {
-        this.playerId = playerId;
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinColumn(name = "profile_id", referencedColumnName = "profile_id")
+    private TheProfile profile;
+
+    @ManyToOne()
+    @JsonIgnore
+    @JoinColumn(name = "team_id", referencedColumnName = "team_id")
+    private Team team;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "muted_list", joinColumns = @JoinColumn(name = "player_id")) // Join to Players table
+    @Column(name = "muted_type")
+    private List<String> muted;
+
+    public Player(TheProfile profile, Team team) {
+        this.profile = profile;
+        this.team = team;
+        this.castBlackVote = false;
         this.isReady = false;  // Players are not ready when they join
+        this.muted = new ArrayList<>();
     }
-    public int getPlayerId() {
-        return playerId;
-    }
-    public void setPlayerId(int playerId) {
-        this.playerId = playerId;
-    }
+
     public String getUsername() {
-        return username;
+        return profile != null ? profile.getUsername() : null;
     }
-    public void setUsername(String username) {
-        this.username = username;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Player player = (Player) o;
+        return Objects.equals(player_id, player.player_id)
+                && Objects.equals(isReady, player.isReady) && Objects.equals(profile, player.profile)
+                && Objects.equals(team, player.team) && Objects.equals(muted, player.muted);
     }
-    public Boolean isReady() {
-        return isReady;
-    }
-    public void setReady(boolean ready) {
-        isReady = ready;
-    }
-    public String getRank() {
-        return rank;
-    }
-    public void setRank(String rank) {
-        this.rank = rank;
-    }
-    public String getClubname() {
-        return clubname;
-    }
-    public void setClubname(String clubname) {
-        this.clubname = clubname;
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(player_id, isReady, profile, team, muted);
     }
 }

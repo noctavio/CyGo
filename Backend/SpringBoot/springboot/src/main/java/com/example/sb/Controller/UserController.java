@@ -1,6 +1,6 @@
 package com.example.sb.Controller;
 
-import com.example.sb.Entity.User;
+import com.example.sb.Model.User;
 import com.example.sb.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -34,10 +34,21 @@ public class UserController {
         }
     }
 
-    @PutMapping("/update/{id}")
-    public ResponseEntity<String> updateUser(@PathVariable Integer id, @RequestBody User user) {
+    @GetMapping
+    public List<User> getAllUsers() {
+        return userService.getAllUsers();
+    }
+
+    @GetMapping("/{username}")
+    public ResponseEntity<User> getByUsername(@PathVariable String username) {
+        User user = userService.getByUsername(username);
+        return user != null ? ResponseEntity.ok(user) : ResponseEntity.notFound().build();
+    }
+
+    @PutMapping("/update/{userId}")
+    public ResponseEntity<String> updateUser(@PathVariable Integer userId, @RequestBody User user) {
         // TODO change this so you can change user/password separately without the other going null
-        Optional<User> existingUserOptional = userService.getByUserID(id);
+        Optional<User> existingUserOptional = userService.getByUserID(userId);
 
         // Check if the user exists
         if (existingUserOptional.isEmpty()) {
@@ -60,17 +71,6 @@ public class UserController {
         }
         userService.updateUser(Optional.of(existingUser));
         return ResponseEntity.ok("User has been updated accordingly.");
-    }
-
-    @GetMapping
-    public List<User> getAllUsers() {
-        return userService.getAllUsers();
-    }
-
-    @GetMapping("/{username}")
-    public ResponseEntity<User> getByUsername(@PathVariable String username) {
-        User user = userService.getByUsername(username);
-        return user != null ? ResponseEntity.ok(user) : ResponseEntity.notFound().build();
     }
 
     /**

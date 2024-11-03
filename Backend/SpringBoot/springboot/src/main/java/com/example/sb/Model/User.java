@@ -1,28 +1,34 @@
-package com.example.sb.Entity;
+package com.example.sb.Model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.annotation.Id;
+
+import java.util.Objects;
 
 @Entity
-@Data
 @Table(name = "REGISTERED_USERS")
 @NoArgsConstructor
-@AllArgsConstructor
+@Getter
+@Setter
 public class User {
 
-    @Getter
-    @Setter
-    @jakarta.persistence.Id
     @Id()
-    @Column(name = "ID")
     @GeneratedValue
-    private int id;
-    @Column(unique = true, name = "USERNAME")
+    private Integer user_id;
+    @Column(unique = true)
     private String username;
-    @Column(name = "PASSWORD")
     private String password;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(user_id, user.user_id) && Objects.equals(username, user.username) && Objects.equals(password, user.password);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(user_id, username, password);
+    }
 }
