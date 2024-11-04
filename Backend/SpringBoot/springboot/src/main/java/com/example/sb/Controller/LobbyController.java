@@ -1,6 +1,7 @@
 package com.example.sb.Controller;
 
 import com.example.sb.Model.Lobby;
+import com.example.sb.Model.Player;
 import com.example.sb.Model.Team;
 import com.example.sb.Service.GobanService;
 import com.example.sb.Service.LobbyService;
@@ -34,6 +35,11 @@ public class LobbyController {
     @GetMapping
     public List<Lobby> getAllLobbies() {
         return lobbyService.getAllLobbies();
+    }
+
+    @GetMapping("/players/{lobbyId}")
+    public List<Player> getAllPlayersInLobby(@PathVariable Integer lobbyId) {
+        return lobbyService.getAllPlayersInLobby(lobbyId);
     }
 
     // TODO implement maybe...

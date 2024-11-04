@@ -26,6 +26,15 @@ public class LobbyService {
         return lobbyRepository.findAll();
     }
 
+    public List<Player> getAllPlayersInLobby(Integer lobbyId) {
+        Optional<Lobby> lobbyOptional = lobbyRepository.findById(lobbyId);
+        if (lobbyOptional.isPresent()) {
+            Lobby lobby = lobbyOptional.get();
+
+            return lobby.getPlayersInLobby();
+        }
+        return null;
+    }
 
     public ResponseEntity<String> createFriendlyLobby(Integer userId) {
         TheProfile profile = userService.findProfileById(userId);

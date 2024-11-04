@@ -3,6 +3,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -21,6 +23,8 @@ public class Team {
     private String teamName;
     private Integer teamScore;
     private Integer playerCount;
+    @Transient
+    private Duration teamTime;
 
     @ManyToOne
     @JsonIgnore
@@ -28,11 +32,11 @@ public class Team {
     private Lobby lobby;
 
     // Two distinct player references instead of a list
-    @OneToOne(cascade = CascadeType.ALL) // or use @OneToOne depending on your player-team relationship
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "player1_id", referencedColumnName = "player_id")
     private Player player1;
 
-    @OneToOne(cascade = CascadeType.ALL) //
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "player2_id", referencedColumnName = "player_id")
     private Player player2;
 
@@ -40,7 +44,8 @@ public class Team {
         this.lobby = lobby;
         this.teamName = teamName;
         this.isBlack = isBlack;
-        teamScore = 0;
+        this.teamScore = 0;
+        this.teamTime = Duration.ofMinutes(lobby.getGameTime() / 2);
         setPlayerCount();
     }
 

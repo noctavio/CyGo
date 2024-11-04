@@ -23,6 +23,7 @@ public class Player {
     private Integer player_id;
     private Boolean isReady;
     private Boolean castBlackVote;
+    private Boolean isTurn;
 
     @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "profile_id", referencedColumnName = "profile_id")
@@ -43,6 +44,7 @@ public class Player {
         this.team = team;
         this.castBlackVote = false;
         this.isReady = false;  // Players are not ready when they join
+        this.isTurn = false;
         this.muted = new ArrayList<>();
     }
 

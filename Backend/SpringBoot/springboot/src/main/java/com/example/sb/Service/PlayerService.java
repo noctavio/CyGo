@@ -126,25 +126,57 @@ public class PlayerService {
 
     public ResponseEntity<String> toggleReady(Integer userId) {
         Player player = userService.findPlayerById(userId);
-        if (player != null) {
+        if (player == null) {
+            return ResponseEntity.ok("Player not found");
+        }
+        if (player.getTeam() != null) {
             player.setIsReady(!player.getIsReady());
 
             playerRepository.save(player);
             String statusMessage = player.getIsReady() ? "Ready" : "Not Ready";
             return ResponseEntity.ok("Player is now: " + statusMessage);
         }
-        return ResponseEntity.ok("Player not found");
+        return ResponseEntity.ok("Player must be in a team to set ready status!");
     }
 
     public ResponseEntity<String> toggleBlackVote(Integer userId) {
         Player player = userService.findPlayerById(userId);
-        if (player != null) {
-            player.setCastBlackVote(!player.getCastBlackVote());
-
-            playerRepository.save(player);
-            String statusMessage = player.getCastBlackVote() ? "in favor of switching teams colors" : "against switching team colors";
-            return ResponseEntity.ok("Player voted "  + statusMessage);
+        if (player == null) {
+            return ResponseEntity.ok("Player not found");
         }
-        return ResponseEntity.ok("Player not found");
+        if (player.getTeam() != null) {
+            player.setCastBlackVote(!player.getCastBlackVote());
+            playerRepository.save(player);
+
+            Lobby lobby = player.getTeam().getLobby();
+            int blackVoteCount = 0;
+            for (Player currentPlayer: lobby.getPlayersInLobby()) {
+                if (currentPlayer.getCastBlackVote()) {
+                    blackVoteCount++;
+                }
+            }
+
+            String switchedMessage = "";
+            if (blackVoteCount > 2) {
+                Team team1 = lobby.getTeam1();
+                Team team2 = lobby.getTeam2();
+                // Swaps the colors of both teams
+                team1.setIsBlack(!team1.getIsBlack());
+                team2.setIsBlack(!team2.getIsBlack());
+                teamRepository.save(team1);
+                teamRepository.save(team2);
+
+                // Resets all votes in case they want to swap again.
+                for (Player currentPlayer: lobby.getPlayersInLobby()) {
+                    currentPlayer.setCastBlackVote(false);
+                    playerRepository.save(currentPlayer);
+                }
+                switchedMessage = "team colors have now SWAPPED, and votes are reset!";
+            }
+
+            String statusMessage = player.getCastBlackVote() ? "in favor of switching teams colors" : "against switching team colors";
+            return ResponseEntity.ok("[ALERT] " + player.getUsername() + " voted "  + statusMessage + " " + switchedMessage);
+        }
+        return ResponseEntity.ok(player.getUsername() + " must be in a team to cast black vote!");
     }
 }
