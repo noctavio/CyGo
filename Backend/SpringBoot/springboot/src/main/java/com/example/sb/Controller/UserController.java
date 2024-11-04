@@ -23,26 +23,29 @@ public class UserController {
         return userService.registerUser(user);
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestParam String username, @RequestParam String password) {
-        // Authenticate user
-        if (userService.authenticateUser(username, password)) {
-            return ResponseEntity.ok("Login successful");
-        }
-        else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
-        }
-    }
-
     @GetMapping
     public List<User> getAllUsers() {
         return userService.getAllUsers();
+    }
+
+    @GetMapping("/loggedIn")
+    public List<User> getAllLoggedIn() {
+        return userService.getAllLoggedIn();
     }
 
     @GetMapping("/{username}")
     public ResponseEntity<User> getByUsername(@PathVariable String username) {
         User user = userService.getByUsername(username);
         return user != null ? ResponseEntity.ok(user) : ResponseEntity.notFound().build();
+    }
+
+    @PutMapping("/login/{username}/{password}")
+    public ResponseEntity<String> login(@PathVariable String username, @PathVariable String password) {
+        return userService.authenticateUser(username, password);
+    }
+    @PutMapping("/logout/{userId}")
+    public ResponseEntity<String> logout(@PathVariable Integer userId) {
+        return userService.logoutUser(userId);
     }
 
     @PutMapping("/update/{userId}")

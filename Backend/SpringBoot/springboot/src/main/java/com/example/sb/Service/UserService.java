@@ -7,10 +7,13 @@ import com.example.sb.Repository.PlayerRepository;
 import com.example.sb.Repository.TheProfileRepository;
 import com.example.sb.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,19 +34,50 @@ public class UserService {
         String secret = user.getPassword();
 
         user.setPassword(passwordEncoder.encode(secret));
+        user.setIsLoggedIn(false);
 
         User savedUser = userRepository.save(user);
         theProfileService.updateProfileTable();
         return savedUser;
     }
 
-    public Boolean authenticateUser(String username, String password) {
+    public ResponseEntity<String> authenticateUser(String username, String password) {
         User user = userRepository.findByUsername(username);
 
         if (user != null && passwordEncoder.matches(password, user.getPassword())) {
-            return true;
+            if (user.getIsLoggedIn()) {
+                return ResponseEntity.ok("User is already logged in...");
+            }
+            user.setIsLoggedIn(true);
+            userRepository.save(user);
+            return ResponseEntity.ok("Login successful");
         }
-        return false;
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+    }
+
+    public ResponseEntity<String> logoutUser(Integer userId) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            if (!user.getIsLoggedIn()) {
+                return ResponseEntity.ok(user.getUsername() + " is not logged in, cannot log out!");
+            }
+            user.setIsLoggedIn(false);
+            userRepository.save(user);
+            return ResponseEntity.ok(user.getUsername() + " has signed out.");
+        }
+        return ResponseEntity.ok("User not found.");
+    }
+
+    public List<User> getAllLoggedIn() {
+        List<User> loggedInList = new ArrayList<>();
+        List<User> users = userRepository.findAll();
+        for (User currentuser : users) {
+            if (currentuser.getIsLoggedIn()) {
+                loggedInList.add(currentuser);
+            }
+        }
+        return loggedInList;
     }
 
     public void updateUser(Optional<User> user) {

@@ -18,6 +18,7 @@ public class User {
     @Column(unique = true)
     private String username;
     private String password;
+    private Boolean isLoggedIn;
 
     @Override
     public boolean equals(Object o) {
