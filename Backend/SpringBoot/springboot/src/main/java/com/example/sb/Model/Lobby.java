@@ -23,6 +23,7 @@ public class Lobby {
     private String hostName;
     private Integer gameTime;
     private Boolean isFriendly;
+    private Boolean isGameInitialized;
     private final String boardSize = "9x9";
 
     @OneToOne(cascade = CascadeType.ALL)
@@ -33,6 +34,10 @@ public class Lobby {
     @JoinColumn(name = "team2_id", referencedColumnName = "team_id")
     private Team team2;
 
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "board_id", referencedColumnName = "board_id")
+    private Goban goban;
+
     //@Column
     //private List<String> invitedPlayers;
 
@@ -40,6 +45,7 @@ public class Lobby {
         this.gameTime = 20;
         this.hostName = hostname;
         this.isFriendly = true;
+        this.isGameInitialized = false;
         //this.invitedPlayers = new ArrayList<>();
     }
 
@@ -67,11 +73,11 @@ public class Lobby {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Lobby lobby = (Lobby) o;
-        return lobby_id == lobby.lobby_id && isFriendly == lobby.isFriendly && Objects.equals(hostName, lobby.hostName) && Objects.equals(gameTime, lobby.gameTime) && Objects.equals(boardSize, lobby.boardSize) && Objects.equals(team1, lobby.team1) && Objects.equals(team2, lobby.team2);
+        return Objects.equals(lobby_id, lobby.lobby_id) && Objects.equals(hostName, lobby.hostName) && Objects.equals(gameTime, lobby.gameTime) && Objects.equals(isFriendly, lobby.isFriendly) && Objects.equals(isGameInitialized, lobby.isGameInitialized) && Objects.equals(boardSize, lobby.boardSize) && Objects.equals(team1, lobby.team1) && Objects.equals(team2, lobby.team2) && Objects.equals(goban, lobby.goban);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(lobby_id, hostName, gameTime, isFriendly, boardSize, team1, team2);
+        return Objects.hash(lobby_id, hostName, gameTime, isFriendly, isGameInitialized, boardSize, team1, team2, goban);
     }
 }

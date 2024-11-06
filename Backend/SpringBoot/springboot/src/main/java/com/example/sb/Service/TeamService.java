@@ -74,18 +74,18 @@ public class TeamService {
         Team targetTeam = player.getTeam();
 
         if (targetTeam != null) {
-            if (targetTeam.getPlayer1().equals(player)) {
+            if (targetTeam.getPlayer1() != null && targetTeam.getPlayer1().equals(player)) {
                 targetTeam.setPlayer1(null);
                 player.setTeam(null);
             }
 
-            else if (targetTeam.getPlayer2().equals(player)) {
+            else if (targetTeam.getPlayer2() != null && targetTeam.getPlayer2().equals(player)) {
                 targetTeam.setPlayer2(null);
                 player.setTeam(null);
             }
 
             else {
-                return ResponseEntity.ok("Player is not in the specified team.");
+                return ResponseEntity.ok("Player is not in the a team.");
             }
 
             player.setIsReady(false);

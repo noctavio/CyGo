@@ -19,12 +19,9 @@ public class LobbyController {
     @Autowired
     private LobbyService lobbyService;
 
-    @Autowired
-    private GobanService gobanService;
-
     @PostMapping("/{hostId}/initialize/game")
     public ResponseEntity<String> initializeGame(@PathVariable Integer hostId) throws JsonProcessingException {
-        return gobanService.initializeGame(hostId);
+        return lobbyService.initializeGame(hostId);
     }
 
     @PostMapping("/{userId}/create")

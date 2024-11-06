@@ -21,8 +21,9 @@ public class Team {
     private Integer team_id; //TODO probably necessary to be unique and primary key.
     private Boolean isBlack;
     private String teamName;
-    private Integer teamScore;
+    private Double teamScore;
     private Integer playerCount;
+    private Integer stoneCount;
     @Transient
     private Duration teamTime;
 
@@ -41,10 +42,11 @@ public class Team {
     private Player player2;
 
     public Team(Lobby lobby, String teamName, boolean isBlack) {
+        this.stoneCount = 41;
         this.lobby = lobby;
         this.teamName = teamName;
         this.isBlack = isBlack;
-        this.teamScore = 0;
+        this.teamScore = 0.0;
         this.teamTime = Duration.ofMinutes(lobby.getGameTime() / 2);
         setPlayerCount();
     }

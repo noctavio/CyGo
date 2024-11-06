@@ -2,6 +2,7 @@ package com.example.sb.Service;
 
 import com.example.sb.Model.*;
 import com.example.sb.Repository.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,6 +22,8 @@ public class LobbyService {
     private TeamRepository teamRepository;
     @Autowired
     private UserService userService;
+    @Autowired
+    private GobanRepository gobanRepository;
 
     public List<Lobby> getAllLobbies() {
         return lobbyRepository.findAll();
@@ -114,10 +117,10 @@ public class LobbyService {
 
         if (lobby != null) {
             //TODO I couldn't get cascade to work here manually set to null to delete.
-            if (teamBeingLeft.getPlayer1().equals(leavingPlayer)) {
+            if (teamBeingLeft.getPlayer1() != null && teamBeingLeft.getPlayer1().equals(leavingPlayer)) {
                 teamBeingLeft.setPlayer1(null);
             }
-            else if (teamBeingLeft.getPlayer2().equals(leavingPlayer)) {
+            else if (teamBeingLeft.getPlayer2() != null && teamBeingLeft.getPlayer2().equals(leavingPlayer)) {
                 teamBeingLeft.setPlayer2(null);
             }
             teamRepository.save(teamBeingLeft);
@@ -204,4 +207,60 @@ public class LobbyService {
         }
     }
 
+    public ResponseEntity<String> initializeGame(Integer hostId) throws JsonProcessingException {
+        TheProfile profile = userService.findProfileById(hostId);
+        Player potentiallyHost = playerRepository.findByProfile(profile);
+        Lobby lobby = potentiallyHost.getTeam().getLobby();
+
+        if (lobby.getIsGameInitialized()) {
+            System.out.println(lobby.getGoban().getPlayerIdTurnList());
+            return ResponseEntity.ok("Game is already initialized");
+        }
+
+        if (potentiallyHost.getUsername().equals(lobby.getHostName())) {
+            Team team1 = lobby.getTeam1();
+            Team team2 = lobby.getTeam2();
+            Player team1PlayerStarter = team1.getPlayer1();
+            Player team2PlayerStarter = team2.getPlayer1();
+
+            if (team1.getPlayerCount() == 2 && team2.getPlayerCount() == 2) {
+                if (team1.getPlayer1().getIsReady() && team1.getPlayer2().getIsReady() && team2.getPlayer1().getIsReady() && team2.getPlayer2().getIsReady()) {
+                    Goban goban = new Goban(lobby);
+                    List<Integer> playerTurnList = goban.getPlayerIdTurnList();
+
+                    // Sets up the specific ordering for players based on which team is black.
+                    if (team1.getIsBlack()) {
+                        team1.setStoneCount(40);
+                        team2.setTeamScore(6.5);
+                        team1PlayerStarter.setIsTurn(true);
+                        playerTurnList.add(team1PlayerStarter.getProfile().getUser().getUser_id());
+                        playerTurnList.add(team2PlayerStarter.getProfile().getUser().getUser_id());
+                        playerTurnList.add(team1.getPlayer2().getProfile().getUser().getUser_id());
+                        playerTurnList.add(team2.getPlayer2().getProfile().getUser().getUser_id());
+                    }
+                    else if (team2.getIsBlack()) {
+                        team2.setStoneCount(40);
+                        team1.setTeamScore(6.5);
+                        team2PlayerStarter.setIsTurn(true);
+                        playerTurnList.add(team2PlayerStarter.getProfile().getUser().getUser_id());
+                        playerTurnList.add(team1PlayerStarter.getProfile().getUser().getUser_id());
+                        playerTurnList.add(team2.getPlayer2().getProfile().getUser().getUser_id());
+                        playerTurnList.add(team1.getPlayer2().getProfile().getUser().getUser_id());
+                    }
+                    lobby.setGoban(goban);
+                    lobby.setIsGameInitialized(true);
+                    goban.setPlayerIdTurnList(playerTurnList);
+
+                    playerRepository.save(team1PlayerStarter);
+                    playerRepository.save(team2PlayerStarter);
+                    gobanRepository.save(goban);
+                    lobbyRepository.save(lobby);
+                    return ResponseEntity.ok("Game has been initialized, player order is ->");
+                }
+                return ResponseEntity.ok("All players must be ready to start the game.");
+            }
+            return ResponseEntity.ok("4 players are required to start the game, otherwise someone has not selected a team!");
+        }
+        return ResponseEntity.ok("Player cannot initialize the game as they are not host!");
+    }
 }

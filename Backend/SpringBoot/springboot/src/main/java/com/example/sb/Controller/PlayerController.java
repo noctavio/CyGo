@@ -15,8 +15,8 @@ public class PlayerController {
     private PlayerService playerService;
 
     /**
-     * Returns a list of all players saved across all lobbies(not practical for testing only)
-     * @return List of ALL players saved in the repository
+     * Finds and returns a list of all players in a specific team.
+     * @return List of all players in a team
      */
     @GetMapping("/{teamId}")
     public List<Player> getPlayersFromTeam(@PathVariable Integer teamId) {

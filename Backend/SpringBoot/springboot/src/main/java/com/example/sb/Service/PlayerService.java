@@ -171,7 +171,7 @@ public class PlayerService {
                     currentPlayer.setCastBlackVote(false);
                     playerRepository.save(currentPlayer);
                 }
-                switchedMessage = "team colors have now SWAPPED, and votes are reset!";
+                switchedMessage = "COLORS HAVE NOW SWAPPED, and votes are reset!";
             }
 
             String statusMessage = player.getCastBlackVote() ? "in favor of switching teams colors" : "against switching team colors";

@@ -7,6 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 @Service
 public class GobanService {
     @Autowired
@@ -15,38 +19,31 @@ public class GobanService {
     private UserService userService;
     @Autowired
     private GobanRepository gobanRepository;
+    @Autowired
+    private LobbyRepository lobbyRepository;
 
-    public ResponseEntity<String> initializeGame(Integer hostId) throws JsonProcessingException {
-        TheProfile profile = userService.findProfileById(hostId);
-        Player potentiallyHost = playerRepository.findByProfile(profile);
-        Lobby lobby = potentiallyHost.getTeam().getLobby();
+    //public List<Integer> getPlayerTurnlist(Integer lobbyId) {
+    //    Optional<Lobby> lobbyOptional = lobbyRepository.findById(lobbyId);
 
-        if (potentiallyHost.getUsername().equals(lobby.getHostName())) {
-            Team team1 = lobby.getTeam1();
-            Team team2 = lobby.getTeam2();
-            Player playerStarting1 = team1.getPlayer1();
-            Player playerStarting2 = team2.getPlayer1();
+    //    if (lobbyOptional.isPresent()) {
+    //        Lobby lobby = lobbyOptional.get();
 
-            if (team1.getPlayerCount() == 2 && team2.getPlayerCount() == 2) {
-                if (team1.getPlayer1().getIsReady() && team1.getPlayer2().getIsReady() && team2.getPlayer1().getIsReady() && team2.getPlayer2().getIsReady()) {
-                    Goban goban = new Goban(lobby);
+    //        Goban board = lobby.getBoard();
+    //        return board.getPlayerIdTurnList();
+    //    }
+    //    return null;
+    //}
 
-                    if (team1.getIsBlack()) {
-                        playerStarting1.setIsTurn(true);
-                    }
-                    else if(team2.getIsBlack()) {
-                        playerStarting2.setIsTurn(true);
-                    }
+    // TODO get board
 
-                    playerRepository.save(playerStarting1);
-                    playerRepository.save(playerStarting2);
-                    gobanRepository.save(goban);
-                    return ResponseEntity.ok("Game has been initialized, player order is ->");
-                }
-                return ResponseEntity.ok("All players must be ready to start the game.");
-            }
-            return ResponseEntity.ok("4 players are required to start the game, otherwise someone has not selected a team!");
+    public String getBoardState(Integer lobbyId) {
+        Optional<Lobby> lobbyOptional = lobbyRepository.findById(lobbyId);
+        if (lobbyOptional.isPresent()) {
+            Lobby lobby = lobbyOptional.get();
+            Goban board = lobby.getGoban();
+
+            return board.getBoardState();
         }
-        return ResponseEntity.ok("Player cannot initialize the game as they are not host!");
+        return null;
     }
 }
