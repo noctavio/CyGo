@@ -31,6 +31,7 @@ public class UserService {
         String secret = user.getPassword();
 
         user.setPassword(passwordEncoder.encode(secret));
+        user.setIsLoggedIn(false);
 
         User savedUser = userRepository.save(user);
         theProfileService.updateProfileTable();
