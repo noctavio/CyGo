@@ -19,6 +19,6 @@ public class GobanController {
     @DeleteMapping("/{lobbyId}/end")
     public ResponseEntity<String> endGame(@PathVariable Integer lobbyId) {
         System.out.println("is there anybody out there");
-        return gobanService.endGame(lobbyId); // TODO this is temporary and for testing not to be used manually, game end is automatic!
+        return gobanService.endGame(lobbyId);
     }
 }

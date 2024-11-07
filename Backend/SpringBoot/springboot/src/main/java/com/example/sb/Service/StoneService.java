@@ -13,8 +13,6 @@ import java.util.Set;
 @Service
 public class StoneService {
     @Autowired
-    private StoneRepository stoneRepository;
-    @Autowired
     private UserService userService;
     @Autowired
     private PlayerRepository playerRepository;
@@ -93,14 +91,13 @@ public class StoneService {
                             capturedStone.setStoneType("Bc");
                         }
                         board[i][j] = capturedStone;
-                        stoneRepository.save(capturedStone);
+                        //currentTeam.setTeamScore(currentTeam.getTeamScore() + 1); //TODO fix double counting
                     }
                 }
             }
             goban.saveBoardState();
             String nextPlayerName = switchToNextPlayer(currentPlayer,goban.getPlayerIdTurnList());
             teamRepository.save(currentTeam);
-            stoneRepository.save(stone);
             gobanRepository.save(goban);
             return ResponseEntity.ok(currentPlayer.getUsername() + " placed a stone, it is now " + nextPlayerName + "'s turn.");
         }
