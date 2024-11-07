@@ -14,6 +14,12 @@ public class TeamController {
     @Autowired
     private TeamService teamService;
 
+    @GetMapping("/{teamId}/timer")
+    public ResponseEntity<Long> getTimer(@PathVariable Integer teamId) {
+        Long timer = teamService.getTimer(teamId);
+        return ResponseEntity.ok(timer);
+    }
+
     @PostMapping("/{userId}/join/{teamId}")
     public ResponseEntity<String> joinTeam(@PathVariable Integer userId, @PathVariable Integer teamId) {
         return teamService.joinTeam(userId, teamId);

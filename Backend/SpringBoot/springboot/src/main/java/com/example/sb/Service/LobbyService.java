@@ -24,6 +24,8 @@ public class LobbyService {
     private UserService userService;
     @Autowired
     private GobanRepository gobanRepository;
+    //@Autowired
+    //private TimerService timerService;
 
     public List<Lobby> getAllLobbies() {
         return lobbyRepository.findAll();
@@ -207,7 +209,7 @@ public class LobbyService {
         }
     }
 
-    public ResponseEntity<String> initializeGame(Integer hostId) throws JsonProcessingException {
+    public ResponseEntity<String> initializeGame(Integer hostId) {
         TheProfile profile = userService.findProfileById(hostId);
         Player potentiallyHost = playerRepository.findByProfile(profile);
         Lobby lobby = potentiallyHost.getTeam().getLobby();
@@ -232,8 +234,11 @@ public class LobbyService {
                     if (team1.getIsBlack()) {
                         team1.setStoneCount(40);
                         team2.setTeamScore(6.5);
+                        team1.setIsTeamTurn(true);
                         team1PlayerStarter.setIsTurn(true);
-                        team1PlayerStarter.setStartTime(new Date());
+                        //team1PlayerStarter.setStartTime(new Date());
+
+                        //timerService.startTimerForTeam(team1);
                         playerTurnList.add(team1PlayerStarter.getProfile().getUser().getUser_id());
                         playerTurnList.add(team2PlayerStarter.getProfile().getUser().getUser_id());
                         playerTurnList.add(team1.getPlayer2().getProfile().getUser().getUser_id());
@@ -242,8 +247,10 @@ public class LobbyService {
                     else if (team2.getIsBlack()) {
                         team2.setStoneCount(40);
                         team1.setTeamScore(6.5);
+                        team2.setIsTeamTurn(true);
                         team2PlayerStarter.setIsTurn(true);
-                        team2PlayerStarter.setStartTime(new Date());
+                        //team2PlayerStarter.setStartTime(new Date());
+                        //timerService.startTimerForTeam(team2);
                         playerTurnList.add(team2PlayerStarter.getProfile().getUser().getUser_id());
                         playerTurnList.add(team1PlayerStarter.getProfile().getUser().getUser_id());
                         playerTurnList.add(team2.getPlayer2().getProfile().getUser().getUser_id());
@@ -257,7 +264,7 @@ public class LobbyService {
                     playerRepository.save(team2PlayerStarter);
                     gobanRepository.save(goban);
                     lobbyRepository.save(lobby);
-                    return ResponseEntity.ok("Game has been initialized, player order is ->");
+                    return ResponseEntity.ok("Game starting soon!");
                 }
                 return ResponseEntity.ok("All players must be ready to start the game.");
             }

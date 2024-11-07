@@ -2,14 +2,13 @@ package com.example.sb.Service;
 
 import com.example.sb.Model.*;
 import com.example.sb.Repository.*;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.expression.SecurityExpressionHandler;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
+import java.util.Set;
 
 @Service
 public class StoneService {
@@ -23,6 +22,8 @@ public class StoneService {
     private GobanRepository gobanRepository;
     @Autowired
     private TeamRepository teamRepository;
+    //@Autowired
+    //private TimerService timerService;
 
     public ResponseEntity<String> placeAStone(Integer userId, Integer x, Integer y) {
         TheProfile profile = userService.findProfileById(userId);
@@ -30,30 +31,72 @@ public class StoneService {
         Goban goban = currentPlayer.getTeam().getLobby().getGoban();
         Team currentTeam = currentPlayer.getTeam();
 
+        if (x < 0 || y < 0) {
+            //off the board placement check
+            return ResponseEntity.ok("Cannot place a a stone at (" + x + ", " + y + ")," );
+        }
+
+        if (!currentPlayer.getTeam().getLobby().getIsGameInitialized()) {
+            return ResponseEntity.ok("Game is no longer active" );
+        }
+
         if (currentPlayer.getIsTurn()) {
-            if (x == 22 && y == 22) {
-                // TODO clear matrix for testing
-                return ResponseEntity.ok("Matrix clear method here temp");
-            }
             goban.loadBoardState();
             Stone[][] board = goban.getBoard();
+
+            if (x == 22 && y == 22) {
+                for (int i = 0; i < board.length; i++) {
+                    for (int j = 0; j < board[i].length; j++) {
+                        Stone stone = board[i][j];
+                        stone.setIsCaptured(false);
+                        stone.setStoneType("X");
+                    }
+                }
+                goban.saveBoardState();
+                gobanRepository.save(goban);
+                return ResponseEntity.ok("Matrix clear method here temp");
+            }
 
             Stone stone = new Stone(goban, x, y);
             if (currentPlayer.getTeam().getIsBlack()) {
                 if (board[x][y].getStoneType().equals("X")) {
                     stone.setStoneType("B");
                 }
+                else if (!board[x][y].getStoneType().equals("X")) {
+                    ResponseEntity.ok("Cannot place a a stone at (" + x + ", " + y + "), as it is occupied." );
+                }
             }
             else {
                 if (board[x][y].getStoneType().equals("X")) {
                     stone.setStoneType("W");
                 }
+                else if (!board[x][y].getStoneType().equals("X")) {
+                    ResponseEntity.ok("Cannot place a a stone at (" + x + ", " + y + "), as it is occupied." );
+                }
             }
 
+            //timerService.stopTimerForTeam(currentTeam);
             Integer stones = currentTeam.getStoneCount();
             currentTeam.setStoneCount(stones - 1);
+            currentTeam.setIsTeamTurn(false);
             board[x][y] = stone;
-            //stone.setIsCaptured(); TODO IMPLEMENT CAPTURE IF SURROUNDED !!!
+
+            for (int i = 0; i < board.length; i++) {
+                for (int j = 0; j < board[i].length; j++) {
+                    if (goban.checkIfCaptured(board, i, j)) {
+                        Stone capturedStone = board[i][j];
+                        capturedStone.setIsCaptured(true);
+                        if (capturedStone.getStoneType().equals("B")) {
+                            capturedStone.setStoneType("Wc");
+                        }
+                        else if (capturedStone.getStoneType().equals("W")) {
+                            capturedStone.setStoneType("Bc");
+                        }
+                        board[i][j] = capturedStone;
+                        stoneRepository.save(capturedStone);
+                    }
+                }
+            }
             goban.saveBoardState();
             String nextPlayerName = switchToNextPlayer(currentPlayer,goban.getPlayerIdTurnList());
             teamRepository.save(currentTeam);
@@ -67,6 +110,10 @@ public class StoneService {
     public ResponseEntity<String> pass(Integer userId) {
         TheProfile profile = userService.findProfileById(userId);
         Player currentPlayer = playerRepository.findByProfile(profile);
+
+        if (!currentPlayer.getTeam().getLobby().getIsGameInitialized()) {
+            return ResponseEntity.ok("Game is no longer active" );
+        }
 
         if (currentPlayer.getIsTurn()) {
             Goban goban = currentPlayer.getTeam().getLobby().getGoban();
@@ -90,14 +137,17 @@ public class StoneService {
         // Retrieve the next player based on the ID
         TheProfile nextProfile = userService.findProfileById(nextTurnId);
         Player nextPlayer = playerRepository.findByProfile(nextProfile);
+        Team nextTeam = nextPlayer.getTeam();
 
         // Update turn states
+        nextTeam.setIsTeamTurn(true);
         nextPlayer.setIsTurn(true);
         currentPlayer.setIsTurn(false);
 
         // Save updated player states if needed (optional, depending on persistence setup)
         playerRepository.save(currentPlayer);
         playerRepository.save(nextPlayer);
+        teamRepository.save(nextTeam);
         return nextPlayer.getUsername();
     }
 }

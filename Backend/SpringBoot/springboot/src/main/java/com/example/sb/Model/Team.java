@@ -24,8 +24,8 @@ public class Team {
     private Double teamScore;
     private Integer playerCount;
     private Integer stoneCount;
-    @Transient
-    private Duration teamTime;
+    private Boolean isTeamTurn;
+    private long timeRemaining;
 
     @ManyToOne
     @JsonIgnore
@@ -42,12 +42,13 @@ public class Team {
     private Player player2;
 
     public Team(Lobby lobby, String teamName, boolean isBlack) {
+        this.isTeamTurn = false;
         this.stoneCount = 41;
         this.lobby = lobby;
         this.teamName = teamName;
         this.isBlack = isBlack;
         this.teamScore = 0.0;
-        this.teamTime = Duration.ofMinutes(lobby.getGameTime() / 2);
+        this.timeRemaining = (long) ((lobby.getGameTime() / 2) * 60);
         setPlayerCount();
     }
 

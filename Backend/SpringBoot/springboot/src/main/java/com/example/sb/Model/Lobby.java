@@ -21,7 +21,7 @@ public class Lobby {
     @GeneratedValue
     private Integer lobby_id;
     private String hostName;
-    private Integer gameTime;
+    private Double gameTime;
     private Boolean isFriendly;
     private Boolean isGameInitialized;
     private final String boardSize = "9x9";
@@ -42,7 +42,7 @@ public class Lobby {
     //private List<String> invitedPlayers;
 
     public Lobby(String hostname) {
-        this.gameTime = 20;
+        this.gameTime = 20.0;
         this.hostName = hostname;
         this.isFriendly = true;
         this.isGameInitialized = false;

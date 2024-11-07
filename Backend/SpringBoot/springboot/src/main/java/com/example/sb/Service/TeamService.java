@@ -27,6 +27,17 @@ public class TeamService {
     private PlayerRepository playerRepository;
     @Autowired
     private LobbyRepository lobbyRepository;
+    //@Autowired
+    //private TimerService timerService;
+
+    public Long getTimer(Integer teamId) {
+        Optional<Team> teamOptional = teamRepository.findById(teamId);
+        if (teamOptional.isPresent()) {
+            Team team = teamOptional.get();
+            return team.getTimeRemaining();
+        }
+        return -1L;
+    }
 
     public ResponseEntity<String> updateTeamName(Integer userId, Team teamJSON) {
         TheProfile profile = userService.findProfileById(userId);
