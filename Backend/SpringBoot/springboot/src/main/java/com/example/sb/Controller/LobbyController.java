@@ -1,8 +1,11 @@
 package com.example.sb.Controller;
 
 import com.example.sb.Model.Lobby;
+import com.example.sb.Model.Player;
 import com.example.sb.Model.Team;
+import com.example.sb.Service.GobanService;
 import com.example.sb.Service.LobbyService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +19,11 @@ public class LobbyController {
     @Autowired
     private LobbyService lobbyService;
 
+    @PostMapping("/{hostId}/initialize/game")
+    public ResponseEntity<String> initializeGame(@PathVariable Integer hostId) throws JsonProcessingException {
+        return lobbyService.initializeGame(hostId);
+    }
+
     @PostMapping("/{userId}/create")
     public ResponseEntity<String> createFriendlyLobby(@PathVariable Integer userId) {
         return lobbyService.createFriendlyLobby(userId);
@@ -24,6 +32,11 @@ public class LobbyController {
     @GetMapping
     public List<Lobby> getAllLobbies() {
         return lobbyService.getAllLobbies();
+    }
+
+    @GetMapping("/players/{lobbyId}")
+    public List<Player> getAllPlayersInLobby(@PathVariable Integer lobbyId) {
+        return lobbyService.getAllPlayersInLobby(lobbyId);
     }
 
     // TODO implement maybe...

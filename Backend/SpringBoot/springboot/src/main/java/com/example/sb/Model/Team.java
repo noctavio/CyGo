@@ -3,6 +3,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -19,8 +21,11 @@ public class Team {
     private Integer team_id; //TODO probably necessary to be unique and primary key.
     private Boolean isBlack;
     private String teamName;
-    private Integer teamScore;
+    private Double teamScore;
     private Integer playerCount;
+    private Integer stoneCount;
+    private Boolean isTeamTurn;
+    private long timeRemaining;
 
     @ManyToOne
     @JsonIgnore
@@ -28,19 +33,22 @@ public class Team {
     private Lobby lobby;
 
     // Two distinct player references instead of a list
-    @OneToOne(cascade = CascadeType.ALL) // or use @OneToOne depending on your player-team relationship
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "player1_id", referencedColumnName = "player_id")
     private Player player1;
 
-    @OneToOne(cascade = CascadeType.ALL) //
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "player2_id", referencedColumnName = "player_id")
     private Player player2;
 
     public Team(Lobby lobby, String teamName, boolean isBlack) {
+        this.isTeamTurn = false;
+        this.stoneCount = 41;
         this.lobby = lobby;
         this.teamName = teamName;
         this.isBlack = isBlack;
-        teamScore = 0;
+        this.teamScore = 0.0;
+        this.timeRemaining = (long) ((lobby.getGameTime() / 2) * 60);
         setPlayerCount();
     }
 
