@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Yellow border layer -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#FFFF00" /> <!-- Border color (yellow) -->
+            <stroke
+                android:width="12dp"
+                android:color="#FFFF00" /> <!-- Same as the solid color for the border -->
+            <corners android:radius="16dp" /> <!-- Increased radius for more rounded corners -->
+        </shape>
+    </item>
+
+    <!-- Red background layer -->
+    <item android:top="8dp" android:bottom="8dp" android:left="8dp" android:right="8dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#FFDB3252" /> <!-- Background color (red) -->
+            <corners android:radius="16dp" /> <!-- Increased radius for more rounded corners -->
+        </shape>
+    </item>
+</layer-list>
