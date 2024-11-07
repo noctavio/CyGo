@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:background="@drawable/border_background">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Club Name"
+            android:textSize="18sp"
+            android:textColor="#FFFFFF"
+            android:layout_marginBottom="8dp" />
+
+        <EditText
+            android:id="@+id/club_name_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter Club Name"
+            android:textColor="#FFFFFF"
+            android:inputType="text"
+            android:layout_marginBottom="16dp" /> <!-- Add margin for spacing -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp"
+            android:gravity="center"
+            android:layout_marginBottom="16dp">
+
+            <Button
+                android:id="@+id/create_club_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Create"
+                android:background="#FFFF00"
+                android:layout_weight="1" />
+
+
+            <Button
+                android:id="@+id/update_club_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Update"
+                android:background="#FFFF00"
+                android:layout_weight="1" />
+
+
+            <Button
+                android:id="@+id/delete_club_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Delete"
+                android:background="#FFFF00"
+                android:layout_weight="1" />
+
+
+            <Button
+                android:id="@+id/get_club_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="GET"
+                android:background="#FFFF00"
+                android:layout_weight="1"/>
+        </LinearLayout>
+        <!-- Club Image -->
+        <!--        <TextView-->
+        <!--            android:layout_width="wrap_content"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:text="Club Image"-->
+        <!--            android:textSize="18sp"-->
+        <!--            android:textColor="#FFFFFF"-->
+        <!--            android:layout_marginTop="16dp"-->
+        <!--            android:layout_marginBottom="8dp" />-->
+
+        <!--        <ImageView-->
+        <!--            android:id="@+id/club_image_preview"-->
+        <!--            android:layout_width="200dp"-->
+        <!--            android:layout_height="200dp"-->
+        <!--            android:scaleType="centerCrop"-->
+        <!--            android:background="#CCCCCC"-->
+        <!--            android:layout_marginBottom="16dp"/> &lt;!&ndash; Add margin for spacing &ndash;&gt;-->
+
+        <!--        <Button-->
+        <!--            android:id="@+id/select_image_button"-->
+        <!--            android:layout_width="wrap_content"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:text="Select Image"-->
+        <!--            android:background="#FFFF00"-->
+        <!--            android:layout_marginBottom="16dp"/> &lt;!&ndash; Add margin for spacing &ndash;&gt;-->
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Members"
+            android:textSize="18sp"
+            android:textColor="#FFFFFF"
+            android:layout_marginBottom="8dp" />
+
+
+        <EditText
+            android:id="@+id/member1_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter Member 1 Name"
+            android:textColor="#FFFFFF"
+            android:inputType="textPersonName"
+            android:layout_marginBottom="8dp"/>
+
+        <EditText
+            android:id="@+id/member2_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter Member 2 Name"
+            android:textColor="#FFFFFF"
+            android:inputType="textPersonName"
+            android:layout_marginBottom="8dp"/>
+
+        <EditText
+            android:id="@+id/member3_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter Member 3 Name"
+            android:textColor="#FFFFFF"
+            android:inputType="textPersonName"
+            android:layout_marginBottom="8dp"/>
+
+        <EditText
+            android:id="@+id/member4_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter Member 4 Name"
+            android:textColor="#FFFFFF"
+            android:inputType="textPersonName"
+            android:layout_marginBottom="8dp"/>
+
+        <EditText
+            android:id="@+id/member5_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter Member 5 Name"
+            android:textColor="#FFFFFF"
+            android:inputType="textPersonName"
+            android:layout_marginBottom="8dp"/>
+
+        <EditText
+            android:id="@+id/member6_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter Member 6 Name"
+            android:textColor="#FFFFFF"
+            android:inputType="textPersonName"
+            android:layout_marginBottom="8dp"/>
+
+        <EditText
+            android:id="@+id/member7_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter Member 7 Name"
+            android:textColor="#FFFFFF"
+            android:inputType="textPersonName"
+            android:layout_marginBottom="8dp"/>
+
+        <EditText
+            android:id="@+id/member8_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter Member 8 Name"
+            android:textColor="#FFFFFF"
+            android:inputType="textPersonName"
+            android:layout_marginBottom="8dp"/>
+
+        <EditText
+            android:id="@+id/member9_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter Member 9 Name"
+            android:textColor="#FFFFFF"
+            android:inputType="textPersonName"
+            android:layout_marginBottom="8dp"/>
+
+        <EditText
+            android:id="@+id/member10_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter Member 10 Name"
+            android:textColor="#FFFFFF"
+            android:inputType="textPersonName"
+            android:layout_marginBottom="8dp"/>
+
+        <EditText
+            android:id="@+id/member11_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter Member 11 Name"
+            android:textColor="#FFFFFF"
+            android:inputType="textPersonName"
+            android:layout_marginBottom="8dp"/>
+
+        <EditText
+            android:id="@+id/member12_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter Member 12 Name"
+            android:textColor="#FFFFFF"
+            android:inputType="textPersonName"
+            android:layout_marginBottom="8dp"/>
+
+        <EditText
+            android:id="@+id/member13_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter Member 13 Name"
+            android:textColor="#FFFFFF"
+            android:inputType="textPersonName"
+            android:layout_marginBottom="8dp"/>
+
+        <EditText
+            android:id="@+id/member14_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter Member 14 Name"
+            android:textColor="#FFFFFF"
+            android:inputType="textPersonName"
+            android:layout_marginBottom="8dp"/>
+
+        <EditText
+            android:id="@+id/member15_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter Member 15 Name"
+            android:textColor="#FFFFFF"
+            android:inputType="textPersonName"
+            android:layout_marginBottom="8dp"/>
+
+        <EditText
+            android:id="@+id/member16_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter Member 16 Name"
+            android:textColor="#FFFFFF"
+            android:inputType="textPersonName"
+            android:layout_marginBottom="8dp"/>
+
+        <EditText
+            android:id="@+id/member17_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter Member 17 Name"
+            android:textColor="#FFFFFF"
+            android:inputType="textPersonName"
+            android:layout_marginBottom="8dp"/>
+
+        <EditText
+            android:id="@+id/member18_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter Member 18 Name"
+            android:textColor="#FFFFFF"
+            android:inputType="textPersonName"
+            android:layout_marginBottom="8dp"/>
+
+        <EditText
+            android:id="@+id/member19_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter Member 19 Name"
+            android:textColor="#FFFFFF"
+            android:inputType="textPersonName"
+            android:layout_marginBottom="8dp"/>
+
+        <EditText
+            android:id="@+id/member20_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter Member 20 Name"
+            android:textColor="#FFFFFF"
+            android:inputType="textPersonName"
+            android:layout_marginBottom="16dp"/>
+
+
+    </LinearLayout>
+</ScrollView>
