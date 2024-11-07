@@ -8,9 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class GobanService {
@@ -24,6 +22,11 @@ public class GobanService {
     private TeamRepository teamRepository;
     @Autowired
     private TheProfileRepository theProfileRepository;
+    @Autowired
+    private UserService userService;
+
+    private static final int[] DIR_X = {-1, 1, 0, 0};
+    private static final int[] DIR_Y = {0, 0, -1, 1};
 
     public String getBoardState(Integer lobbyId) {
         Optional<Lobby> lobbyOptional = lobbyRepository.findById(lobbyId);
@@ -38,6 +41,7 @@ public class GobanService {
         }
         return null;
     }
+
     public ResponseEntity<String> endGame(Integer lobbyId) {
         Optional<Lobby> lobbyOptional = lobbyRepository.findById(lobbyId);
         if (lobbyOptional.isPresent()) {
@@ -122,5 +126,183 @@ public class GobanService {
             return ResponseEntity.ok("Game over,\n " + teamWinner + "\n" + finaleScores);
         }
         return ResponseEntity.ok("Wrong lobby id");
+    }
+
+    public ResponseEntity<String> placeAStone(Integer userId, Integer x, Integer y) {
+        TheProfile profile = userService.findProfileById(userId);
+        Player currentPlayer = playerRepository.findByProfile(profile);
+        Goban goban = currentPlayer.getTeam().getLobby().getGoban();
+        Team currentTeam = currentPlayer.getTeam();
+
+        if (x < 0 || y < 0) {
+            //off the board placement check
+            return ResponseEntity.ok("Cannot place a a stone at (" + x + ", " + y + ")," );
+        }
+
+        if (!currentPlayer.getTeam().getLobby().getIsGameInitialized()) {
+            return ResponseEntity.ok("Game is no longer active" );
+        }
+
+        if (currentPlayer.getIsTurn()) {
+            goban.loadMatrixFromBoardString();
+            Stone[][] board = goban.getBoard();
+
+            if (x == 22 && y == 22) { // TODO clears board for testing only
+                for (int i = 0; i < board.length; i++) {
+                    for (int j = 0; j < board[i].length; j++) {
+                        Stone stone = board[i][j];
+                        stone.setIsCaptured(false);
+                        stone.setStoneType("X");
+                    }
+                }
+                goban.saveBoardString();
+                gobanRepository.save(goban);
+                return ResponseEntity.ok("Matrix clear method here temp");
+            }
+
+            Stone stone = new Stone(goban, x, y);
+            if (currentPlayer.getTeam().getIsBlack()) {
+                if (board[x][y].getStoneType().equals("X")) {
+                    stone.setStoneType("B");
+                }
+                else if (!board[x][y].getStoneType().equals("X")) {
+                    return ResponseEntity.ok("Cannot place a a stone at (" + x + ", " + y + "), as it is occupied." );
+                }
+            }
+            else if (!currentPlayer.getTeam().getIsBlack()){
+                if (board[x][y].getStoneType().equals("X")) {
+                    stone.setStoneType("W");
+                }
+                else if (!board[x][y].getStoneType().equals("X")) {
+                    return ResponseEntity.ok("Cannot place a a stone at (" + x + ", " + y + "), as it is occupied." );
+                }
+            }
+
+            //timerService.stopTimerForTeam(currentTeam);
+            Integer stones = currentTeam.getStoneCount();
+            currentTeam.setStoneCount(stones - 1);
+            currentTeam.setIsTeamTurn(false);
+            board[x][y] = stone;
+
+            for (int i = 0; i < board.length; i++) {
+                for (int j = 0; j < board[i].length; j++) {
+                    // Check if it's not already set to captured, but has been deemed captured then proceed and adjust board/points!
+                    if (!board[i][j].getIsCaptured() && checkIfCaptured(board, i, j)) {
+                        Stone capturedStone = board[i][j];
+                        capturedStone.setIsCaptured(true);
+                        if (capturedStone.getStoneType().equals("B")) {
+                            capturedStone.setStoneType("Wc");
+                        }
+                        else if (capturedStone.getStoneType().equals("W")) {
+                            capturedStone.setStoneType("Bc");
+                        }
+                        board[i][j] = capturedStone;
+                        currentTeam.setTeamScore(currentTeam.getTeamScore() + 1);
+                    }
+                }
+            }
+            goban.saveBoardString();
+            String nextPlayerName = switchToNextPlayer(currentPlayer,goban.getPlayerIdTurnList());
+            teamRepository.save(currentTeam);
+            gobanRepository.save(goban);
+            return ResponseEntity.ok(currentPlayer.getUsername() + " placed a stone, it is now " + nextPlayerName + "'s turn.");
+        }
+        return ResponseEntity.ok("It is not " + currentPlayer.getUsername() + "'s turn, cannot place a stone." );
+    }
+
+    public ResponseEntity<String> pass(Integer userId) {
+        TheProfile profile = userService.findProfileById(userId);
+        Player currentPlayer = playerRepository.findByProfile(profile);
+
+        if (!currentPlayer.getTeam().getLobby().getIsGameInitialized()) {
+            return ResponseEntity.ok("Game is no longer active" );
+        }
+
+        if (currentPlayer.getIsTurn()) {
+            Goban goban = currentPlayer.getTeam().getLobby().getGoban();
+            String nextPlayerName = switchToNextPlayer(currentPlayer, goban.getPlayerIdTurnList());
+
+            return ResponseEntity.ok(currentPlayer.getUsername() + " passed, it is now " + nextPlayerName + "'s turn." );
+        }
+
+        return ResponseEntity.ok("It is not " + currentPlayer.getUsername() + "'s turn, cannot pass." );
+    }
+
+    //Helper Methods
+    public String switchToNextPlayer(Player currentPlayer, List<Integer> turnSequence) {
+        // Find the current player's ID and index in the turn sequence
+        Integer currentTurnId = currentPlayer.getProfile().getUser().getUser_id();
+        int currentIndex = turnSequence.indexOf(currentTurnId);
+
+        // Determine the next index in a circular manner
+        int nextIndex = (currentIndex + 1) % turnSequence.size();
+        Integer nextTurnId = turnSequence.get(nextIndex);
+
+        // Retrieve the next player based on the ID
+        TheProfile nextProfile = userService.findProfileById(nextTurnId);
+        Player nextPlayer = playerRepository.findByProfile(nextProfile);
+        Team nextTeam = nextPlayer.getTeam();
+
+        // Update turn states
+        nextTeam.setIsTeamTurn(true);
+        nextPlayer.setIsTurn(true);
+        currentPlayer.setIsTurn(false);
+
+        // Save updated player states if needed (optional, depending on persistence setup)
+        playerRepository.save(currentPlayer);
+        playerRepository.save(nextPlayer);
+        teamRepository.save(nextTeam);
+        return nextPlayer.getUsername();
+    }
+
+    // Checks if a stone is captured
+    public boolean checkIfCaptured(Stone[][] board, int x, int y) {
+        String stone = board[x][y].getStoneType();
+        if (stone.equals("X")) {
+            return false;  // No stone at position
+        }
+
+        // Perform a DFS/BFS to find the group of stones
+        boolean[][] visited = new boolean[board.length][board[0].length];
+        Set<String> group = new HashSet<>();
+        Set<String> liberties = new HashSet<>();
+        exploreGroup(board, x, y, stone, visited, group, liberties);
+
+        // If there are no liberties, the group is captured
+        return liberties.isEmpty();
+    }
+
+    // Explores a group of connected stones and its liberties
+    private void exploreGroup(Stone[][] board, int x, int y, String stone, boolean[][] visited, Set<String> group, Set<String> liberties) {
+        if (x < 0 || x >= board.length || y < 0 || y >= board[0].length || visited[x][y] || !board[x][y].getStoneType().equals(stone)) {
+            return;  // Out of bounds, already visited, or not the same stone
+        }
+
+        visited[x][y] = true;
+        group.add(x + "," + y);
+
+        // Check all adjacent positions for liberties or more stones in the group
+        for (int i = 0; i < 4; i++) {
+            int newX = x + DIR_X[i];
+            int newY = y + DIR_Y[i];
+
+            if (newX >= 0 && newX < board.length && newY >= 0 && newY < board[0].length) {
+                if (board[newX][newY].getStoneType().equals("X")) {
+                    liberties.add(newX + "," + newY);  // Add liberty (empty space)
+                } else if (board[newX][newY].getStoneType().equals(stone)) {
+                    exploreGroup(board, newX, newY, stone, visited, group, liberties);  // Recursively explore group
+                }
+            }
+        }
+    }
+
+    // Capture the group of stones(not complete)
+    public void captureGroup(Stone[][] board, Set<String> group) {
+        for (String position : group) {
+            String[] pos = position.split(",");
+            int x = Integer.parseInt(pos[0]);
+            int y = Integer.parseInt(pos[1]);
+            board[x][y].setStoneType("X");  // Remove the stone //TODO implement capture type, Bc/Wc
+        }
     }
 }

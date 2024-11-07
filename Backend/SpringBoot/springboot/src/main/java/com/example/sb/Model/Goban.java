@@ -31,9 +31,6 @@ public class Goban {
     @JoinColumn(name = "lobby_id", referencedColumnName = "lobby_id")
     private Lobby lobby;
 
-    private static final int[] DIR_X = {-1, 1, 0, 0};
-    private static final int[] DIR_Y = {0, 0, -1, 1};
-
     public Goban(Lobby lobby)  {
         this.lobby = lobby;
         this.board = new Stone[9][9];
@@ -44,62 +41,11 @@ public class Goban {
                 this.board[i][j] = new Stone(this, i, j);
             }
         }
-        saveBoardState();
+        saveBoardString();
     }
 
-    // Check if a stone is captured
-    public boolean checkIfCaptured(Stone[][] board, int x, int y) {
-        String stone = board[x][y].getStoneType();
-        if (stone.equals("X")) {
-            return false;  // No stone at the position
-        }
-
-        // Perform a DFS/BFS to find the group of stones
-        boolean[][] visited = new boolean[board.length][board[0].length];
-        Set<String> group = new HashSet<>();
-        Set<String> liberties = new HashSet<>();
-        exploreGroup(board, x, y, stone, visited, group, liberties);
-
-        // If there are no liberties, the group is captured
-        return liberties.isEmpty();
-    }
-
-    // Helper method to explore a group of connected stones and its liberties
-    private void exploreGroup(Stone[][] board, int x, int y, String stone, boolean[][] visited, Set<String> group, Set<String> liberties) {
-        if (x < 0 || x >= board.length || y < 0 || y >= board[0].length || visited[x][y] || !board[x][y].getStoneType().equals(stone)) {
-            return;  // Out of bounds, already visited, or not the same stone
-        }
-
-        visited[x][y] = true;
-        group.add(x + "," + y);
-
-        // Check all adjacent positions for liberties or more stones in the group
-        for (int i = 0; i < 4; i++) {
-            int newX = x + DIR_X[i];
-            int newY = y + DIR_Y[i];
-
-            if (newX >= 0 && newX < board.length && newY >= 0 && newY < board[0].length) {
-                if (board[newX][newY].getStoneType().equals("X")) {
-                    liberties.add(newX + "," + newY);  // Add liberty (empty space)
-                } else if (board[newX][newY].getStoneType().equals(stone)) {
-                    exploreGroup(board, newX, newY, stone, visited, group, liberties);  // Recursively explore the group
-                }
-            }
-        }
-    }
-
-    // Capture the group of stones
-    public void captureGroup(Stone[][] board, Set<String> group) {
-        for (String position : group) {
-            String[] pos = position.split(",");
-            int x = Integer.parseInt(pos[0]);
-            int y = Integer.parseInt(pos[1]);
-            board[x][y].setStoneType("X");  // Remove the stone //TODO implement capture type, Bc/Wc
-        }
-    }
-
-    // Method to convert board to JSON and store it
-    public void saveBoardState() {
+    // Setter for saving the board as a string
+    public void saveBoardString() {
         //ObjectMapper mapper = new ObjectMapper();
         //this.boardState = mapper.writeValueAsString(this.board);
         StringBuilder boardString = new StringBuilder();
@@ -114,7 +60,8 @@ public class Goban {
         this.boardState = boardString.toString();
     }
 
-    public void loadBoardState() {
+    // Setter for creating a board object based off the saved string data
+    public void loadMatrixFromBoardString() {
         // Split the boardState string by new lines to get each row
         this.board = new Stone[9][9];
         String[] rows = this.boardState.trim().split("\n");
