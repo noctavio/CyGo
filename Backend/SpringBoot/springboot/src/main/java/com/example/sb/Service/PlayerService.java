@@ -134,7 +134,7 @@ public class PlayerService {
 
             playerRepository.save(player);
             String statusMessage = player.getIsReady() ? "Ready" : "Not Ready";
-            return ResponseEntity.ok("Player is now: " + statusMessage);
+            return ResponseEntity.ok( player.getUsername() + " is now: " + statusMessage);
         }
         return ResponseEntity.ok("Player must be in a team to set ready status!");
     }

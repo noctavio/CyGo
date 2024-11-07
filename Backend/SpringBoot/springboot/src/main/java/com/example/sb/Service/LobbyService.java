@@ -233,6 +233,7 @@ public class LobbyService {
                         team1.setStoneCount(40);
                         team2.setTeamScore(6.5);
                         team1PlayerStarter.setIsTurn(true);
+                        team1PlayerStarter.setStartTime(new Date());
                         playerTurnList.add(team1PlayerStarter.getProfile().getUser().getUser_id());
                         playerTurnList.add(team2PlayerStarter.getProfile().getUser().getUser_id());
                         playerTurnList.add(team1.getPlayer2().getProfile().getUser().getUser_id());
@@ -242,6 +243,7 @@ public class LobbyService {
                         team2.setStoneCount(40);
                         team1.setTeamScore(6.5);
                         team2PlayerStarter.setIsTurn(true);
+                        team2PlayerStarter.setStartTime(new Date());
                         playerTurnList.add(team2PlayerStarter.getProfile().getUser().getUser_id());
                         playerTurnList.add(team1PlayerStarter.getProfile().getUser().getUser_id());
                         playerTurnList.add(team2.getPlayer2().getProfile().getUser().getUser_id());

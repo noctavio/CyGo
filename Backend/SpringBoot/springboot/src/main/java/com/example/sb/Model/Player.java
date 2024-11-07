@@ -1,6 +1,7 @@
 package com.example.sb.Model;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -24,6 +25,14 @@ public class Player {
     private Boolean isReady;
     private Boolean castBlackVote;
     private Boolean isTurn;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "startedTurn")
+    private Date startTime;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "endedTurn")
+    private Date endTime;
 
     @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "profile_id", referencedColumnName = "profile_id")
@@ -57,11 +66,11 @@ public class Player {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Player player = (Player) o;
-        return Objects.equals(player_id, player.player_id) && Objects.equals(isReady, player.isReady) && Objects.equals(castBlackVote, player.castBlackVote) && Objects.equals(isTurn, player.isTurn) && Objects.equals(profile, player.profile) && Objects.equals(team, player.team) && Objects.equals(muted, player.muted);
+        return Objects.equals(player_id, player.player_id) && Objects.equals(isReady, player.isReady) && Objects.equals(castBlackVote, player.castBlackVote) && Objects.equals(isTurn, player.isTurn) && Objects.equals(startTime, player.startTime) && Objects.equals(endTime, player.endTime) && Objects.equals(profile, player.profile) && Objects.equals(team, player.team) && Objects.equals(muted, player.muted);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(player_id, isReady, castBlackVote, isTurn, profile, team, muted);
+        return Objects.hash(player_id, isReady, castBlackVote, isTurn, startTime, endTime, profile, team, muted);
     }
 }

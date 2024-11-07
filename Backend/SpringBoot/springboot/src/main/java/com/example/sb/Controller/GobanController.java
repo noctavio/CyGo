@@ -23,4 +23,8 @@ public class GobanController {
     public String getBoardState(@PathVariable Integer lobbyId) {
         return gobanService.getBoardState(lobbyId);
     }
+    @DeleteMapping("/{lobbyId}/endGame")
+    public ResponseEntity<String> endGame(@PathVariable Integer lobbyId) {
+        return gobanService.endGame(lobbyId);
+    }
 }
