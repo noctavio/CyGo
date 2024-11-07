@@ -81,7 +81,8 @@ public class StoneService {
 
             for (int i = 0; i < board.length; i++) {
                 for (int j = 0; j < board[i].length; j++) {
-                    if (goban.checkIfCaptured(board, i, j)) {
+                    // Check if it's not already set to captured, but has been deemed captured then proceed and adjust board/points!
+                    if (!board[i][j].getIsCaptured() && goban.checkIfCaptured(board, i, j)) {
                         Stone capturedStone = board[i][j];
                         capturedStone.setIsCaptured(true);
                         if (capturedStone.getStoneType().equals("B")) {
@@ -91,7 +92,7 @@ public class StoneService {
                             capturedStone.setStoneType("Bc");
                         }
                         board[i][j] = capturedStone;
-                        //currentTeam.setTeamScore(currentTeam.getTeamScore() + 1); //TODO fix double counting
+                        currentTeam.setTeamScore(currentTeam.getTeamScore() + 1);
                     }
                 }
             }
