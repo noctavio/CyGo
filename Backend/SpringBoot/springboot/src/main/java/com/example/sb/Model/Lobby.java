@@ -1,5 +1,6 @@
 package com.example.sb.Model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -34,6 +35,7 @@ public class Lobby {
     @JoinColumn(name = "team2_id", referencedColumnName = "team_id")
     private Team team2;
 
+    @JsonIgnore
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "board_id", referencedColumnName = "board_id")
     private Goban goban;

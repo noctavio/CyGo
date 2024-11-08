@@ -1,5 +1,6 @@
 package com.example.sb.Model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.*;
@@ -27,8 +28,10 @@ public class Goban {
     @Transient
     private Stone[][] board;
 
+
     @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "lobby_id", referencedColumnName = "lobby_id")
+    @JsonIgnore
     private Lobby lobby;
 
     public Goban(Lobby lobby)  {
