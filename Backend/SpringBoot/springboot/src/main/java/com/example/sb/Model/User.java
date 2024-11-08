@@ -2,6 +2,8 @@ package com.example.sb.Model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Objects;
 
@@ -19,6 +21,12 @@ public class User {
     private String username;
     private String password;
     private Boolean isLoggedIn;
+
+    public User (User user, String encodedPassword) {
+        this.username = user.getUsername();
+        this.password = encodedPassword;
+        this.isLoggedIn = false;
+    }
 
     @Override
     public boolean equals(Object o) {

@@ -31,12 +31,10 @@ public class UserService {
     private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public User registerUser(User user) {
-        String secret = user.getPassword();
+        String encodedPassword = passwordEncoder.encode(user.getPassword());
+        User userObject = new User(user, encodedPassword);
 
-        user.setPassword(passwordEncoder.encode(secret));
-        user.setIsLoggedIn(false);
-
-        User savedUser = userRepository.save(user);
+        User savedUser = userRepository.save(userObject);
         theProfileService.updateProfileTable();
         return savedUser;
     }

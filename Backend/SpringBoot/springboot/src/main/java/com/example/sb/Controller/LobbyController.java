@@ -34,7 +34,7 @@ public class LobbyController {
         return lobbyService.getAllLobbies();
     }
 
-    @GetMapping("/players/{lobbyId}")
+    @GetMapping("all/players/{lobbyId}")
     public List<Player> getAllPlayersInLobby(@PathVariable Integer lobbyId) {
         return lobbyService.getAllPlayersInLobby(lobbyId);
     }
