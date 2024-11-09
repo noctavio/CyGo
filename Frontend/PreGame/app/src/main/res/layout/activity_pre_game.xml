@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".PreGameActivity"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/border_background"
+    android:padding="16dp">
+
+    <Button
+        android:id="@+id/createFriendlyLobbyBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Create Friendly Lobby" />
+
+    <Switch
+        android:id="@+id/friendlySwitch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Friendly Lobby" />
+
+    <Button
+        android:id="@+id/joinLobbyBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Join Lobby" />
+
+    <Button
+        android:id="@+id/invitePlayerBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Invite Player" />
+
+    <Button
+        android:id="@+id/readyBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Ready" />
+
+    <Button
+        android:id="@+id/btnLeaveLobby"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Leave Lobby" />
+
+    <Button
+        android:id="@+id/btnKickPlayer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Kick Player" />
+
+    <Button
+        android:id="@+id/btnDeleteLobby"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Delete Lobby" />
+
+    <TextView
+        android:id="@+id/statusText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="Status: Not Ready" />
+
+</LinearLayout>
