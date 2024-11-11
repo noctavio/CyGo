@@ -11,7 +11,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button LeaderboardBtn;
     private Button ClubBtn;
     private Button GameBtn;
-//    private Button SettingsBtn;  // Declare SettingsBtn
+    private Button SettingsBtn;  // Declare SettingsBtn
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,13 +22,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         LeaderboardBtn = findViewById(R.id.LeaderboardBtn);
         ClubBtn = findViewById(R.id.ClubBtn);
         GameBtn = findViewById(R.id.GameBtn);
-//        SettingsBtn = findViewById(R.id.SettingsBtn);  // Initialize SettingsBtn
+        SettingsBtn = findViewById(R.id.SettingsBtn);  // Initialize SettingsBtn
 
         // Set click listeners
         ClubBtn.setOnClickListener(this);
         LeaderboardBtn.setOnClickListener(this);
         GameBtn.setOnClickListener(this);
-//        SettingsBtn.setOnClickListener(this);  // Set click listener for SettingsBtn
+        SettingsBtn.setOnClickListener(this);  // Set click listener for SettingsBtn
     }
 
     @Override
@@ -46,9 +46,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Intent intent = new Intent(MainActivity.this, PreGameActivity.class);
             startActivity(intent);
         }
-//        else if (view.getId() == R.id.SettingsBtn) {
-//            Intent intent = new Intent(MainActivity.this, Settings.class);
-//            startActivity(intent);
-//        }
+        else if (view.getId() == R.id.SettingsBtn) {
+            Intent intent = new Intent(MainActivity.this, Settings.class);
+            startActivity(intent);
+        }
     }
 }

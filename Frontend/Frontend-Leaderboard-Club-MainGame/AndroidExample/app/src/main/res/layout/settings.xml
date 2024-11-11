@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="10dp"
+    android:background="@drawable/border_background">
+
+    <!-- Profile Section (Horizontal Alignment) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="2dp"
+        android:gravity="center"
+        android:orientation="horizontal">
+        <ImageView
+            android:id="@+id/home_button"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginBottom="12dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginLeft="12dp"
+
+            android:src="@drawable/home_button" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Settings"
+            android:layout_marginRight="45dp"
+            android:layout_marginBottom="12dp"
+            android:textColor="#FFFFFF"
+            android:textSize="30sp"
+            android:layout_marginTop="12dp"
+            android:gravity="center" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_marginVertical="8dp"
+        android:background="?android:attr/listDivider" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Profile"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        android:gravity="center" />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="?android:attr/listDivider"
+        android:layout_marginVertical="8dp" />
+    <!-- Horizontal Line Divider -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <!-- Profile Picture (ImageButton) -->
+        <ImageButton
+            android:id="@+id/profilePicture"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:background="@null"
+            android:contentDescription="Profile Picture"
+            android:onClick="onUploadProfilePicture"
+            android:scaleType="centerInside"
+            android:src="@drawable/default_picture" />
+
+        <!-- Profile Name and Change Username Button -->
+        <TextView
+            android:id="@+id/profileName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="8dp"
+            android:textColor="#FFFFFF"
+            android:text="Username"
+            android:textSize="18sp" />
+
+        <Button
+            android:id="@+id/changeUsernameButton"
+            android:layout_width="60dp"
+            android:layout_height="35dp"
+            android:textSize="8dp"
+            android:onClick="onChangeUsername"
+            android:text="Change" />
+    </LinearLayout>
+
+    <View
+    android:layout_width="match_parent"
+    android:layout_height="2dp"
+    android:layout_marginVertical="8dp"
+    android:background="?android:attr/listDivider" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Boards"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        android:gravity="center" />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="?android:attr/listDivider"
+        android:layout_marginVertical="8dp" />
+
+    <!-- Horizontal Image Row -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:orientation="horizontal"
+        android:gravity="center_horizontal">
+
+        <ImageView
+            android:id="@+id/board1"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="100dp"
+            android:src="@drawable/board" />
+
+        <ImageView
+            android:id="@+id/board2"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="100dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:src="@drawable/board_2" />
+
+        <ImageView
+            android:id="@+id/board3"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="100dp"
+            android:src="@drawable/board_3" />
+    </LinearLayout>
+    <View
+    android:layout_width="match_parent"
+    android:layout_height="2dp"
+    android:layout_marginVertical="8dp"
+    android:background="?android:attr/listDivider" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Stones"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        android:gravity="center" />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="?android:attr/listDivider"
+        android:layout_marginVertical="8dp" />
+
+    <!-- Horizontal Image Row -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:orientation="horizontal"
+        android:gravity="center_horizontal">
+
+        <ImageView
+            android:id="@+id/stone1"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="60dp"
+            android:src="@drawable/stones1" />
+
+        <ImageView
+            android:id="@+id/stone2"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="60dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:src="@drawable/stones2" />
+
+        <ImageView
+            android:id="@+id/stone3"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="60dp"
+            android:src="@drawable/stones3" />
+    </LinearLayout>
+    <View
+    android:layout_width="match_parent"
+    android:layout_height="2dp"
+    android:layout_marginVertical="8dp"
+    android:background="?android:attr/listDivider" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Account"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        android:gravity="center" />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="?android:attr/listDivider"
+        android:layout_marginVertical="8dp" />
+
+
+
+</LinearLayout>
+
+

@@ -37,10 +37,10 @@
             android:name=".MainGame"
             android:theme="@style/Theme.AppCompat.Light"
             android:exported="true" />
-<!--        <activity-->
-<!--            android:name=".Settings"-->
-<!--            android:theme="@style/Theme.AppCompat.Light"-->
-<!--            android:exported="true" />-->
+        <activity
+            android:name=".Settings"
+            android:theme="@style/Theme.AppCompat.Light"
+            android:exported="true" />
 
         <activity
             android:name=".MainActivity"
