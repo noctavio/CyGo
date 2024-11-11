@@ -1,6 +1,6 @@
 package com.example.sb.Repository;
 
-import com.example.sb.Entity.Club;
+import com.example.sb.Model.Club;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
