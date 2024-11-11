@@ -103,12 +103,8 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<!-- Add the javax.websocket-api dependency here -->
-		<dependency>
-			<groupId>javax.websocket</groupId>
-			<artifactId>javax.websocket-api</artifactId>
-			<version>1.1</version>
-		</dependency>
+
+
 	</dependencies>
 
 	<build>
