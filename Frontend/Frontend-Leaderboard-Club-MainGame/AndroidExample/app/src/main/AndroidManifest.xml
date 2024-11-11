@@ -23,10 +23,10 @@
             android:exported="false" />
 
         <!-- Fixed theme for GameChat -->
-<!--        <activity-->
-<!--            android:name=".GameChat"-->
-<!--            android:theme="@style/Theme.AppCompat.Light"-->
-<!--            android:exported="false" />-->
+        <activity
+            android:name=".GameChat"
+            android:theme="@style/Theme.AppCompat.Light"
+            android:exported="false" />
 
         <activity android:name=".PreGameActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
@@ -37,10 +37,10 @@
             android:name=".MainGame"
             android:theme="@style/Theme.AppCompat.Light"
             android:exported="true" />
-<!--        <activity-->
-<!--            android:name=".Settings"-->
-<!--            android:theme="@style/Theme.AppCompat.Light"-->
-<!--            android:exported="true" />-->
+        <activity
+            android:name=".Settings"
+            android:theme="@style/Theme.AppCompat.Light"
+            android:exported="true" />
 
         <activity
             android:name=".MainActivity"

@@ -173,14 +173,14 @@ public class MainGame extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-//        findViewById(R.id.message_button).setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Intent intent = new Intent(MainGame.this, GameChat.class);
-//                intent.putExtra("hostID", hostID); // Pass hostID to GameChat
-//                startActivityForResult(intent, 1); // Start GameChat for result
-//            }
-//        });
+        findViewById(R.id.message_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainGame.this, GameChat.class);
+                intent.putExtra("hostID", hostID); // Pass hostID to GameChat
+                startActivityForResult(intent, 1); // Start GameChat for result
+            }
+        });
     }
     private class FetchBoardStoneDetails extends AsyncTask<Void, Void, String> {
 

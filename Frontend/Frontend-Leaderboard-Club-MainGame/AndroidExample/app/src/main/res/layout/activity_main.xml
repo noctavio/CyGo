@@ -42,10 +42,10 @@
         android:text="Pre Game" />
 
     <!-- Settings Button -->
-<!--    <Button android:id="@+id/SettingsBtn"-->
-<!--        android:layout_width="200dp"-->
-<!--        android:layout_height="80dp"-->
-<!--        android:layout_marginTop="20dp"-->
-<!--        android:layout_gravity="center"-->
-<!--        android:text="Settings" />-->
+    <Button android:id="@+id/SettingsBtn"
+        android:layout_width="200dp"
+        android:layout_height="80dp"
+        android:layout_marginTop="20dp"
+        android:layout_gravity="center"
+        android:text="Settings" />
 </androidx.appcompat.widget.LinearLayoutCompat>
