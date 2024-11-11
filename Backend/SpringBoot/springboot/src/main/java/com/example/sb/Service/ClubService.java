@@ -1,6 +1,6 @@
 package com.example.sb.Service;
 
-import com.example.sb.Entity.Club;
+import com.example.sb.Model.Club;
 import com.example.sb.Repository.ClubRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;

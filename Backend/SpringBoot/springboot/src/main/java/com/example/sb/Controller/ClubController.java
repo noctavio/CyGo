@@ -1,6 +1,6 @@
 package com.example.sb.Controller;
 
-import com.example.sb.Entity.Club;
+import com.example.sb.Model.Club;
 import com.example.sb.Service.ClubService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
