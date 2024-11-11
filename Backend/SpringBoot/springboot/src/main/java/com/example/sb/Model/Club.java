@@ -19,17 +19,22 @@ public class Club {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id; // Primary key
 
+    @Getter
+    @Setter
     @Column(name = "club_name")
     private String clubName;
 
+    @Getter
+    @Setter
     @Column(name = "club_picture")
     private String clubPicture;
 
     @ElementCollection
+    @Getter
+    @Setter
     @CollectionTable(name = "club_members", joinColumns = @JoinColumn(name = "club_id"))
     @Column(name = "member_name")
     private List<String> members = new ArrayList<>(); // List of member names
-
 
 }
 
