@@ -30,5 +30,6 @@ public class Club {
     @Column(name = "member_name")
     private List<String> members = new ArrayList<>(); // List of member names
 
+
 }
 
