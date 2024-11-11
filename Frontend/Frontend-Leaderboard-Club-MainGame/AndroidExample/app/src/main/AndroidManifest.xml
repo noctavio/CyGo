@@ -23,10 +23,10 @@
             android:exported="false" />
 
         <!-- Fixed theme for GameChat -->
-<!--        <activity-->
-<!--            android:name=".GameChat"-->
-<!--            android:theme="@style/Theme.AppCompat.Light"-->
-<!--            android:exported="false" />-->
+        <activity
+            android:name=".GameChat"
+            android:theme="@style/Theme.AppCompat.Light"
+            android:exported="false" />
 
         <activity android:name=".PreGameActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
