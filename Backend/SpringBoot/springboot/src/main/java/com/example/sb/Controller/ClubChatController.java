@@ -1,7 +1,10 @@
 package com.example.sb.Controller;
 
-import com.example.sb.Model.*;
-import com.example.sb.Repository.ClubMessageRepository;
+import com.example.sb.Model.Message;
+import com.example.sb.Model.Player;
+import com.example.sb.Model.TheProfile;
+import com.example.sb.Model.User;
+import com.example.sb.Repository.MessageRepository;
 import com.example.sb.Repository.PlayerRepository;
 import com.example.sb.Repository.TheProfileRepository;
 import com.example.sb.Repository.UserRepository;
@@ -21,15 +24,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * Represents a WebSocket chat server for handling real-time communication
- * between clubs, restricting users to see only messages from their own club.
- */
+@Controller      // this is needed for this to be an endpoint to springboot
 @ServerEndpoint("/clubChat/{clubName}/{username}")
-@Controller
 public class ClubChatController {
 
-    private static ClubMessageRepository clubMsgRepo;
     // Store all socket sessions and their corresponding club names and usernames
     private static Map<String, Map<Session, String>> clubSessionsMap = new Hashtable<>();
     private static Map<Session, String> sessionClubNameMap = new Hashtable<>();
@@ -103,7 +101,6 @@ public class ClubChatController {
             // Broadcast the message to everyone in the same club, including the sender's username
             broadcast(clubName, username + ": " + message);
         }
-        clubMsgRepo.save(new ClubMessage(clubName, username, message));
     }
 
     /**
