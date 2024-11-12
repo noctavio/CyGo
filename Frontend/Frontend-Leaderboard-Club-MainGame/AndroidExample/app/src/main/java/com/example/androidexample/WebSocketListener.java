@@ -2,6 +2,7 @@ package com.example.androidexample;
 
 import org.java_websocket.handshake.ServerHandshake;
 
+
 /**
  * Interface defining methods for handling WebSocket events.
  * Implement this interface to listen for WebSocket connection,
@@ -39,3 +40,5 @@ public interface WebSocketListener {
      */
     void onWebSocketError(Exception ex);
 }
+
+

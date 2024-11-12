@@ -5,31 +5,47 @@
     tools:context=".MainActivity"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:paddingTop="50dp"
+    android:paddingBottom="50dp">
 
+    <!-- Title Text -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="100dp"
         android:layout_gravity="center"
         android:textSize="30sp"
-        android:text="Main Menu">
-    </TextView>
+        android:text="Main Menu"/>
 
+    <!-- Leaderboard Button -->
     <Button android:id="@+id/LeaderboardBtn"
         android:layout_width="200dp"
         android:layout_height="80dp"
-        android:layout_marginTop="100dp"
-        android:layout_marginBottom="20dp"
+        android:layout_marginTop="30dp"
         android:layout_gravity="center"
         android:text="Leaderboard" />
+
+    <!-- Club Button -->
     <Button android:id="@+id/ClubBtn"
         android:layout_width="200dp"
         android:layout_height="80dp"
-        android:layout_marginTop="100dp"
-        android:layout_marginBottom="20dp"
+        android:layout_marginTop="20dp"
         android:layout_gravity="center"
         android:text="Club" />
 
+    <!-- Pre Game Button -->
+    <Button android:id="@+id/GameBtn"
+        android:layout_width="200dp"
+        android:layout_height="80dp"
+        android:layout_marginTop="20dp"
+        android:layout_gravity="center"
+        android:text="Pre Game" />
 
+    <!-- Settings Button -->
+    <Button android:id="@+id/SettingsBtn"
+        android:layout_width="200dp"
+        android:layout_height="80dp"
+        android:layout_marginTop="20dp"
+        android:layout_gravity="center"
+        android:text="Settings" />
 </androidx.appcompat.widget.LinearLayoutCompat>

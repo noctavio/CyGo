@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="stone_size">36dp</dimen> <!-- Adjust based on board size and resolution -->
+</resources>
