@@ -118,6 +118,10 @@ public class LobbyService {
         Lobby lobby = teamBeingLeft.getLobby();
 
         if (lobby != null) {
+            if (leavingPlayer.getUsername().equals(lobby.getHostName())) {
+                lobbyRepository.delete(lobby);
+                return ResponseEntity.ok("HOST left the lobby without transferring HOST privileges, lobby deleted!");
+            }
             //TODO I couldn't get cascade to work here manually set to null to delete.
             if (teamBeingLeft.getPlayer1() != null && teamBeingLeft.getPlayer1().equals(leavingPlayer)) {
                 teamBeingLeft.setPlayer1(null);
@@ -132,21 +136,6 @@ public class LobbyService {
         else {
             // Handles lobby is not found
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Lobby not found!");
-        }
-    }
-
-    public ResponseEntity<String> deleteLobby(Integer hostUserId) {
-        TheProfile profile = userService.findProfileById(hostUserId);
-        Player potentiallyHost = playerRepository.findByProfile(profile);
-        Lobby lobbyToDelete = potentiallyHost.getTeam().getLobby();
-
-        if (potentiallyHost.getUsername().equals(lobbyToDelete.getHostName())) {
-
-            lobbyRepository.delete(lobbyToDelete);
-            return ResponseEntity.ok("Lobby deleted!");
-        }
-        else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(potentiallyHost.getUsername() + " is not host, cannot delete lobby.");
         }
     }
 

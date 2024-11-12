@@ -67,8 +67,4 @@ public class LobbyController {
         return lobbyService.kickPlayer(hostUserId, userId);
     }
 
-    @DeleteMapping("/{hostUserId}/killLobby")
-    public ResponseEntity<String> killLobby(@PathVariable Integer hostUserId) {
-        return lobbyService.deleteLobby(hostUserId);
-    }
 }

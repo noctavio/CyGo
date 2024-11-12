@@ -10,7 +10,7 @@ import org.springframework.context.annotation.FilterType;
 @ComponentScan(basePackages = { "com.example.sb" }, excludeFilters = { @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = { Stone.class }) })
 public class BackendApplication {
 
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args) {
 		SpringApplication.run(BackendApplication.class, args);
 	}
 }
