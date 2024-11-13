@@ -110,7 +110,7 @@ public class UserService {
             userRepository.deleteById(userId);
             return true;
         }
-       return false;
+        return false;
     }
 
     public TheProfile findProfileById(Integer userId) {
