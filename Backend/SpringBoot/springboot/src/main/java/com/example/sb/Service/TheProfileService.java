@@ -1,13 +1,16 @@
 package com.example.sb.Service;
 
+import com.example.sb.Constants.RankConstants;
 import com.example.sb.Model.TheProfile;
 import com.example.sb.Model.User;
 import com.example.sb.Repository.TheProfileRepository;
 import com.example.sb.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -57,20 +60,57 @@ public class TheProfileService {
     }
 
     public TheProfile getProfileByID(Integer userId) {
-        // Retrieve the user by username
-        Optional<User> user = userRepository.findById(userId); // This should return the User object
-
-        // If user is not found, handle it appropriately
+        Optional<User> user = userRepository.findById(userId);
         if (user.isEmpty()) {
             throw new ResourceNotFoundException("User not found with id: " + userId);
         }
 
-        // Retrieve the profile using the User object
         return theProfileRepository.findByUser(user);
     }
 
-    public void updateProfile(TheProfile profile) {
-        theProfileRepository.save(profile);
+    public ResponseEntity<String> updateProfile(TheProfile profileToUpdate, TheProfile profileJSON) {
+
+        if (profileToUpdate == null) {
+            return ResponseEntity.badRequest().body("Profile was not found");
+        }
+
+        if ((profileJSON.getWins() != null && profileJSON.getWins() < 0) || (profileJSON.getLoss() != null && profileJSON.getLoss() < 0)) {
+
+            return ResponseEntity.badRequest().body("Wins and losses must be non-negative.");
+        }
+
+        if (profileJSON.getRank() != null) {
+            if (Arrays.asList(RankConstants.RANKS).contains(profileJSON.getRank())) {
+                profileToUpdate.setRank(profileJSON.getRank());
+            }
+            else {
+                return ResponseEntity.badRequest().body("Invalid rank input... please review Go ranks -> (30 kyu - 1 kyu) and (1 dan - 9 dan)");
+            }
+        }
+
+        if (profileJSON.getClubpicture() != null) {
+            profileToUpdate.setClubpicture(profileJSON.getClubpicture());
+        }
+
+        if (profileJSON.getProfilepicture() != null) {
+            profileToUpdate.setProfilepicture(profileJSON.getProfilepicture());
+        }
+
+        if (profileJSON.getClubname() != null) {
+            profileToUpdate.setClubname(profileJSON.getClubname());
+        }
+
+        if (profileJSON.getWins() != null) {
+            profileToUpdate.setWins(profileJSON.getWins());
+        }
+
+        if (profileJSON.getLoss() != null) {
+            profileToUpdate.setLoss(profileJSON.getLoss());
+        }
+
+        profileToUpdate.setGamesplayed();
+        theProfileRepository.save(profileToUpdate);
+        return ResponseEntity.ok("The user has been updated accordingly.");
     }
 
     public void updateProfileTable() {

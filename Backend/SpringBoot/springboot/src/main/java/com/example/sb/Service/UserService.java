@@ -78,14 +78,28 @@ public class UserService {
         return loggedInList;
     }
 
-    public void updateUser(Optional<User> user) {
-        // Check if the Optional contains a value
-        if (user.isPresent()) {
+    public ResponseEntity<String> updateUser(Optional<User> userOptional, User userJSON) {
+
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+
+            if (userJSON.getUsername() != null) {
+                user.setUsername(userJSON.getUsername());
+            }
+
+            if (userJSON.getPassword() != null) {
+                String newPassword = userJSON.getPassword();
+                //updates pass if it changed
+                if (!newPassword.isEmpty()) {
+                    PasswordEncoder encoder = new BCryptPasswordEncoder();
+                    user.setPassword(encoder.encode(newPassword));
+                }
+            }
             theProfileService.updateProfileTable();
-            userRepository.save(user.get());  // Save the User if present
-        } else {
-            throw new IllegalArgumentException("User must be present to update."); // Handle the absence of User
+            userRepository.save(user);  // Save the User if present
+            return ResponseEntity.ok("User has been updated accordingly.");
         }
+        return ResponseEntity.ok("User does not exist...");
     }
 
     public List<User> getAllUsers() {
@@ -105,12 +119,12 @@ public class UserService {
      * @param userId user id
      * @return boolean
      */
-    public boolean deleteByID(Integer userId) {
+    public ResponseEntity<String> deleteByID(Integer userId) {
         if (userRepository.findById(userId).isPresent()) {
             userRepository.deleteById(userId);
-            return true;
+            return ResponseEntity.ok("User deleted successfully.");
         }
-       return false;
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
     }
 
     public TheProfile findProfileById(Integer userId) {

@@ -7,7 +7,6 @@ import com.example.sb.Model.TheProfile;
 import com.example.sb.Repository.LobbyRepository;
 import com.example.sb.Repository.PlayerRepository;
 import com.example.sb.Repository.TeamRepository;
-import com.example.sb.Repository.TheProfileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -134,5 +133,4 @@ public class TeamService {
         }
         return Collections.emptyList();
     }
-
 }

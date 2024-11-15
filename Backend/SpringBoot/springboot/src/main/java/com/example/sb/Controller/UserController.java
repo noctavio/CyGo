@@ -2,11 +2,12 @@ package com.example.sb.Controller;
 
 import com.example.sb.Model.User;
 import com.example.sb.Service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,81 +16,92 @@ import java.util.Optional;
 @RequestMapping("/users")
 @RestController
 public class UserController {
+
     @Autowired
     private UserService userService;
 
+    @Operation(summary = "Register a new user", description = "Creates a new user account and stores it in the database.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User successfully registered"),
+            @ApiResponse(responseCode = "400", description = "Invalid user input")
+    })
     @PostMapping("/register")
-    public User registerUser(@RequestBody User user) {
+    public User registerUser(
+            @Parameter(description = "Details of the user to be registered") @RequestBody User user) {
         return userService.registerUser(user);
     }
 
+    @Operation(summary = "Get all users", description = "Fetches the list of all registered users.")
+    @ApiResponse(responseCode = "200", description = "List of users retrieved successfully")
     @GetMapping
     public List<User> getAllUsers() {
         return userService.getAllUsers();
     }
 
+    @Operation(summary = "Get all logged-in users", description = "Fetches the list of all currently logged-in users.")
+    @ApiResponse(responseCode = "200", description = "List of logged-in users retrieved successfully")
     @GetMapping("/loggedIn")
     public List<User> getAllLoggedIn() {
         return userService.getAllLoggedIn();
     }
 
+    @Operation(summary = "Get user by username", description = "Fetches details of a specific user by their username.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User retrieved successfully"),
+            @ApiResponse(responseCode = "404", description = "User not found")
+    })
     @GetMapping("/{username}")
-    public ResponseEntity<User> getByUsername(@PathVariable String username) {
+    public ResponseEntity<User> getByUsername(
+            @Parameter(description = "Username of the user to fetch") @PathVariable String username) {
         User user = userService.getByUsername(username);
         return user != null ? ResponseEntity.ok(user) : ResponseEntity.notFound().build();
     }
 
+    @Operation(summary = "Log in a user", description = "Authenticates a user based on username and password.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Login successful"),
+            @ApiResponse(responseCode = "401", description = "Invalid credentials")
+    })
     @PutMapping("/login/{username}/{password}")
-    public ResponseEntity<String> login(@PathVariable String username, @PathVariable String password) {
+    public ResponseEntity<String> login(
+            @Parameter(description = "Username of the user") @PathVariable String username,
+            @Parameter(description = "Password of the user") @PathVariable String password) {
         return userService.authenticateUser(username, password);
     }
+
+    @Operation(summary = "Log out a user", description = "Logs out a specific user based on their ID.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Logout successful"),
+            @ApiResponse(responseCode = "404", description = "User not found")
+    })
     @PutMapping("/logout/{userId}")
-    public ResponseEntity<String> logout(@PathVariable Integer userId) {
+    public ResponseEntity<String> logout(
+            @Parameter(description = "ID of the user to log out") @PathVariable Integer userId) {
         return userService.logoutUser(userId);
     }
 
+    @Operation(summary = "Update a user's details", description = "Updates the details of a specific user.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User details updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid input data"),
+            @ApiResponse(responseCode = "404", description = "User not found")
+    })
     @PutMapping("/update/{userId}")
-    public ResponseEntity<String> updateUser(@PathVariable Integer userId, @RequestBody User user) {
-        // TODO change this so you can change user/password separately without the other going null
-        Optional<User> existingUserOptional = userService.getByUserID(userId);
-
-        // Check if the user exists
-        if (existingUserOptional.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        User existingUser = existingUserOptional.get(); // Extract the User from Optional
-
-        if (user.getUsername() != null) {
-            existingUser.setUsername(user.getUsername());
-        }
-
-        if (user.getPassword() != null) {
-            String newPassword = user.getPassword();
-            //updates pass if it changed
-            if (!newPassword.isEmpty()) {
-                PasswordEncoder encoder = new BCryptPasswordEncoder();
-                existingUser.setPassword(encoder.encode(newPassword));
-            }
-        }
-        userService.updateUser(Optional.of(existingUser));
-        return ResponseEntity.ok("User has been updated accordingly.");
+    public ResponseEntity<String> updateUser(
+            @Parameter(description = "ID of the user to update") @PathVariable Integer userId,
+            @Parameter(description = "Updated details of the user") @RequestBody User userJSON) {
+        Optional<User> userOptional = userService.getByUserID(userId);
+        return userService.updateUser(userOptional, userJSON);
     }
 
-    /**
-     * This deletes a user's account and will also remove them from all other tables.
-     * @param id ID input
-     * @return a status message
-     */
+    @Operation(summary = "Delete a user by ID", description = "Deletes a user account and removes their data from all related tables.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User deleted successfully"),
+            @ApiResponse(responseCode = "404", description = "User not found")
+    })
     @DeleteMapping("/hardDelete/{id}")
-    public ResponseEntity<String> deleteByUsername(@PathVariable Integer id) {
-        boolean isDeletedFromUsers = userService.deleteByID(id);
-
-        if (isDeletedFromUsers) {
-            return ResponseEntity.ok("User deleted successfully.");
-        }
-        else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
-        }
+    public ResponseEntity<String> deleteByID(
+            @Parameter(description = "ID of the user to delete") @PathVariable Integer id) {
+        return userService.deleteByID(id);
     }
 }
