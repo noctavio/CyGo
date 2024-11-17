@@ -72,28 +72,4 @@ public class SettingsService {
             }
         }
     }
-
-    public boolean updateSettingsByUsername(String username, Settings newSettingData) {
-        Optional<Settings> optionalSetting = settingRepository.findByUsername(username);
-        if (optionalSetting.isPresent()) {
-            Settings existingSetting = optionalSetting.get();
-
-            if (newSettingData.getPieceColor() != 0) { // Assuming 0 is not a valid PIECECOLOR
-                existingSetting.setPieceColor(newSettingData.getPieceColor());
-            }
-
-            if (newSettingData.getBoardColor() != 0) { // Assuming 0 is not a valid BOARDCOLOR
-                existingSetting.setBoardColor(newSettingData.getBoardColor());
-            }
-
-            if (newSettingData.getUsername() != null) {
-                existingSetting.setUsername(newSettingData.getUsername());
-            }
-
-            settingRepository.save(existingSetting);
-            return true;
-        } else {
-            throw new ResourceNotFoundException("Setting not found with username: " + username);
-        }
-    }
 }
