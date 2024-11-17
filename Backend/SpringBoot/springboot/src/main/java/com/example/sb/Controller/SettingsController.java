@@ -1,10 +1,18 @@
 package com.example.sb.Controller;
 
+import ch.qos.logback.core.joran.event.SaxEventRecorder;
 import com.example.sb.Model.Settings;
+import com.example.sb.Model.TheProfile;
 import com.example.sb.Model.User;
+import com.example.sb.Repository.TheProfileRepository;
+import com.example.sb.Repository.UserRepository;
 import com.example.sb.Service.SettingsService;
+import com.example.sb.Service.TheProfileService;
 import com.example.sb.Service.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,6 +29,9 @@ public class SettingsController {
     @Autowired
     private SettingsService settingsService;
 
+    @Autowired
+    private TheProfileService theProfileService;
+
 
     @GetMapping
     public List<Settings> getAllSettings() {
@@ -32,12 +43,12 @@ public class SettingsController {
         return settingsService.getSettingsById(id);
     }
 
-    @PostMapping
-    public ResponseEntity<String> createSetting(@RequestBody Settings setting) {
-        settingsService.createSettings(setting); // Create a new setting
-        return ResponseEntity.ok("Setting created successfully.");
-    }
+    @PostMapping("/refresh")
+    public ResponseEntity<String> createProfilesFromUsers() {
+            settingsService.updateSettingsfromuser();
+            return ResponseEntity.ok("Player usernames and IDs have been transferred to the profiles table.");
 
+    }
     @PutMapping("/update/{username}")
     public ResponseEntity<String> updateSetting(@PathVariable String username, @RequestBody Settings settingJSON) {
         // Fetch the existing setting by username
@@ -56,7 +67,7 @@ public class SettingsController {
             return ResponseEntity.badRequest().body("User not found.");
         }
 
-        // Update the user's username if it's provided in the settingJSON
+
         if (settingJSON.getUsername() != null && !settingJSON.getUsername().equals(user.getUsername())) {
             user.setUsername(settingJSON.getUsername());
             userService.updateUser(Optional.of(user));  // Save the updated user
@@ -71,9 +82,6 @@ public class SettingsController {
             existingSetting.setBoardColor(settingJSON.getBoardColor());
         }
 
-        if (settingJSON.getUsername() != null) {
-            existingSetting.setUsername(settingJSON.getUsername());
-        }
 
         // Save the updated settings
         settingsService.updateSettings(existingSetting);
@@ -81,12 +89,17 @@ public class SettingsController {
         return ResponseEntity.ok("The setting has been updated accordingly.");
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteSetting(@PathVariable Integer id) {
-        if (settingsService.deleteSettings(id)) {
-            return ResponseEntity.ok("Setting deleted successfully.");
-        } else {
-            return ResponseEntity.badRequest().body("Setting not found.");
-        }
+    @DeleteMapping("/{username}")
+    public ResponseEntity<String> deleteSetting(@PathVariable String username) {
+
+        User user = userService.getByUsername(username);
+        TheProfile theProfile = theProfileService.getProfileByUser(user);
+        Settings settings = settingsService.getSettingsByUsername(username);
+        settingsService.deleteSettings(settings.getId());
+        userService.deleteByID(user.getUser_id());
+        theProfileService.getProfileByID(theProfile.getProfile_id());
+        return ResponseEntity.ok("deleted");
+
     }
+
 }

@@ -13,28 +13,37 @@ import java.util.List;
 @Table(name = "settings")
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
 public class Settings {
 
-    @Getter
-    @Setter
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
     private int id; // Primary key with auto-increment
 
-    @Getter
-    @Setter
+
     @Column(name = "PIECECOLOR")
     private int pieceColor;
 
-    @Getter
-    @Setter
+
     @Column(name = "BOARDCOLOR")
     private int boardColor;
 
-    @Getter
-    @Setter
+
     @Column(name = "USERNAME")
     private String username;
+
+    @Lob
+    @OneToOne
+    private User user;
+
+    public Settings(User user, String username){
+        this.user = user;
+        this.boardColor = 1;
+        this.pieceColor = 1;
+        this.username = username;
+    }
 }
 
