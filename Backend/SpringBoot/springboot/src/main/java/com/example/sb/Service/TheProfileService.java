@@ -82,11 +82,6 @@ public class TheProfileService {
         // Retrieve the profile using the User object
         return theProfileRepository.findByUser(user);
     }
-    public boolean deleteByUser(User user) {
-       TheProfile theProfile = getProfileByUser(user);
-       theProfileRepository.deleteById(theProfile.getProfile_id());
-        return false;
-    }
 
     public void updateProfile(TheProfile profile) {
         theProfileRepository.save(profile);
