@@ -19,6 +19,8 @@ public class TheProfileService {
     @Autowired
     private UserRepository userRepository;
 
+
+
     public List<TheProfile> getTop10Players() {
         // Fetch all players from database
         List<TheProfile> players = theProfileRepository.findAll();
@@ -56,6 +58,18 @@ public class TheProfileService {
         return theProfileRepository.findAll();
     }
 
+    public TheProfile getProfileByUser(User user) {
+        // Retrieve the user by username
+         // This should return the User object
+
+        // If user is not found, handle it appropriately
+        if (user == null) {
+            throw new ResourceNotFoundException("User not found with id: " + user.getUser_id());
+        }
+
+        // Retrieve the profile using the User object
+        return theProfileRepository.findByUser(Optional.of(user));
+    }
     public TheProfile getProfileByID(Integer userId) {
         // Retrieve the user by username
         Optional<User> user = userRepository.findById(userId); // This should return the User object
@@ -91,4 +105,5 @@ public class TheProfileService {
             }
         }
     }
+
 }
