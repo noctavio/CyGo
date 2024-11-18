@@ -229,6 +229,21 @@ public class Settings extends AppCompatActivity {
             }
         }
 
+        public void onUploadProfilePicture(View view) {
+            // Correct the context by using Settings.this
+            AlertDialog.Builder builder = new AlertDialog.Builder(Settings.this);
+            builder.setTitle("Upload Profile Picture");
+            builder.setMessage("Feature not implemented yet!");
+            builder.setPositiveButton("OK", (dialog, which) -> dialog.dismiss());
+            builder.show();
+
+            // Example: You could use an intent to open a file picker or camera
+            // Intent intent = new Intent(Intent.ACTION_PICK);
+            // intent.setType("image/*");
+            // startActivityForResult(intent, REQUEST_CODE);
+        }
+
+
         private String updateBoardStone(String type, int value) {
             String response = "";
             try {
