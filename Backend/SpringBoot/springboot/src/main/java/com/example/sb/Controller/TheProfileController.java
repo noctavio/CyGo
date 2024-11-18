@@ -63,16 +63,12 @@ public class TheProfileController {
             }
         }
 
-        if (profileJSON.getClubpicture() != null) {
-            existingUser.setClubpicture(profileJSON.getClubpicture());
+        if (profileJSON.getClub() != null) {
+            existingUser.setClub(profileJSON.getClub());
         }
 
         if (profileJSON.getProfilepicture() != null) {
             existingUser.setProfilepicture(profileJSON.getProfilepicture());
-        }
-
-        if (profileJSON.getClubname() != null) {
-            existingUser.setClubname(profileJSON.getClubname());
         }
 
         if (profileJSON.getWins() != null) {
