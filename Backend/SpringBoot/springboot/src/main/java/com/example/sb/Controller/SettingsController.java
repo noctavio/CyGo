@@ -67,7 +67,7 @@ public class SettingsController {
             return ResponseEntity.badRequest().body("User not found.");
         }
 
-
+        // Update the user's username if it's provided in the settingJSON
         if (settingJSON.getUsername() != null && !settingJSON.getUsername().equals(user.getUsername())) {
             user.setUsername(settingJSON.getUsername());
             userService.updateUser(Optional.of(user));  // Save the updated user

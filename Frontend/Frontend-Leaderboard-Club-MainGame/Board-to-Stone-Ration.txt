@@ -1,4 +1,0 @@
-Stone:
-130x130 pixels // 3.44x3.44 cm
-
-Board: 1200x1200 pixels // 31.75x31.75cm
