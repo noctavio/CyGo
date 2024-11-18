@@ -83,7 +83,8 @@ public class UserService {
         if (user.isPresent()) {
             theProfileService.updateProfileTable();
             userRepository.save(user.get());  // Save the User if present
-        } else {
+        }
+        else {
             throw new IllegalArgumentException("User must be present to update."); // Handle the absence of User
         }
     }

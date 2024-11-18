@@ -29,11 +29,11 @@ public class SettingsService {
         Optional<Settings> setting = settingRepository.findById(id);
         return setting.orElseThrow(() -> new ResourceNotFoundException("Setting not found with ID: " + id));
     }
-    @Transactional
-    public Settings getSettingsByUsername(String username) {
-        Optional<Settings> setting = settingRepository.findByUsername(username);
-        return setting.orElseThrow(() -> new ResourceNotFoundException("Setting not found with username: " + username));
-    }
+    //@Transactional
+    //public Settings getSettingsByUsername(String username) {
+    //    Optional<Settings> setting = settingRepository.findByUsername(username);
+    //    return setting.orElseThrow(() -> new ResourceNotFoundException("Setting not found with username: " + username));
+    //}
 
     public void createSettings(Settings setting) {
         settingRepository.save(setting);
@@ -60,9 +60,7 @@ public class SettingsService {
 
             if (settings == null) {
                 // If no profile exists, create a new profile
-                String username = user.getUsername();
-                Settings newSettings = new Settings(user, username);
-                newSettings.setUsername(username);
+                Settings newSettings = new Settings(user);
                 settingRepository.save(newSettings);
                 // Save new profile
             }

@@ -11,32 +11,26 @@ import lombok.*;
 @NoArgsConstructor
 public class Tutorial {
 
-    @jakarta.persistence.Id
-    @Column(name = "move_id")
+    @Id()
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int moveId; // Primary key
-
-    @Column(name = "game_id", nullable = false)
-    private int gameId;
-
-    @Column(name = "player_color", nullable = false)
-    private int playerColor; // 0 for Black, 1 for White
-
-    @Column(name = "x_position", nullable = false)
-    private int xPosition;
-
-    @Column(name = "y_position", nullable = false)
-    private int yPosition;
-
-    @Column(name = "move_number", nullable = false)
-    private int moveNumber;
+    private Integer move_id; // Primary key
+    @Column(nullable = false)
+    private Integer game_id;
+    @Column(nullable = false)
+    private Integer player_color; // 0 for Black, 1 for White
+    @Column(nullable = false)
+    private Integer x_position;
+    @Column(nullable = false)
+    private Integer y_position;
+    @Column(nullable = false)
+    private Integer move_number;
 
     public Tutorial(Integer gameId, Integer playerColor, Integer xPosition, Integer yPosition, Integer moveNumber) {
-        this.gameId = gameId;
-        this.playerColor = playerColor;
-        this.xPosition = xPosition;
-        this.yPosition = yPosition;
-        this.moveNumber = moveNumber;
+        this.game_id = gameId;
+        this.player_color = playerColor;
+        this.x_position = xPosition;
+        this.y_position = yPosition;
+        this.move_number = moveNumber;
     }
     // Log entity state before saving
     @PrePersist
@@ -46,12 +40,12 @@ public class Tutorial {
     @Override
     public String toString() {
         return "Tutorial{" +
-                "moveId=" + moveId +
-                ", gameId=" + gameId +
-                ", moveNumber=" + moveNumber +
-                ", playerColor=" + playerColor +
-                ", xPosition=" + xPosition +
-                ", yPosition=" + yPosition +
+                "moveId=" + move_id +
+                ", gameId=" + game_id +
+                ", moveNumber=" + move_number +
+                ", playerColor=" + player_color +
+                ", xPosition=" + x_position +
+                ", yPosition=" + y_position +
                 '}';
     }
 }

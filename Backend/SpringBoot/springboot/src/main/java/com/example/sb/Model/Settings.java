@@ -17,33 +17,20 @@ import java.util.List;
 @Setter
 public class Settings {
 
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ID")
-    private int id; // Primary key with auto-increment
+    private Integer settings_id; // Primary key
+    private Integer piece_color;
+    private Integer board_color;
 
-
-    @Column(name = "PIECECOLOR")
-    private int pieceColor;
-
-
-    @Column(name = "BOARDCOLOR")
-    private int boardColor;
-
-
-    @Column(name = "USERNAME")
-    private String username;
-
-    @Lob
-    @OneToOne
-    private User user;
-
-    public Settings(User user, String username){
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinColumn(name = "user_id", referencedColumnName = "user_id")
+    private User user; // When you set the user for some object(such as Settings), you don't have to set it manually
+                       // this user reference already has a username which you can retrieve using user.getUsername();
+    public Settings(User user){
         this.user = user;
-        this.boardColor = 1;
-        this.pieceColor = 1;
-        this.username = username;
+        this.board_color = 1;
+        this.piece_color = 1;
     }
 }
 

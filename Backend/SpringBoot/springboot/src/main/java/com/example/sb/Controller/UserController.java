@@ -49,8 +49,7 @@ public class UserController {
     }
 
     @PutMapping("/update/{userId}")
-    public ResponseEntity<String> updateUser(@PathVariable Integer userId, @RequestBody User user) {
-        // TODO change this so you can change user/password separately without the other going null
+    public ResponseEntity<String> updateUser(@PathVariable Integer userId, @RequestBody User userJSON) {
         Optional<User> existingUserOptional = userService.getByUserID(userId);
 
         // Check if the user exists
@@ -60,12 +59,12 @@ public class UserController {
 
         User existingUser = existingUserOptional.get(); // Extract the User from Optional
 
-        if (user.getUsername() != null) {
-            existingUser.setUsername(user.getUsername());
+        if (userJSON.getUsername() != null) {
+            existingUser.setUsername(userJSON.getUsername());
         }
 
-        if (user.getPassword() != null) {
-            String newPassword = user.getPassword();
+        if (userJSON.getPassword() != null) {
+            String newPassword = userJSON.getPassword();
             //updates pass if it changed
             if (!newPassword.isEmpty()) {
                 PasswordEncoder encoder = new BCryptPasswordEncoder();
