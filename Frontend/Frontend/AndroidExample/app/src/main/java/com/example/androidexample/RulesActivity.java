@@ -18,6 +18,14 @@ import com.android.volley.toolbox.Volley;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class represents the activity that is responsible for managing the game board, 
+ * player turns,and hints in a Go game.
+ * It handles user interactions with the board, and provides strategic hints to players.
+ * It communicates with a backend server to validate and update the game state.
+ *
+ * @author Eden Basnet
+ */
 public class RulesActivity extends AppCompatActivity {
 
     private static final int BOARD_SIZE = 9;
@@ -32,6 +40,11 @@ public class RulesActivity extends AppCompatActivity {
     private static final int WHITE = 2;
     private int[][] boardState = new int[BOARD_SIZE][BOARD_SIZE];
 
+    /**
+     * Called when the activity is first created. Sets up the board and initializes components.
+     *
+     * @param savedInstanceState The saved instance state from a previous session, if any.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,10 +64,15 @@ public class RulesActivity extends AppCompatActivity {
         hintsButton.setOnClickListener(v -> showHint());
     }
 
+    /**
+     * Sets up the board by dynamically creating ImageButton views for each cell.
+     * Each button corresponds to a board position and allows players to place stones.
+     */
     private void setupBoard() {
         int boardWidth = boardLayout.getWidth();
         int stoneSize = boardWidth / BOARD_SIZE;
 
+        // Create buttons for each board cell
         for (int row = 0; row < BOARD_SIZE; row++) {
             for (int col = 0; col < BOARD_SIZE; col++) {
                 ImageButton stoneButton = new ImageButton(this);
@@ -67,9 +85,9 @@ public class RulesActivity extends AppCompatActivity {
                 params.setMargins(1, 1, 1, 1);
 
                 stoneButton.setLayoutParams(params);
-
                 stoneButton.setBackgroundColor(android.graphics.Color.TRANSPARENT);
 
+                // Set up the on-click listener for placing a stone
                 final int x = row;
                 final int y = col;
                 stoneButton.setOnClickListener(v -> placeStone(x, y, stoneButton));
@@ -78,6 +96,13 @@ public class RulesActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Handles placing a stone on the board. Sends the move to the backend server for validation.
+     *
+     * @param x            The x-coordinate on the board.
+     * @param y            The y-coordinate on the board.
+     * @param stoneButton  The button representing the stone to be placed.
+     */
     private void placeStone(int x, int y, ImageButton stoneButton) {
         String url = serverUrl + "/" + userId + "/place/" + x + "/" + y;
 
@@ -95,6 +120,13 @@ public class RulesActivity extends AppCompatActivity {
         requestQueue.add(postRequest);
     }
 
+    /**
+     * Updates the board with a placed stone. Tracks the current turn and the last placed stone.
+     *
+     * @param x            The x-coordinate of the placed stone.
+     * @param y            The y-coordinate of the placed stone.
+     * @param stoneButton  The button representing the placed stone.
+     */
     private void updateBoardWithStone(int x, int y, ImageButton stoneButton) {
         // Reset the previous stone to a regular stone if applicable
         if (lastPlacedStone != null) {
@@ -112,6 +144,9 @@ public class RulesActivity extends AppCompatActivity {
         isBlackTurn = !isBlackTurn;
     }
 
+    /**
+     * Displays a hint dialog to the player with strategic advice based on the current game state.
+     */
     private void showHint() {
         String hintMessage = generateHintMessage();
 
@@ -123,6 +158,11 @@ public class RulesActivity extends AppCompatActivity {
                 .show();
     }
 
+    /**
+     * Generates a hint message based on the current board state, offering strategic advice.
+     *
+     * @return A string containing the hint message.
+     */
     private String generateHintMessage() {
         List<String> hints = new ArrayList<>();
 
@@ -151,6 +191,11 @@ public class RulesActivity extends AppCompatActivity {
         return String.join("\n", hints);
     }
 
+    /**
+     * Determines whether an offensive hint should be given, based on the presence of adjacent black stones.
+     *
+     * @return True if an offensive hint should be given, false otherwise.
+     */
     private boolean shouldGiveOffensiveHint() {
         for (int row = 0; row < BOARD_SIZE; row++) {
             for (int col = 0; col < BOARD_SIZE; col++) {
@@ -162,6 +207,13 @@ public class RulesActivity extends AppCompatActivity {
         return false;
     }
 
+    /**
+     * Checks if a given position has an adjacent black stone.
+     *
+     * @param row The row of the current position.
+     * @param col The column of the current position.
+     * @return True if there is an adjacent black stone, false otherwise.
+     */
     private boolean hasAdjacentBlackStone(int row, int col) {
         int[][] directions = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
         for (int[] dir : directions) {
@@ -174,10 +226,22 @@ public class RulesActivity extends AppCompatActivity {
         return false;
     }
 
+    /**
+     * Checks whether a given position is within the bounds of the board.
+     *
+     * @param row The row of the position.
+     * @param col The column of the position.
+     * @return True if the position is within bounds, false otherwise.
+     */
     private boolean isInBounds(int row, int col) {
         return row >= 0 && row < BOARD_SIZE && col >= 0 && col < BOARD_SIZE;
     }
 
+    /**
+     * Determines whether a defensive hint should be given, based on the presence of empty adjacent cells near black stones.
+     *
+     * @return True if a defensive hint should be given, false otherwise.
+     */
     private boolean shouldGiveDefensiveHint() {
         for (int row = 0; row < BOARD_SIZE; row++) {
             for (int col = 0; col < BOARD_SIZE; col++) {
@@ -189,6 +253,13 @@ public class RulesActivity extends AppCompatActivity {
         return false;
     }
 
+    /**
+     * Checks if a given position has an empty adjacent cell.
+     *
+     * @param row The row of the current position.
+     * @param col The column of the current position.
+     * @return True if there is an empty adjacent cell, false otherwise.
+     */
     private boolean hasEmptyAdjacentCell(int row, int col) {
         int[][] directions = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
         for (int[] dir : directions) {
@@ -201,6 +272,11 @@ public class RulesActivity extends AppCompatActivity {
         return false;
     }
 
+    /**
+     * Determines whether a territory hint should be given to the player based on the presence of empty cells near the edges.
+     *
+     *  @return True if there are empty cells adjacent to the edges of the board and a black stone is nearby, false otherwise.
+     */
     private boolean shouldGiveTerritoryHint() {
         for (int i = 0; i < BOARD_SIZE; i++) {
             // Check if there are empty cells near the edges (top, bottom, left, right)
@@ -214,6 +290,12 @@ public class RulesActivity extends AppCompatActivity {
         return false;
     }
 
+    /**
+     * Determines whether a capture hint should be given to the player. A capture hint is shown when an opponent's stone
+     * has only one liberty left (an adjacent empty spot) and can be captured on the next move.
+     *
+     * @return True if there is a white stone with only one liberty remaining, false otherwise.
+     */
     private boolean shouldGiveCaptureHint() {
         for (int row = 0; row < BOARD_SIZE; row++) {
             for (int col = 0; col < BOARD_SIZE; col++) {
@@ -225,6 +307,14 @@ public class RulesActivity extends AppCompatActivity {
         return false;
     }
 
+    /**
+     * Checks whether a given position has only one liberty left. A liberty is defined as an adjacent empty space.
+     * The method checks the four adjacent directions (up, down, left, right) to count how many liberties the stone has.
+     *
+     * @param row The row of the stone to check.
+     * @param col The column of the stone to check.
+     * @return True if the stone has exactly one liberty, false otherwise.
+     */
     private boolean hasSingleLiberty(int row, int col) {
         int[][] directions = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
         int libertyCount = 0;
@@ -238,6 +328,13 @@ public class RulesActivity extends AppCompatActivity {
         return libertyCount == 1; // Only one liberty left
     }
 
+    /**
+     * Determines whether the player should be warned about over-concentration of black stones. Over-concentration occurs
+     * when there is a cluster of black stones occupying a 2x2 grid. The player is advised to avoid concentrating too many
+     * stones in a small area.
+     *
+     * @return True if there are more than one cluster of black stones in a 2x2 grid, false otherwise.
+     */
     private boolean shouldAvoidOverConcentrationHint() {
         int blackStoneClusters = 0;
 
