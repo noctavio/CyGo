@@ -42,3 +42,4 @@ public class SettingsService {
         }
         return ResponseEntity.ok("User does not exist...");
     }
+}

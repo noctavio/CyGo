@@ -7,6 +7,5 @@ import java.util.Optional;
 
 public interface ClubRepository extends JpaRepository<Club, Integer> {
     Optional<Club> findById(Integer id);
-
     void deleteById(Integer id);
 }
