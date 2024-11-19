@@ -9,6 +9,13 @@ import com.example.sb.Repository.UserRepository;
 import com.example.sb.Service.SettingsService;
 import com.example.sb.Service.TheProfileService;
 import com.example.sb.Service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,31 +29,59 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/settings") // Base URL for the controller
+@RequestMapping("/settings")
+@Tag(name = "SettingsController", description = "Controller for managing user settings")
 public class SettingsController {
+
     @Autowired
     private UserService userService;
+
     @Autowired
     private SettingsService settingsService;
+
     @Autowired
     private TheProfileService theProfileService;
+
     @Autowired
     private TheProfileRepository theProfileRepository;
+
     @Autowired
     private UserRepository userRepository;
 
+    @Operation(summary = "Get all settings", description = "Fetch all user settings from the database.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved all settings",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = Settings.class)))
+    })
     @GetMapping
     public List<Settings> getAllSettings() {
         return settingsService.getAllSettings();
     }
 
+    @Operation(summary = "Get setting by ID", description = "Fetch a specific setting by its ID.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved the setting",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = Settings.class))),
+            @ApiResponse(responseCode = "404", description = "Setting not found")
+    })
     @GetMapping("/{id}")
     public Settings getSettingById(@PathVariable Integer id) {
         return settingsService.getSettingsById(id);
     }
 
+    @Operation(summary = "Update user settings", description = "Update user settings, including username, password, profile picture, and other fields.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully updated the setting",
+                    content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "400", description = "Invalid input or user not found")
+    })
     @PutMapping("/update/{userId}")
-    public ResponseEntity<String> updateSetting(@PathVariable Integer userId, @RequestBody Settings settingJSON) {
+    public ResponseEntity<String> updateSetting(
+            @PathVariable Integer userId,
+            @RequestBody(description = "Updated settings data", required = true,
+                    content = @Content(schema = @Schema(implementation = Settings.class)))
+            Settings settingJSON) {
+
         Optional<User> userOptional = userService.getByUserID(userId);
 
         if (userOptional.isPresent()) {
@@ -61,7 +96,6 @@ public class SettingsController {
 
             if (settingJSON.getProfile().getUser().getPassword() != null) {
                 String newPassword = settingJSON.getProfile().getUser().getPassword();
-                // updates pass if it changed and is not an empty string!
                 if (!newPassword.isEmpty()) {
                     PasswordEncoder encoder = new BCryptPasswordEncoder();
                     existingUser.setPassword(encoder.encode(newPassword));
@@ -72,12 +106,11 @@ public class SettingsController {
                 existingProfile.setProfilePicture(settingJSON.getProfile().getProfilePicture());
             }
 
-            // Update other fields if provided in the settings
-            if (settingJSON.getPieceColor() != 0) { // Assuming 0 is not a valid PIECECOLOR
+            if (settingJSON.getPieceColor() != 0) {
                 existingSetting.setPieceColor(settingJSON.getPieceColor());
             }
 
-            if (settingJSON.getBoardColor() != 0) { // Assuming 0 is not a valid BOARDCOLOR
+            if (settingJSON.getBoardColor() != 0) {
                 existingSetting.setBoardColor(settingJSON.getBoardColor());
             }
 
