@@ -45,11 +45,11 @@ public class TutorialService {
         Optional<Tutorial> existingTutorial = tutorialRepository.findById(id);
         if (existingTutorial.isPresent()) {
             Tutorial updatedTutorial = existingTutorial.get();
-            updatedTutorial.setMoveId(tutorial.getMoveId());
+            updatedTutorial.setMove_id(tutorial.getMove_id());
             updatedTutorial.setGameId(tutorial.getGameId());
             updatedTutorial.setPlayerColor(tutorial.getPlayerColor());
-            updatedTutorial.setXPosition(tutorial.getXPosition());
-            updatedTutorial.setYPosition(tutorial.getYPosition());
+            updatedTutorial.setX_position(tutorial.getX_position());
+            updatedTutorial.setY_position(tutorial.getY_position());
             updatedTutorial.setMoveNumber(tutorial.getMoveNumber());
             tutorialRepository.save(updatedTutorial);
         } else {

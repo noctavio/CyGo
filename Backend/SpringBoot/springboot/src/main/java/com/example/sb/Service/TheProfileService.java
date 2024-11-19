@@ -1,13 +1,18 @@
 package com.example.sb.Service;
 
+import com.example.sb.Constants.RankConstants;
+import com.example.sb.Model.Settings;
 import com.example.sb.Model.TheProfile;
 import com.example.sb.Model.User;
+import com.example.sb.Repository.SettingsRepository;
 import com.example.sb.Repository.TheProfileRepository;
 import com.example.sb.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -18,8 +23,8 @@ public class TheProfileService {
     private TheProfileRepository theProfileRepository;
     @Autowired
     private UserRepository userRepository;
-
-
+    @Autowired
+    private SettingsRepository settingsRepository;
 
     public List<TheProfile> getTop10Players() {
         // Fetch all players from database
@@ -59,17 +64,12 @@ public class TheProfileService {
     }
 
     public TheProfile getProfileByUser(User user) {
-        // Retrieve the user by username
-         // This should return the User object
-
-        // If user is not found, handle it appropriately
         if (user == null) {
-            throw new ResourceNotFoundException("User not found with id: " + user.getUser_id());
+            throw new ResourceNotFoundException("User not found...");
         }
-
-        // Retrieve the profile using the User object
         return theProfileRepository.findByUser(Optional.of(user));
     }
+
     public TheProfile getProfileByID(Integer userId) {
         // Retrieve the user by username
         Optional<User> user = userRepository.findById(userId); // This should return the User object
@@ -83,10 +83,6 @@ public class TheProfileService {
         return theProfileRepository.findByUser(user);
     }
 
-    public void updateProfile(TheProfile profile) {
-        theProfileRepository.save(profile);
-    }
-
     public void updateProfileTable() {
         List<User> users = userRepository.findAll(); // Fetch all users
 
@@ -97,7 +93,11 @@ public class TheProfileService {
             if (existingProfile == null) {
                 // If no profile exists, create a new profile
                 TheProfile newProfile = new TheProfile(user);
-                theProfileRepository.save(newProfile);  // Save new profile
+                Settings newSettings = new Settings(newProfile);
+
+                newProfile.setSettings(newSettings);
+                theProfileRepository.save(newProfile);
+                settingsRepository.save(newSettings);
             }
             else {
                 existingProfile.setUser(user);
@@ -105,5 +105,4 @@ public class TheProfileService {
             }
         }
     }
-
 }

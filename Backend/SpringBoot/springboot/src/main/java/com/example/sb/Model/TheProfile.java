@@ -1,5 +1,6 @@
 package com.example.sb.Model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,13 +18,20 @@ public class TheProfile {
     @GeneratedValue()
     private Integer profile_id;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne()
     @JoinColumn(name = "user_id", referencedColumnName = "user_id")
     private User user;
 
-    private String profilepicture;
-    private String clubname;
-    private String clubpicture;
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinColumn(name = "club_id", referencedColumnName = "club_id")
+    private Club club;
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    @JoinColumn(name = "settings_id", referencedColumnName = "settings_id")
+    private Settings settings;
+
+    private String profilePicture;
     private Integer wins;
     private Integer loss;
     private Integer games;
@@ -31,9 +39,7 @@ public class TheProfile {
 
     public TheProfile(User user) {
         this.user = user;
-        this.profilepicture = "-/-";
-        this.clubname = "-/-";
-        this.clubpicture = "-/-";
+        this.profilePicture = "-/-";
         this.rank = "30 kyu";
         this.wins = 0;
         this.loss = 0;
@@ -55,11 +61,11 @@ public class TheProfile {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TheProfile profile = (TheProfile) o;
-        return Objects.equals(profile_id, profile.profile_id) && Objects.equals(user, profile.user) && Objects.equals(profilepicture, profile.profilepicture) && Objects.equals(clubname, profile.clubname) && Objects.equals(clubpicture, profile.clubpicture) && Objects.equals(wins, profile.wins) && Objects.equals(loss, profile.loss) && Objects.equals(games, profile.games) && Objects.equals(rank, profile.rank);
+        return Objects.equals(profile_id, profile.profile_id) && Objects.equals(user, profile.user) && Objects.equals(profilePicture, profile.profilePicture) && Objects.equals(wins, profile.wins) && Objects.equals(loss, profile.loss) && Objects.equals(games, profile.games) && Objects.equals(rank, profile.rank);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(profile_id, user, profilepicture, clubname, clubpicture, wins, loss, games, rank);
+        return Objects.hash(profile_id, user, profilePicture, wins, loss, games, rank);
     }
 }

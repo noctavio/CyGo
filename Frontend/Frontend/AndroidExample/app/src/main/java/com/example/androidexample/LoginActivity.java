@@ -17,6 +17,14 @@ import com.android.volley.toolbox.Volley;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+/**
+ * This class is the activity for users to login to the app
+ * It provides functionality for user login, registration, update, 
+ * and deletion using a Spring Boot backend server.
+ *
+ * @author Eden Basnet
+ */
+
 public class LoginActivity extends AppCompatActivity {
 
     private EditText usernameEditText;  // Define username EditText variable
@@ -29,6 +37,12 @@ public class LoginActivity extends AppCompatActivity {
     private RequestQueue requestQueue;  // Volley request queue
     private int userId;
 
+    /**
+     * Called when the activity is starting. Initializes UI components
+     * and sets up click listeners for user actions.
+     *
+     * @param savedInstanceState The state of the activity when it was previously paused.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,7 +68,9 @@ public class LoginActivity extends AppCompatActivity {
         deleteButton.setOnClickListener(v -> showDeleteDialog());
     }
 
-    // AlertDialog for registering a new user
+    /**
+     * Displays an AlertDialog for registering a new user.
+     */
     private void showRegisterDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Register User");
@@ -82,7 +98,9 @@ public class LoginActivity extends AppCompatActivity {
         builder.show();
     }
 
-    // AlertDialog for updating user details
+    /**
+     * Displays an AlertDialog for updating user details.
+     */
     private void showUpdateDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Update User");
@@ -123,7 +141,9 @@ public class LoginActivity extends AppCompatActivity {
         builder.show();
     }
 
-    // AlertDialog for deleting a user
+    /**
+     * Displays an AlertDialog for deleting a user.
+     */
     private void showDeleteDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Delete User");
@@ -148,6 +168,12 @@ public class LoginActivity extends AppCompatActivity {
         builder.show();
     }
 
+    /**
+     * Registers a new user by sending their details to the server.
+     *
+     * @param username The username to register.
+     * @param password The password to register.
+     */
     private void registerUser(String username, String password) {
         String url = "http://10.90.72.226:8080/users/register"; // Register URL
 
@@ -172,6 +198,12 @@ public class LoginActivity extends AppCompatActivity {
         requestQueue.add(jsonObjectRequest);
     }
 
+    /**
+     * Logs in a user by validating their credentials with the server.
+     *
+     * @param username The username to log in with.
+     * @param password The password to log in with.
+     */
     private void loginUser(String username, String password) {
         // Trim whitespace from inputs
         username = username.trim();
@@ -199,6 +231,13 @@ public class LoginActivity extends AppCompatActivity {
         requestQueue.add(stringRequest);
     }
 
+    /**
+     * Updates the user's details on the server.
+     *
+     * @param userId      The ID of the user to update.
+     * @param newUsername The new username.
+     * @param newPassword The new password.
+     */
     private void updateUser(int userId, String newUsername, String newPassword) {
         String updateUrl = "http://10.90.72.226:8080/users/update/" + userId; // Use stored userId
 
@@ -231,6 +270,11 @@ public class LoginActivity extends AppCompatActivity {
         requestQueue.add(updateRequest);
     }
 
+    /**
+     * Deletes a user from the server.
+     *
+     * @param userId The ID of the user to delete.
+     */
     private void deleteUser(int userId) {
 
         String deleteUrl = "http://10.90.72.226:8080/users/" + userId;

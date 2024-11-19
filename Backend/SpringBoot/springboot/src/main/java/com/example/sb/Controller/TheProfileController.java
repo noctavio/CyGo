@@ -1,14 +1,16 @@
 package com.example.sb.Controller;
 
-import com.example.sb.Constants.RankConstants;
 import com.example.sb.Model.TheProfile;
 import com.example.sb.Service.TheProfileService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
 import java.util.List;
+
 @RestController
 public class TheProfileController {
 
@@ -19,74 +21,45 @@ public class TheProfileController {
      * Returns a list of the top 10 players sorted by rank (highest to lowest)
      * @return list
      */
-
+    @Operation(summary = "Refresh player profiles", description = "Refreshes the profiles table by transferring player usernames and IDs")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Player usernames and IDs have been transferred to the profiles table"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @PostMapping("/profiles/refresh")
     public ResponseEntity<String> createProfilesFromUsers() {
         TheProfileService.updateProfileTable();
-        return ResponseEntity.ok("Player username's and ID's have been transferred to the profiles table.");
+        return ResponseEntity.ok("Player usernames and IDs have been transferred to the profiles table.");
     }
 
+    @Operation(summary = "Get top 10 players", description = "Returns a list of the top 10 players sorted by rank (highest to lowest)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved leaderboard"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @GetMapping("/leaderboard")
     public List<TheProfile> getLeaderboard() {
         return TheProfileService.getTop10Players();
     }
 
+    @Operation(summary = "Get all profiles", description = "Returns a list of all player profiles")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved profiles"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @GetMapping("/profiles")
     public List<TheProfile> getAllProfiles() {
         return TheProfileService.getAllProfiles();
     }
 
+    @Operation(summary = "Get a profile by user ID", description = "Returns the profile of a player by their user ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved profile"),
+            @ApiResponse(responseCode = "404", description = "Profile not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @GetMapping(path = "/profiles/{userId}")
     public TheProfile getProfileById(@PathVariable Integer userId) {
         return TheProfileService.getProfileByID(userId);
     }
-
-    @PutMapping("/profiles/update/{userId}")
-    public ResponseEntity<String> updateProfile(@PathVariable Integer userId, @RequestBody TheProfile profileJSON) {
-        TheProfile existingUser = TheProfileService.getProfileByID(userId);
-
-        if (existingUser == null) {
-            return ResponseEntity.badRequest().body("Profile was not found");
-        }
-
-        if ((profileJSON.getWins() != null && profileJSON.getWins() < 0) || (profileJSON.getLoss() != null && profileJSON.getLoss() < 0)) {
-
-            return ResponseEntity.badRequest().body("Wins and losses must be non-negative.");
-        }
-
-        if (profileJSON.getRank() != null) {
-            if (Arrays.asList(RankConstants.RANKS).contains(profileJSON.getRank())) {
-                existingUser.setRank(profileJSON.getRank());
-            }
-            else {
-                return ResponseEntity.badRequest().body("Invalid rank input... please review Go ranks -> (30 kyu - 1 kyu) and (1 dan - 9 dan)");
-            }
-        }
-
-        if (profileJSON.getClubpicture() != null) {
-            existingUser.setClubpicture(profileJSON.getClubpicture());
-        }
-
-        if (profileJSON.getProfilepicture() != null) {
-            existingUser.setProfilepicture(profileJSON.getProfilepicture());
-        }
-
-        if (profileJSON.getClubname() != null) {
-            existingUser.setClubname(profileJSON.getClubname());
-        }
-
-        if (profileJSON.getWins() != null) {
-            existingUser.setWins(profileJSON.getWins());
-        }
-
-        if (profileJSON.getLoss() != null) {
-            existingUser.setLoss(profileJSON.getLoss());
-        }
-
-        existingUser.setGamesplayed();
-        TheProfileService.updateProfile(existingUser);
-
-        return ResponseEntity.ok("The user has been updated accordingly.");
-    }
 }
-

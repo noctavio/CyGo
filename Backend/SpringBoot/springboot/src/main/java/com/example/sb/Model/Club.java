@@ -10,31 +10,23 @@ import java.util.List;
 @Table(name = "clubs")
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
 public class Club {
 
-    @Getter
-    @Setter
-    @jakarta.persistence.Id
-    @Column(name = "ID")
+    @Id()
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id; // Primary key
+    private int club_id; // Primary key
 
-    @Getter
-    @Setter
     @Column(name = "club_name")
     private String clubName;
 
-    @Getter
-    @Setter
     @Column(name = "club_picture")
     private String clubPicture;
 
     @ElementCollection
-    @Getter
-    @Setter
     @CollectionTable(name = "club_members", joinColumns = @JoinColumn(name = "club_id"))
     @Column(name = "member_name")
     private List<String> members = new ArrayList<>(); // List of member names
 
 }
-

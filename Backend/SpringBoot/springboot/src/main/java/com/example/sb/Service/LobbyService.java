@@ -46,7 +46,7 @@ public class LobbyService {
 
         // Initializes lobby with host
         Lobby lobby = new Lobby(profile.getUsername());
-        Team team1 = new Team(lobby, profile.getClubname(), true);
+        Team team1 = new Team(lobby, profile.getClub().getClubName(), true);
         lobby.setTeam1(team1);
 
         Team emptyTeam2 = new Team(lobby,"-/-", false);

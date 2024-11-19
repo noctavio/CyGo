@@ -1,49 +1,34 @@
 package com.example.sb.Model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Entity
 @Table(name = "settings")
 @AllArgsConstructor
-@NoArgsConstructor
 @Getter
 @Setter
+@NoArgsConstructor
 public class Settings {
-
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ID")
-    private int id; // Primary key with auto-increment
+    private Integer settings_id; // Primary key
+    private Integer pieceColor;
+    private Integer boardColor;
 
+    @OneToOne()
+    @JoinColumn(name = "profile_id", referencedColumnName = "profile_id")
+    private TheProfile profile;
 
-    @Column(name = "PIECECOLOR")
-    private int pieceColor;
-
-
-    @Column(name = "BOARDCOLOR")
-    private int boardColor;
-
-
-    @Column(name = "USERNAME")
-    private String username;
-
-    @Lob
-    @OneToOne
-    private User user;
-
-    public Settings(User user, String username){
-        this.user = user;
+    public Settings(TheProfile profile) {
+        this.profile = profile;
         this.boardColor = 1;
         this.pieceColor = 1;
-        this.username = username;
     }
 }
 

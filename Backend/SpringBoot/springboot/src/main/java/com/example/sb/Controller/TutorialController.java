@@ -59,7 +59,8 @@ public class TutorialController {
     public ResponseEntity<String> deleteTutorial(@PathVariable Integer id) {
         if (tutorialService.deleteTutorial(id)) {
             return ResponseEntity.ok("Tutorial deleted successfully.");
-        } else {
+        }
+        else {
             return ResponseEntity.badRequest().body("Tutorial not found.");
         }
     }
@@ -74,7 +75,8 @@ public class TutorialController {
         // Check if the provided tutorial matches the given gameId and moveNumber
         if (inputTutorial.getGameId() == gameId && inputTutorial.getMoveNumber() == moveNumber) {
             return ResponseEntity.ok("Success: The tutorial matches the provided gameId and moveNumber.");
-        } else {
+        }
+        else {
             return ResponseEntity.badRequest().body("Failure: The tutorial does not match the provided gameId and moveNumber.");
         }
     }
