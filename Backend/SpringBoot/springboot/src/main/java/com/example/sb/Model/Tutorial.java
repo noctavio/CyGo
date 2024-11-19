@@ -15,22 +15,22 @@ public class Tutorial {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer move_id; // Primary key
     @Column(nullable = false)
-    private Integer game_id;
+    private Integer gameId;
     @Column(nullable = false)
-    private Integer player_color; // 0 for Black, 1 for White
+    private Integer playerColor; // 0 for Black, 1 for White
     @Column(nullable = false)
     private Integer x_position;
     @Column(nullable = false)
     private Integer y_position;
     @Column(nullable = false)
-    private Integer move_number;
+    private Integer moveNumber;
 
     public Tutorial(Integer gameId, Integer playerColor, Integer xPosition, Integer yPosition, Integer moveNumber) {
-        this.game_id = gameId;
-        this.player_color = playerColor;
+        this.gameId = gameId;
+        this.playerColor = playerColor;
         this.x_position = xPosition;
         this.y_position = yPosition;
-        this.move_number = moveNumber;
+        this.moveNumber = moveNumber;
     }
     // Log entity state before saving
     @PrePersist
@@ -41,9 +41,9 @@ public class Tutorial {
     public String toString() {
         return "Tutorial{" +
                 "moveId=" + move_id +
-                ", gameId=" + game_id +
-                ", moveNumber=" + move_number +
-                ", playerColor=" + player_color +
+                ", gameId=" + gameId +
+                ", moveNumber=" + moveNumber +
+                ", playerColor=" + playerColor +
                 ", xPosition=" + x_position +
                 ", yPosition=" + y_position +
                 '}';

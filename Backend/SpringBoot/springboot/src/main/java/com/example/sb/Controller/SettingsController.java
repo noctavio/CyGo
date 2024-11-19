@@ -30,6 +30,10 @@ public class SettingsController {
     private SettingsService settingsService;
     @Autowired
     private TheProfileService theProfileService;
+    @Autowired
+    private TheProfileRepository theProfileRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     @GetMapping
     public List<Settings> getAllSettings() {
@@ -41,65 +45,47 @@ public class SettingsController {
         return settingsService.getSettingsById(id);
     }
 
-    @PostMapping("/refresh")
-    public ResponseEntity<String> createProfilesFromUsers() {
-            settingsService.updateSettingsfromuser();
-            return ResponseEntity.ok("Player usernames and IDs have been transferred to the profiles table.");
+    @PutMapping("/update/{userId}")
+    public ResponseEntity<String> updateSetting(@PathVariable Integer userId, @RequestBody Settings settingJSON) {
+        Optional<User> userOptional = userService.getByUserID(userId);
 
-    }
+        if (userOptional.isPresent()) {
+            User existingUser = userOptional.get();
+            TheProfile existingProfile = theProfileService.getProfileByUser(existingUser);
 
-    @PutMapping("/update/{username}")
-    public ResponseEntity<String> updateSetting(@PathVariable Integer settingsId, @RequestBody Settings settingJSON) {
-        // Fetch the existing setting by username
-        Settings existingSetting = settingsService.getSettingsById(settingsId);
+            Settings existingSetting = existingProfile.getSettings();
 
-        // If the setting doesn't exist, return an error
-        if (existingSetting == null) {
-            return ResponseEntity.badRequest().body("Setting not found for the specified username.");
-        }
-
-        User existingUser = userService.getByUsername(username);
-
-        if (existingUser == null) {
-            return ResponseEntity.badRequest().body("User not found.");
-        }
-
-        if (settingJSON.getUser().getUsername() != null) {
-            existingUser.setUsername(settingJSON.getUser().getUsername());
-        }
-
-        if (settingJSON.getUser().getPassword() != null) {
-            String newPassword = settingJSON.getUser().getPassword();
-            //updates pass if it changed
-            if (!newPassword.isEmpty()) {
-                PasswordEncoder encoder = new BCryptPasswordEncoder();
-                existingUser.setPassword(encoder.encode(newPassword));
+            if (settingJSON.getProfile().getUser().getUsername() != null) {
+                existingUser.setUsername(settingJSON.getProfile().getUser().getUsername());
             }
+
+            if (settingJSON.getProfile().getUser().getPassword() != null) {
+                String newPassword = settingJSON.getProfile().getUser().getPassword();
+                // updates pass if it changed and is not an empty string!
+                if (!newPassword.isEmpty()) {
+                    PasswordEncoder encoder = new BCryptPasswordEncoder();
+                    existingUser.setPassword(encoder.encode(newPassword));
+                }
+            }
+
+            if (settingJSON.getProfile().getProfilePicture() != null) {
+                existingProfile.setProfilePicture(settingJSON.getProfile().getProfilePicture());
+            }
+
+            // Update other fields if provided in the settings
+            if (settingJSON.getPieceColor() != 0) { // Assuming 0 is not a valid PIECECOLOR
+                existingSetting.setPieceColor(settingJSON.getPieceColor());
+            }
+
+            if (settingJSON.getBoardColor() != 0) { // Assuming 0 is not a valid BOARDCOLOR
+                existingSetting.setBoardColor(settingJSON.getBoardColor());
+            }
+
+            settingsService.updateSettings(existingSetting);
+            theProfileRepository.save(existingProfile);
+            userRepository.save(existingUser);
+            return ResponseEntity.ok("The setting has been updated accordingly.");
         }
-
-        // Update other fields if provided in the settings
-        if (settingJSON.getPiece_color() != 0) { // Assuming 0 is not a valid PIECECOLOR
-            existingSetting.setPiece_color(settingJSON.getPiece_color());
-        }
-
-        if (settingJSON.getBoard_color() != 0) { // Assuming 0 is not a valid BOARDCOLOR
-            existingSetting.setBoard_color(settingJSON.getBoard_color());
-        }
-
-        existingSetting.setUser(existingUser);
-        settingsService.updateSettings(existingSetting);
-        return ResponseEntity.ok("The setting has been updated accordingly.");
-    }
-
-    @DeleteMapping("/{username}")
-    public ResponseEntity<String> deleteSetting(@PathVariable String username) {
-        User user = userService.getByUsername(username);
-        TheProfile theProfile = theProfileService.getProfileByUser(user);
-        Settings settings = settingsService.getSettingsByUsername(username);
-
-        settingsService.deleteSettings(settings.getSettings_id());
-        userService.deleteByID(user.getUser_id());
-        theProfileService.getProfileByID(theProfile.getProfile_id());
-        return ResponseEntity.ok("deleted");
+        return ResponseEntity.badRequest().body("User not found.");
     }
 }

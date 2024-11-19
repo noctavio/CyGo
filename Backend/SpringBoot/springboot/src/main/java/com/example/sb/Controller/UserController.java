@@ -81,7 +81,7 @@ public class UserController {
      * @return a status message
      */
     @DeleteMapping("/hardDelete/{id}")
-    public ResponseEntity<String> deleteByUsername(@PathVariable Integer id) {
+    public ResponseEntity<String> deleteById(@PathVariable Integer id) {
         boolean isDeletedFromUsers = userService.deleteByID(id);
 
         if (isDeletedFromUsers) {

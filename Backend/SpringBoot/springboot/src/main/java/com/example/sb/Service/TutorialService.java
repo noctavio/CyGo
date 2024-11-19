@@ -46,11 +46,11 @@ public class TutorialService {
         if (existingTutorial.isPresent()) {
             Tutorial updatedTutorial = existingTutorial.get();
             updatedTutorial.setMove_id(tutorial.getMove_id());
-            updatedTutorial.setGame_id(tutorial.getGame_id());
-            updatedTutorial.setPlayer_color(tutorial.getPlayer_color());
+            updatedTutorial.setGameId(tutorial.getGameId());
+            updatedTutorial.setPlayerColor(tutorial.getPlayerColor());
             updatedTutorial.setX_position(tutorial.getX_position());
             updatedTutorial.setY_position(tutorial.getY_position());
-            updatedTutorial.setMove_number(tutorial.getMove_number());
+            updatedTutorial.setMoveNumber(tutorial.getMoveNumber());
             tutorialRepository.save(updatedTutorial);
         } else {
             throw new ResourceNotFoundException("Tutorial not found with id: " + id);
@@ -70,6 +70,6 @@ public class TutorialService {
 
     // Check if the provided tutorial matches the given gameId and moveNumber
     public boolean checkTutorialByGameAndMove(int gameId, int moveNumber, Tutorial inputTutorial) {
-        return inputTutorial.getGame_id() == gameId && inputTutorial.getMove_number() == moveNumber;
+        return inputTutorial.getGameId() == gameId && inputTutorial.getMoveNumber() == moveNumber;
     }
 }

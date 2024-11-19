@@ -73,7 +73,7 @@ public class TutorialController {
             @RequestBody Tutorial inputTutorial) {
 
         // Check if the provided tutorial matches the given gameId and moveNumber
-        if (inputTutorial.getGame_id() == gameId && inputTutorial.getMove_number() == moveNumber) {
+        if (inputTutorial.getGameId() == gameId && inputTutorial.getMoveNumber() == moveNumber) {
             return ResponseEntity.ok("Success: The tutorial matches the provided gameId and moveNumber.");
         }
         else {

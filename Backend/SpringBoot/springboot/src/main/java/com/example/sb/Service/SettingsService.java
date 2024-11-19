@@ -7,6 +7,7 @@ import com.example.sb.Repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -35,39 +36,35 @@ public class SettingsService {
     //    return setting.orElseThrow(() -> new ResourceNotFoundException("Setting not found with username: " + username));
     //}
 
-    public void createSettings(Settings setting) {
-        settingRepository.save(setting);
-    }
-
     public void updateSettings(Settings setting) {
         settingRepository.save(setting);
     }
 
-    public boolean deleteSettings(Integer id) {
+    public ResponseEntity<String> deleteSettings(Integer id) {
         if (settingRepository.existsById(id)) {
             settingRepository.deleteById(id);
-            return true;
+            return ResponseEntity.ok("Settings deleted.");
         }
-        return false;
+        return ResponseEntity.ok("User does not exist...");
     }
 
-    public void updateSettingsfromuser() {
-        List<User> users = userRepository.findAll(); // Fetch all users
+    //public void updateSettingsFromUser() {
+    //    List<User> users = userRepository.findAll(); // Fetch all users
 
-        for (User user : users) {
+    //    for (User user : users) {
             // Fetch the profile by current user from theProfileRepository
-            Settings settings = settingRepository.findByUser(Optional.ofNullable(user)).orElse(null);
+    //        Settings settings = settingRepository.findByUser(Optional.ofNullable(user)).orElse(null);
 
-            if (settings == null) {
+    //        if (settings == null) {
                 // If no profile exists, create a new profile
-                Settings newSettings = new Settings(user);
-                settingRepository.save(newSettings);
+    //            Settings newSettings = new Settings(user);
+    //            settingRepository.save(newSettings);
                 // Save new profile
             }
-            else {
-                settings.setUser(user);
-                settingRepository.save(settings);
-            }
-        }
-    }
-}
+    //        else {
+     //           settings.setUser(user);
+    //            settingRepository.save(settings);
+    //        }
+    //    }
+    //}
+    //}

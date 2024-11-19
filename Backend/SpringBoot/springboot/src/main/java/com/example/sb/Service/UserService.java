@@ -7,6 +7,7 @@ import com.example.sb.Repository.PlayerRepository;
 import com.example.sb.Repository.TheProfileRepository;
 import com.example.sb.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -29,6 +30,8 @@ public class UserService {
     private PlayerRepository playerRepository;
 
     private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    @Autowired
+    private UserDetailsServiceAutoConfiguration userDetailsServiceAutoConfiguration;
 
     public User registerUser(User user) {
         String encodedPassword = passwordEncoder.encode(user.getPassword());
@@ -108,6 +111,9 @@ public class UserService {
      */
     public boolean deleteByID(Integer userId) {
         if (userRepository.findById(userId).isPresent()) {
+            TheProfile profileToDelete = findProfileById(userId);
+
+            profileRepository.delete(profileToDelete);
             userRepository.deleteById(userId);
             return true;
         }
