@@ -14,18 +14,33 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
+/**
+ * This class represents the activity which handles the functionality of the pre-game lobby 
+ * where users can create or join lobbies, invite or kick players, toggle their ready status,
+ * and leave or delete lobbies.
+ * It interacts with a backend server using HTTP requests and provides dialogs for user input.
+ *
+ * @author Eden Basnet
+ */
+
 public class PreGameActivity extends AppCompatActivity {
 
+    // UI elements
     private Button btnCreateFriendlyLobby, btnJoinLobby, btnInvitePlayer, btnReady, btnLeaveLobby, btnKickPlayer, btnDeleteLobby, gameBtn;
     private TextView statusText;
-    private int userId; // Initially set to 0, but updated from the user input when toggling ready status
+    private int userId; 
 
+    /**
+     * Initializes the activity, binds views, and sets up click listeners for buttons.
+     *
+     * @param savedInstanceState the saved instance state
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pre_game);
 
-        // Initialize views
+        // Initialize views and buttons
         btnCreateFriendlyLobby = findViewById(R.id.createFriendlyLobbyBtn);
         btnJoinLobby = findViewById(R.id.joinLobbyBtn);
         btnInvitePlayer = findViewById(R.id.invitePlayerBtn);
@@ -51,7 +66,9 @@ public class PreGameActivity extends AppCompatActivity {
         });
     }
 
-    // Method to prompt the user for their userId and then toggle ready status
+    /**
+     * Displays a dialog for the user to input their user ID and then toggles their ready status.
+     */
     private void promptForUserId() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Enter Your User ID");
@@ -79,7 +96,11 @@ public class PreGameActivity extends AppCompatActivity {
         builder.show();
     }
 
-    // Method to toggle the ready status of a player
+    /**
+     * Toggles the ready status of a player by sending a PUT request to the server.
+     *
+     * @param userId the ID of the user whose ready status will be toggled
+     */
     private void toggleReadyStatus(int userId) {
         // Update the URL with the correct endpoint
         String url = "http://coms-3090-051.class.las.iastate.edu:8080/lobby/players/" + userId + "/toggleReady";
@@ -108,7 +129,9 @@ public class PreGameActivity extends AppCompatActivity {
         Volley.newRequestQueue(this).add(stringRequest);
     }
 
-    // Dialog methods for other features (not modified, just copied from your original code)
+    /**
+     * Displays a dialog for creating a lobby and sends a POST request to the server.
+     */
     private void showCreateLobbyDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Create Lobby");
@@ -133,6 +156,9 @@ public class PreGameActivity extends AppCompatActivity {
         builder.show();
     }
 
+    /**
+     * Displays a dialog for joining a lobby and sends a PUT request to the server.
+     */
     private void showJoinLobbyDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Join Lobby");
@@ -161,6 +187,9 @@ public class PreGameActivity extends AppCompatActivity {
         builder.show();
     }
 
+    /**
+     * Displays a dialog for inviting a player to the lobby and sends a POST request to the server.
+     */
     private void showInvitePlayerDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Invite Player");
@@ -178,6 +207,9 @@ public class PreGameActivity extends AppCompatActivity {
         builder.show();
     }
 
+    /**
+     * Displays a dialog for leaving a lobby and sends a DELETE request to the server.
+     */
     private void showLeaveLobbyDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Leave Lobby");
@@ -196,6 +228,9 @@ public class PreGameActivity extends AppCompatActivity {
         builder.show();
     }
 
+    /**
+     * Displays a dialog for kicking a player from the lobby and sends a DELETE request to the server.
+     */
     private void showKickPlayerDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Kick Player");
@@ -222,6 +257,9 @@ public class PreGameActivity extends AppCompatActivity {
         builder.show();
     }
 
+    /**
+     * Displays a dialog for deleting a lobby and sends a DELETE request to the server.
+     */
     private void showDeleteLobbyDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Delete Lobby");
@@ -239,7 +277,12 @@ public class PreGameActivity extends AppCompatActivity {
         builder.show();
     }
 
-// Method to create a lobby
+    /**
+     * Creates a new lobby for the specified user.
+     * Sends a POST request to the backend server to create a lobby for the user.
+     * 
+     * @param userId the ID of the user who is creating the lobby
+     */ 
     private void createLobby(int userId) {
         String url = "http://10.90.72.226:8080/lobby/" + userId + "/create";
         StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
@@ -256,7 +299,13 @@ public class PreGameActivity extends AppCompatActivity {
         Volley.newRequestQueue(this).add(stringRequest);
     }
 
-    // Method to join a lobby
+    /**
+     * Joins an existing lobby for the specified user.
+     * Sends a PUT request to the backend server to join a specific lobby.
+     * 
+     * @param lobbyId the ID of the lobby the user is joining
+     * @param userId the ID of the user who is joining the lobby
+     */
     private void joinLobby(int lobbyId, int userId) {
         String url = "http://10.90.72.226:8080/lobby/" + userId + "/join/" + lobbyId;
         StringRequest stringRequest = new StringRequest(Request.Method.PUT, url,
@@ -273,7 +322,12 @@ public class PreGameActivity extends AppCompatActivity {
         Volley.newRequestQueue(this).add(stringRequest);
     }
 
-    // Method to invite a player
+    /**
+     * Invites a player to join the lobby.
+     * Sends a POST request to the backend server to invite a player to a specific lobby.
+     * 
+     * @param playerId the ID of the player being invited to the lobby
+     */
     private void invitePlayer(int playerId) {
         String url = "http://10.90.72.226:8080/lobby/invite/" + playerId;
         StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
@@ -290,7 +344,12 @@ public class PreGameActivity extends AppCompatActivity {
         Volley.newRequestQueue(this).add(stringRequest);
     }
 
-    // Method to leave a lobby
+    /**
+     * Allows the user to leave the current lobby.
+     * Sends a DELETE request to the backend server to remove the user from the lobby.
+     * 
+     * @param userId the ID of the user who is leaving the lobby
+     */
     private void leaveLobby(int userId) {
         String url = "http://10.90.72.226:8080/lobby/" + userId + "/leave";
         StringRequest stringRequest = new StringRequest(Request.Method.DELETE, url,
@@ -307,7 +366,13 @@ public class PreGameActivity extends AppCompatActivity {
         Volley.newRequestQueue(this).add(stringRequest);
     }
 
-    // Method to kick a player
+    /**
+     * Kicks a player from the lobby.
+     * Sends a DELETE request to the backend server to kick a player out of the lobby.
+     * 
+     * @param hostUserId the ID of the host user who is performing the kick operation
+     * @param userId the ID of the player being kicked from the lobby
+     */
     private void kickPlayerFromLobby(int hostUserId, int userId) {
         String url = "http://10.90.72.226:8080/lobby/" + hostUserId + "/kick/" + userId;
         StringRequest stringRequest = new StringRequest(Request.Method.DELETE, url,
@@ -324,7 +389,12 @@ public class PreGameActivity extends AppCompatActivity {
         Volley.newRequestQueue(this).add(stringRequest);
     }
 
-    // Method to delete a lobby
+    /**
+     * Deletes the lobby created by the host user.
+     * Sends a DELETE request to the backend server to delete the specified lobby.
+     * 
+     * @param hostUserId the ID of the host user who is deleting the lobby
+     */
     private void deleteLobby(int hostUserId) {
         String url = "http://10.90.72.226:8080/lobby/" + hostUserId + "/killLobby";
         StringRequest stringRequest = new StringRequest(Request.Method.DELETE, url,
