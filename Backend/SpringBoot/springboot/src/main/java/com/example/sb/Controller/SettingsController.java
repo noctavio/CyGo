@@ -32,13 +32,10 @@ import java.util.Optional;
 @RequestMapping("/settings")
 @Tag(name = "SettingsController", description = "Controller for managing user settings")
 public class SettingsController {
-
     @Autowired
     private UserService userService;
-
     @Autowired
     private SettingsService settingsService;
-
     @Autowired
     private TheProfileService theProfileService;
 
@@ -96,6 +93,7 @@ public class SettingsController {
 
             if (settingJSON.getProfile().getUser().getPassword() != null) {
                 String newPassword = settingJSON.getProfile().getUser().getPassword();
+                // updates pass if it changed and is not an empty string!
                 if (!newPassword.isEmpty()) {
                     PasswordEncoder encoder = new BCryptPasswordEncoder();
                     existingUser.setPassword(encoder.encode(newPassword));
@@ -106,11 +104,12 @@ public class SettingsController {
                 existingProfile.setProfilePicture(settingJSON.getProfile().getProfilePicture());
             }
 
-            if (settingJSON.getPieceColor() != 0) {
+            // Update other fields if provided in the settings
+            if (settingJSON.getPieceColor() != 0) { // Assuming 0 is not a valid PIECECOLOR
                 existingSetting.setPieceColor(settingJSON.getPieceColor());
             }
 
-            if (settingJSON.getBoardColor() != 0) {
+            if (settingJSON.getBoardColor() != 0) { // Assuming 0 is not a valid BOARDCOLOR
                 existingSetting.setBoardColor(settingJSON.getBoardColor());
             }
 

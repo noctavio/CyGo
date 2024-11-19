@@ -10,8 +10,10 @@ maven-build:
   tags:                 # to specify which runner to execute this job
     - springboot_tag    # change to your runner's tag
   script:               # what to execute for this job
-    - cd Backend/SpringBoot/springboot        # change 'Backend' to to where you have the pom.xml (do not add / in the beginning)
-    - mvn package       # maven package
+    - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-17.0.11.0.9-2.el9.x86_64
+    - export PATH=$JAVA_HOME/bin:$PATH
+    - cd Backend/SpringBoot/springboot
+    - mvn package     # maven package
   artifacts:            # where to output the packaged jar file, change 'Backend' to to where you have the pom.xml
     paths:
     - Backend/SpringBoot/springboot/target/*.jar # change 'Backend' to where you have 'target' (do not add a / in the beginning)
@@ -25,9 +27,11 @@ maven-test:
   stage: maventest     # one of the stages listed above
   tags:
      - springboot_tag   # change to your runner's tag
-  script:
-     - cd Backend/SpringBoot/springboot       # change 'Backend' to to where you have the pom.xml (do not add / in the beginning)
-     - mvn test         # maven test
+  script: # what to execute for this job
+    - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-17.0.11.0.9-2.el9.x86_64
+    - export PATH=$JAVA_HOME/bin:$PATH
+    - cd Backend/SpringBoot/springboot
+    - mvn package     # maven package
   only:
     refs:
       - main            # only to trigger the pipeline when changes are pushed to 'main'
