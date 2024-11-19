@@ -30,11 +30,6 @@ public class SettingsService {
         Optional<Settings> setting = settingRepository.findById(id);
         return setting.orElseThrow(() -> new ResourceNotFoundException("Setting not found with ID: " + id));
     }
-    //@Transactional
-    //public Settings getSettingsByUsername(String username) {
-    //    Optional<Settings> setting = settingRepository.findByUsername(username);
-    //    return setting.orElseThrow(() -> new ResourceNotFoundException("Setting not found with username: " + username));
-    //}
 
     public void updateSettings(Settings setting) {
         settingRepository.save(setting);
@@ -47,24 +42,3 @@ public class SettingsService {
         }
         return ResponseEntity.ok("User does not exist...");
     }
-
-    //public void updateSettingsFromUser() {
-    //    List<User> users = userRepository.findAll(); // Fetch all users
-
-    //    for (User user : users) {
-            // Fetch the profile by current user from theProfileRepository
-    //        Settings settings = settingRepository.findByUser(Optional.ofNullable(user)).orElse(null);
-
-    //        if (settings == null) {
-                // If no profile exists, create a new profile
-    //            Settings newSettings = new Settings(user);
-    //            settingRepository.save(newSettings);
-                // Save new profile
-            }
-    //        else {
-     //           settings.setUser(user);
-    //            settingRepository.save(settings);
-    //        }
-    //    }
-    //}
-    //}
