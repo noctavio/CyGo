@@ -81,17 +81,6 @@ public class UserService {
         return loggedInList;
     }
 
-    public void updateUser(Optional<User> user) {
-        // Check if the Optional contains a value
-        if (user.isPresent()) {
-            theProfileService.updateProfileTable();
-            userRepository.save(user.get());  // Save the User if present
-        }
-        else {
-            throw new IllegalArgumentException("User must be present to update."); // Handle the absence of User
-        }
-    }
-
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
@@ -109,15 +98,15 @@ public class UserService {
      * @param userId user id
      * @return boolean
      */
-    public boolean deleteByID(Integer userId) {
+    public ResponseEntity<String> deleteByID(Integer userId) {
         if (userRepository.findById(userId).isPresent()) {
             TheProfile profileToDelete = findProfileById(userId);
 
             profileRepository.delete(profileToDelete);
             userRepository.deleteById(userId);
-            return true;
+            ResponseEntity.ok("User deleted");
         }
-        return false;
+        return ResponseEntity.ok("User does not exist...");
     }
 
     public TheProfile findProfileById(Integer userId) {

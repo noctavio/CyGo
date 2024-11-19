@@ -86,19 +86,7 @@ public class UserController {
             @ApiResponse(responseCode = "400", description = "Invalid input data"),
             @ApiResponse(responseCode = "404", description = "User not found")
     })
-    @PutMapping("/update/{userId}")
-    public ResponseEntity<String> updateUser(
-            @Parameter(description = "ID of the user to update") @PathVariable Integer userId,
-            @Parameter(description = "Updated details of the user") @RequestBody User userJSON) {
-        Optional<User> userOptional = userService.getByUserID(userId);
-        return userService.updateUser(userOptional, userJSON);
-    }
 
-    @Operation(summary = "Delete a user by ID", description = "Deletes a user account and removes their data from all related tables.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "User deleted successfully"),
-            @ApiResponse(responseCode = "404", description = "User not found")
-    })
     @DeleteMapping("/hardDelete/{id}")
     public ResponseEntity<String> deleteByID(
             @Parameter(description = "ID of the user to delete") @PathVariable Integer id) {

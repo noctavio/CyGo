@@ -32,6 +32,7 @@ public class Tutorial {
         this.y_position = yPosition;
         this.moveNumber = moveNumber;
     }
+
     // Log entity state before saving
     @PrePersist
     public void logEntityState() {
