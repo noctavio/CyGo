@@ -2,6 +2,13 @@ package com.example.sb.Controller;
 
 import com.example.sb.Model.Tutorial;
 import com.example.sb.Service.TutorialService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -9,41 +16,75 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/tutorials") // Base URL for the controller
+@RequestMapping("/tutorials")
+@Tag(name = "TutorialController", description = "Controller for managing tutorials")
 public class TutorialController {
 
     @Autowired
     private TutorialService tutorialService;
 
-    // Get all tutorials
+    @Operation(summary = "Get all tutorials", description = "Retrieve a list of all tutorials.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved list",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = Tutorial.class)))
+    })
     @GetMapping
     public List<Tutorial> getAllTutorials() {
         return tutorialService.getAllTutorials();
     }
 
-    // Get tutorial by ID
+    @Operation(summary = "Get tutorial by ID", description = "Retrieve a specific tutorial by its ID.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved the tutorial",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = Tutorial.class))),
+            @ApiResponse(responseCode = "404", description = "Tutorial not found")
+    })
     @GetMapping("/{id}")
     public Tutorial getTutorialById(@PathVariable Integer id) {
         return tutorialService.getTutorialById(id);
     }
 
-    // Get tutorials by gameId and moveNumber
+    @Operation(summary = "Get tutorial by gameId and moveNumber", description = "Retrieve a tutorial by its associated gameId and moveNumber.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved the tutorial",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = Tutorial.class))),
+            @ApiResponse(responseCode = "404", description = "Tutorial not found")
+    })
     @GetMapping("/game/{gameId}/move/{moveNumber}")
     public Tutorial getTutorialByGameAndMove(@PathVariable int gameId, @PathVariable int moveNumber) {
         return tutorialService.getTutorialByGameAndMove(gameId, moveNumber);
     }
 
-    // POST endpoint for creating a new tutorial
+    @Operation(summary = "Create a new tutorial", description = "Add a new tutorial to the system.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Tutorial created successfully",
+                    content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "400", description = "Invalid input")
+    })
     @PostMapping
-    public ResponseEntity<String> createTutorial(@RequestBody Tutorial tutorial) {
-        System.out.println("Received Tutorial: " + tutorial);  // Log the incoming tutorial
+    public ResponseEntity<String> createTutorial(
+            @RequestBody(description = "Tutorial to be created", required = true,
+                    content = @Content(schema = @Schema(implementation = Tutorial.class)))
+            Tutorial tutorial) {
+
+        System.out.println("Received Tutorial: " + tutorial);
         tutorialService.createTutorial(tutorial);
         return ResponseEntity.ok("Tutorial saved successfully.");
     }
 
-    // Update tutorial
+    @Operation(summary = "Update a tutorial", description = "Update an existing tutorial by ID.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Tutorial updated successfully",
+                    content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "400", description = "Tutorial not found")
+    })
     @PutMapping("/{id}")
-    public ResponseEntity<String> updateTutorial(@PathVariable Integer id, @RequestBody Tutorial tutorial) {
+    public ResponseEntity<String> updateTutorial(
+            @PathVariable Integer id,
+            @RequestBody(description = "Updated tutorial data", required = true,
+                    content = @Content(schema = @Schema(implementation = Tutorial.class)))
+            Tutorial tutorial) {
+
         Tutorial existingTutorial = tutorialService.getTutorialById(id);
 
         if (existingTutorial == null) {
@@ -54,7 +95,11 @@ public class TutorialController {
         return ResponseEntity.ok("Tutorial updated successfully.");
     }
 
-    // Delete tutorial
+    @Operation(summary = "Delete a tutorial", description = "Delete a tutorial by its ID.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Tutorial deleted successfully"),
+            @ApiResponse(responseCode = "400", description = "Tutorial not found")
+    })
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteTutorial(@PathVariable Integer id) {
         if (tutorialService.deleteTutorial(id)) {
@@ -65,14 +110,20 @@ public class TutorialController {
         }
     }
 
-    // Check if tutorial's gameId and moveNumber match the provided values
+    @Operation(summary = "Check tutorial's gameId and moveNumber", description = "Validate if a tutorial matches the given gameId and moveNumber.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Tutorial matches the provided values",
+                    content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "400", description = "Tutorial does not match the provided values")
+    })
     @PostMapping("/check/{gameId}/{moveNumber}")
     public ResponseEntity<String> checkTutorialByGameAndMove(
             @PathVariable int gameId,
             @PathVariable int moveNumber,
-            @RequestBody Tutorial inputTutorial) {
+            @RequestBody(description = "Tutorial to validate", required = true,
+                    content = @Content(schema = @Schema(implementation = Tutorial.class)))
+            Tutorial inputTutorial) {
 
-        // Check if the provided tutorial matches the given gameId and moveNumber
         if (inputTutorial.getGameId() == gameId && inputTutorial.getMoveNumber() == moveNumber) {
             return ResponseEntity.ok("Success: The tutorial matches the provided gameId and moveNumber.");
         }
@@ -81,3 +132,4 @@ public class TutorialController {
         }
     }
 }
+
