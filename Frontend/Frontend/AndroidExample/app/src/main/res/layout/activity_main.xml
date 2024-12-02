@@ -20,13 +20,13 @@
     <!-- Leaderboard Button -->
     <Button android:id="@+id/LeaderboardBtn"
         android:layout_width="200dp"
-        android:layout_height="60dp"
+        android:layout_height="50dp"
         android:layout_marginTop="30dp"
         android:layout_gravity="center"
         android:text="Leaderboard" />
     <Button android:id="@+id/Login"
         android:layout_width="200dp"
-        android:layout_height="60dp"
+        android:layout_height="50dp"
         android:layout_marginTop="20dp"
         android:layout_gravity="center"
         android:text="Login" />
@@ -34,13 +34,13 @@
     <!-- Club Button -->
     <Button android:id="@+id/ClubBtn"
         android:layout_width="200dp"
-        android:layout_height="60dp"
+        android:layout_height="50dp"
         android:layout_marginTop="20dp"
         android:layout_gravity="center"
         android:text="Club" />
     <Button android:id="@+id/ClubChatBtn"
         android:layout_width="200dp"
-        android:layout_height="60dp"
+        android:layout_height="50dp"
         android:layout_marginTop="20dp"
         android:layout_gravity="center"
         android:text="Club Chat" />
@@ -48,7 +48,7 @@
     <!-- Pre Game Button -->
     <Button android:id="@+id/GameBtn"
         android:layout_width="200dp"
-        android:layout_height="60dp"
+        android:layout_height="50dp"
         android:layout_marginTop="20dp"
         android:layout_gravity="center"
         android:text="Pre Game" />
@@ -56,15 +56,21 @@
     <!-- Settings Button -->
     <Button android:id="@+id/SettingsBtn"
         android:layout_width="200dp"
-        android:layout_height="80dp"
+        android:layout_height="50dp"
         android:layout_marginTop="20dp"
         android:layout_gravity="center"
         android:text="Settings" />
     <Button android:id="@+id/Rules"
         android:layout_width="200dp"
-        android:layout_height="60dp"
+        android:layout_height="50dp"
         android:layout_marginTop="20dp"
         android:layout_gravity="center"
         android:text="Rules" />
+    <Button android:id="@+id/Welcome"
+        android:layout_width="200dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="20dp"
+        android:layout_gravity="center"
+        android:text="Welcome" />
 
 </androidx.appcompat.widget.LinearLayoutCompat>

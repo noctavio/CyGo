@@ -61,6 +61,10 @@
             android:name=".Settings"
             android:theme="@style/Theme.AppCompat.Light"
             android:exported="true" />
+        <activity
+            android:name=".PreLogin"
+            android:theme="@style/Theme.AppCompat.Light"
+            android:exported="true" />
 
 
         <activity

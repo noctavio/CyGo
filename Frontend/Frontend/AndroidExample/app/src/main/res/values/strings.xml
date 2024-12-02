@@ -27,4 +27,6 @@
     <string name="password_label">Password:</string>
     <string name="login_username_hint">Enter username here</string>
     <string name="login_password_hint">Enter password here</string>
+    <string name="banner_description">Banner goes accross screen until its in middle.</string>
+    <string name="button_description">play_button\n</string>
 </resources>
