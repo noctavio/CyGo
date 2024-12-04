@@ -30,15 +30,23 @@ public class OctavioTests {
     }
 
     @Test
-    public void registerLoginAndLogoutTest() {
-        String requestBody = "{\"username\": \"Octavio\", \"password\": \"kelpTree12\"}";
+    public void registerLoginAndLogout_etc() {
+        String user1JSON = "{\"username\": \"Octavio\", \"password\": \"kelpTree12\"}";
+        String user2JSON = "{\"username\": \"Dummy1\", \"password\": \"password1\"}";
 
         //Register
         given()
                 .contentType(ContentType.JSON)
-                    .body(requestBody)
+                .body(user1JSON)
                 .when()
-                    .post("/users/register").then()
+                .post("/users/register").then()
+                .statusCode(200);
+        //Register(Dummy)
+        given()
+                .contentType(ContentType.JSON)
+                .body(user2JSON)
+                .when()
+                .post("/users/register").then()
                 .statusCode(200);
         //Verify created user.
         given()
@@ -77,5 +85,28 @@ public class OctavioTests {
                 .statusCode(200)
                 .contentType(ContentType.JSON)
                 .body("isLoggedIn", equalTo(false));
+
+
+
+        given()
+                .when()
+                .get("/users")
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .body("isLoggedIn", equalTo(false));// TODO change
+        given()
+                .when()
+                .get("/users/loggedIn")
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .body("isLoggedIn", equalTo(false));
+        // Delete Dummy
+        given()
+                .when()
+                .delete("/hardDelete/2")
+                .then()
+                .statusCode(200);
     }
 }
