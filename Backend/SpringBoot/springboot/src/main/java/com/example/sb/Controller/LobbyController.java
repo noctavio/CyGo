@@ -27,8 +27,7 @@ public class LobbyController {
     })
     @PostMapping("/{hostId}/initialize/game")
     public ResponseEntity<String> initializeGame(
-            @Parameter(description = "ID of the host user initializing the game") @PathVariable Integer hostId)
-            throws JsonProcessingException {
+            @Parameter(description = "ID of the host user initializing the game") @PathVariable Integer hostId) {
         return lobbyService.initializeGame(hostId);
     }
 
