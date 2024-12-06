@@ -1,6 +1,4 @@
 package com.example.sb.Model;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,25 +21,29 @@ public class Joseki {
     @Column(name = "move_number", nullable = false) // Maps to move_number column
     private String moveNumber;
 
-    @Column(name = "move_position", nullable = false) // Maps to move_position column
-    private String movePosition;
+    @Column(name = "x_position", nullable = false) // Maps to move_position column
+    private int xPosition;
+
+    @Column(name = "y_position", nullable = false) // Maps to move_position column
+    private int yPosition;
 
     @Column(name = "board_size") // Maps to board_size column
     private String boardSize;
 
-    @Column(name = "host_name") // Maps to host_name column
-    private String hostName;
+
 
     @Column(name = "board_id", unique = true) // Maps to board_id column
     private Integer boardId;
+    @Column (name = "last_move")
+    private String lastMove;
 
     // Constructors
-    public Joseki(String moveNumber, String movePosition) {
+    public Joseki(String moveNumber, int x, int y, GobanJoseki goban) {
         this.moveNumber = moveNumber;
-        this.movePosition = movePosition;
-        this.boardSize = boardSize;
-        this.hostName = hostName;
-        this.boardId = boardId;
+        this.xPosition = x;
+        this.yPosition = y;
+        this.boardSize = "9x9";
+        this.boardId = goban.getBoard_id();
     }
 
     @Override
@@ -51,14 +53,14 @@ public class Joseki {
         Joseki joseki = (Joseki) o;
         return Objects.equals(josekiId, joseki.josekiId) &&
                 Objects.equals(moveNumber, joseki.moveNumber) &&
-                Objects.equals(movePosition, joseki.movePosition) &&
+                Objects.equals(xPosition, joseki.xPosition) &&
+                Objects.equals(yPosition, joseki.yPosition) &&
                 Objects.equals(boardSize, joseki.boardSize) &&
-                Objects.equals(hostName, joseki.hostName) &&
                 Objects.equals(boardId, joseki.boardId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(josekiId, moveNumber, movePosition, boardSize, hostName, boardId);
+        return Objects.hash(josekiId, moveNumber, xPosition, yPosition, boardSize, boardId);
     }
 }

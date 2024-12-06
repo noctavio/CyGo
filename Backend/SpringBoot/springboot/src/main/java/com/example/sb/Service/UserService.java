@@ -104,7 +104,7 @@ public class UserService {
 
             profileRepository.delete(profileToDelete);
             userRepository.deleteById(userId);
-            return ResponseEntity.ok("User deleted");
+            ResponseEntity.ok("User deleted");
         }
         return ResponseEntity.ok("User does not exist...");
     }
