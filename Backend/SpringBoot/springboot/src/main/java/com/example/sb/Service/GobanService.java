@@ -63,6 +63,9 @@ public class GobanService {
                 team2.getPlayer1().getUsername() + "-|-" + team2.getPlayer2().getUsername();
         String teamWinner = winningTeamName + " (" + winningPlayers + ") wins the game.";
 
+        String finaleScores = "Final scores are, " + team1.getTeamName() + ": " + team1.getTeamScore() +
+                " and " + team2.getTeamName() + ": " + team2.getTeamScore();
+
         // Update profiles
         updateTeamProfiles(team1, isTeam1Winner, team2);
         updateTeamProfiles(team2, !isTeam1Winner, team1);
@@ -76,10 +79,6 @@ public class GobanService {
         saveAllProfiles(team1, team2);
         teamRepository.save(team1);
         teamRepository.save(team2);
-
-        String finaleScores = "Final scores are, " + team1.getTeamName() + ": " + team1.getTeamScore() +
-                " and " + team2.getTeamName() + ": " + team2.getTeamScore();
-
         return ResponseEntity.ok("Game over,\n " + teamWinner + "\n" + finaleScores);
     }
 

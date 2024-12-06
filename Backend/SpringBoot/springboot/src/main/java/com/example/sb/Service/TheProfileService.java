@@ -139,14 +139,19 @@ public class TheProfileService {
         int eloChange = (int) Math.round(k * ((isWin ? 1 : 0) - expectedScore));
 
         // Update Elo
-        profile.setElo(profile.getElo() + eloChange);
+        if (profile.getElo() + eloChange < 0){
+            profile.setElo(0);
+        }
+        else {
+            profile.setElo(profile.getElo() + eloChange);
+        }
 
         // Track wins/losses
         if (isWin) {
             profile.setWins(profile.getWins() + 1);
         }
         else {
-            profile.setWins(profile.getLoss() + 1);
+            profile.setLoss(profile.getLoss() + 1);
         }
 
         // Adjust rank

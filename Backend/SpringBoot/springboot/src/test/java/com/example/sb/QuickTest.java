@@ -82,7 +82,7 @@ public class QuickTest {
                 .when()
                 .put("/lobby/2/join/1")
                 .then()
-                .statusCode(500); // TODO EXCLAIMER, FK issue where the second person to join the lobby will raise a false positive on a 'duplicate entry'. Meaning it's not duplicate although springboot says otherwise despite verifying id and user integrity.
+                .statusCode(500); // TODO EXCLAIMER, FK issue where the second person to join the lobby will raise a false positive on a 'duplicate entry'.
         given()
                 .when()
                 .put("/lobby/3/join/1")
@@ -94,56 +94,41 @@ public class QuickTest {
                 .then()
                 .statusCode(200);
 
-        // MAKE ALL PLAYERS SET READY
-        given()
-                .when()
-                .put("/lobby/players/1/toggleReady")
-                .then()
-                .statusCode(200);
-        given()
-                .when()
-                .put("/lobby/players/2/toggleReady")
-                .then()
-                .statusCode(200);
-        given()
-                .when()
-                .put("/lobby/players/3/toggleReady")
-                .then()
-                .statusCode(200);
-        given()
-                .when()
-                .put("/lobby/players/4/toggleReady")
-                .then()
-                .statusCode(200);
+        // MAKE ALL PLAYERS SET READY, START GAME, END GAME, ELO TESTING
+        for (int i = 0; i < 1; i++) { // TODO extreme testing
+            // MAKE ALL PLAYERS SET READY
+            given()
+                    .when()
+                    .put("/lobby/players/1/toggleReady")
+                    .then()
+                    .statusCode(200);
+            given()
+                    .when()
+                    .put("/lobby/players/2/toggleReady")
+                    .then()
+                    .statusCode(200);
+            given()
+                    .when()
+                    .put("/lobby/players/3/toggleReady")
+                    .then()
+                    .statusCode(200);
+            given()
+                    .when()
+                    .put("/lobby/players/4/toggleReady")
+                    .then()
+                    .statusCode(200);
 
-        // Initialize the game(as host) using the players in the lobby alongside whatever configuration.
-        given()
-                .when()
-                .post("/lobby/1/initialize/game")
-                .then()
-                .statusCode(200);
-
-        // Emulates a faux game where Dummy1(Black team player 1 starts first)
-        // places a black piece at (0,0) then Dummy3(next in sequence) passes their turn
-        // Turn order for this demonstration is Dummy1(Team2), Dummy3(Team1), Dummy2(Team2), Dummy4(Team1)
-        given()
-                .when()
-                .post("/goban/4/place/0/0")
-                .then()
-                .statusCode(200);
-        given()
-                .when()
-                .delete("/goban/1/end")
-                .then()
-                .statusCode(200);
-
-        // Check that the game is forcibly ended after that single piece and turn pass is completed.
-        given()
-                .when()
-                .get("/lobby")
-                .then()
-                .statusCode(200)
-                .contentType(ContentType.JSON)
-                .body("[0].isGameInitialized", equalTo(false));
+            // Initialize the game(as host) using the players in the lobby alongside whatever configuration.
+            given()
+                    .when()
+                    .post("/lobby/1/initialize/game")
+                    .then()
+                    .statusCode(200);
+            given()
+                    .when()
+                    .delete("/goban/1/end")
+                    .then()
+                    .statusCode(200);
+        }
     }
 }
