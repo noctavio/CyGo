@@ -1,0 +1,149 @@
+package com.example.sb;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+import io.restassured.http.ContentType;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import io.restassured.RestAssured;
+
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.server.LocalServerPort;
+
+@RunWith(SpringRunner.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+public class QuickTest {
+
+    @LocalServerPort
+    private int port;
+
+    @Before
+    public void setup() {
+        // Correctly set the base URI and port
+        RestAssured.baseURI = "http://localhost";
+        RestAssured.port = port;
+    }
+
+    @Test
+    public void basicQuickTest() {
+        String user1JSON = "{\"username\": \"Dummy1\", \"password\": \"password1\"}";
+        String user2JSON = "{\"username\": \"Dummy2\", \"password\": \"password2\"}";
+        String user3JSON = "{\"username\": \"Dummy3\", \"password\": \"password3\"}";
+        String user4JSON = "{\"username\": \"Dummy4\", \"password\": \"password4\"}";
+        String user5JSON = "{\"username\": \"Dummy5\", \"password\": \"password5\"}";
+        // TODO use later to test timer and such.
+        String newConfigJSON = "{ \"gameTime\": \"25\", \"hostName\": \"Dummy3\", \"isFriendly\": \"false\" }";
+
+        //Register 5 Dummies(TODO use 5 later for test.)
+        given()
+                .contentType(ContentType.JSON)
+                .body(user1JSON)
+                .when()
+                .post("/users/register").then()
+                .statusCode(200);
+        given()
+                .contentType(ContentType.JSON)
+                .body(user2JSON)
+                .when()
+                .post("/users/register").then()
+                .statusCode(200);
+        given()
+                .contentType(ContentType.JSON)
+                .body(user3JSON)
+                .when()
+                .post("/users/register").then()
+                .statusCode(200);
+        given()
+                .contentType(ContentType.JSON)
+                .body(user4JSON)
+                .when()
+                .post("/users/register").then()
+                .statusCode(200);
+        given()
+                .contentType(ContentType.JSON)
+                .body(user5JSON)
+                .when()
+                .post("/users/register").then()
+                .statusCode(200);
+
+        // Make Dummy1 host and initialize a lobby
+        given()
+                .when()
+                .post("/lobby/1/create")
+                .then()
+                .statusCode(200);
+
+        // Make the other three join and then set their status to ready.
+        given()
+                .when()
+                .put("/lobby/2/join/1")
+                .then()
+                .statusCode(500); // TODO EXCLAIMER, FK issue where the second person to join the lobby will raise a false positive on a 'duplicate entry'. Meaning it's not duplicate although springboot says otherwise despite verifying id and user integrity.
+        given()
+                .when()
+                .put("/lobby/3/join/1")
+                .then()
+                .statusCode(200);
+        given()
+                .when()
+                .put("/lobby/4/join/1")
+                .then()
+                .statusCode(200);
+
+        // MAKE ALL PLAYERS SET READY
+        given()
+                .when()
+                .put("/lobby/players/1/toggleReady")
+                .then()
+                .statusCode(200);
+        given()
+                .when()
+                .put("/lobby/players/2/toggleReady")
+                .then()
+                .statusCode(200);
+        given()
+                .when()
+                .put("/lobby/players/3/toggleReady")
+                .then()
+                .statusCode(200);
+        given()
+                .when()
+                .put("/lobby/players/4/toggleReady")
+                .then()
+                .statusCode(200);
+
+        // Initialize the game(as host) using the players in the lobby alongside whatever configuration.
+        given()
+                .when()
+                .post("/lobby/1/initialize/game")
+                .then()
+                .statusCode(200);
+
+        // Emulates a faux game where Dummy1(Black team player 1 starts first)
+        // places a black piece at (0,0) then Dummy3(next in sequence) passes their turn
+        // Turn order for this demonstration is Dummy1(Team2), Dummy3(Team1), Dummy2(Team2), Dummy4(Team1)
+        given()
+                .when()
+                .post("/goban/4/place/0/0")
+                .then()
+                .statusCode(200);
+        given()
+                .when()
+                .delete("/goban/1/end")
+                .then()
+                .statusCode(200);
+
+        // Check that the game is forcibly ended after that single piece and turn pass is completed.
+        given()
+                .when()
+                .get("/lobby")
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .body("[0].isGameInitialized", equalTo(false));
+    }
+}

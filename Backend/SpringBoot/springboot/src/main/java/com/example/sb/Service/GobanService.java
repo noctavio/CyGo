@@ -24,6 +24,8 @@ public class GobanService {
     private TheProfileRepository theProfileRepository;
     @Autowired
     private UserService userService;
+    @Autowired
+    private TheProfileService theProfileService;
 
     private static final int[] DIR_X = {-1, 1, 0, 0};
     private static final int[] DIR_Y = {0, 0, -1, 1};
@@ -44,88 +46,83 @@ public class GobanService {
 
     public ResponseEntity<String> endGame(Integer lobbyId) {
         Optional<Lobby> lobbyOptional = lobbyRepository.findById(lobbyId);
-        if (lobbyOptional.isPresent()) {
-            Lobby lobby = lobbyOptional.get();
-            Team team1 = lobby.getTeam1();
-            // player number is not based on order, it's just a variable name
-            Player player1 = team1.getPlayer1();
-            TheProfile profile1 = player1.getProfile();
-            Player player2 = team1.getPlayer2();
-            TheProfile profile2 = player2.getProfile();
-            Team team2 = lobby.getTeam2();
-            Player player3 = team2.getPlayer1();
-            TheProfile profile3 = player3.getProfile();
-            Player player4 = team2.getPlayer2();
-            TheProfile profile4 = player4.getProfile();
-            Goban board = lobby.getGoban();
-
-            String teamWinner;
-            if (team1.getTeamScore() > team2.getTeamScore()) {
-                teamWinner = team1.getTeamName() + "("+ player1.getUsername() + "-|-" + player2.getUsername() + ") win's the game.";
-                profile1.setWins(profile1.getWins() + 1);
-                profile2.setWins(profile2.getWins() + 1);
-                profile3.setLoss(profile3.getLoss() + 1);
-                profile4.setLoss(profile4.getLoss() + 1);
-            }
-            else {
-                teamWinner = team2.getTeamName() + "("+ player1.getUsername() + "-|-" + player2.getUsername() + ") win's the game.";
-                profile3.setWins(profile3.getWins() + 1);
-                profile4.setWins(profile4.getWins() + 1);
-                profile1.setLoss(profile1.getLoss() + 1);
-                profile2.setLoss(profile2.getLoss() + 1);
-            }
-            String finaleScores = "Final scores are, " + team1.getTeamName() + ": " + team1.getTeamScore() +
-                    " and " + team2.getTeamName() + ": " + team2.getTeamScore();
-
-            profile1.setGames(profile1.getGames() + 1);
-            profile2.setGames(profile2.getGames() + 1);
-            profile3.setGames(profile3.getGames() + 1);
-            profile4.setGames(profile4.getGames() + 1);
-            lobby.setGoban(null);
-            lobby.setIsGameInitialized(false);
-
-            team1.setTeamScore(0.0);
-            team1.setStoneCount(41);
-
-            team2.setTeamScore(0.0);
-            team2.setStoneCount(41);
-
-            //player1.setStartTime(null);
-            //player1.setEndTime(null);
-            player1.setIsTurn(false);
-            player1.setIsReady(false);
-
-            //player2.setStartTime(null);
-            //player2.setEndTime(null);
-            player2.setIsTurn(false);
-            player2.setIsReady(false);
-
-            //player3.setStartTime(null);
-            //player3.setEndTime(null);
-            player3.setIsTurn(false);
-            player3.setIsReady(false);
-
-            //player4.setStartTime(null);
-            //player4.setEndTime(null);
-            player4.setIsTurn(false);
-            player4.setIsReady(false);
-
-            gobanRepository.delete(board);
-            lobbyRepository.save(lobby);
-            playerRepository.save(player1);
-            playerRepository.save(player2);
-            playerRepository.save(player3);
-            playerRepository.save(player4);
-            theProfileRepository.save(profile1);
-            theProfileRepository.save(profile2);
-            theProfileRepository.save(profile3);
-            theProfileRepository.save(profile4);
-            teamRepository.save(team1);
-            teamRepository.save(team2);
-
-            return ResponseEntity.ok("Game over,\n " + teamWinner + "\n" + finaleScores);
+        if (lobbyOptional.isEmpty()) {
+            return ResponseEntity.ok("Wrong lobby id");
         }
-        return ResponseEntity.ok("Wrong lobby id");
+
+        Lobby lobby = lobbyOptional.get();
+        Team team1 = lobby.getTeam1();
+        Team team2 = lobby.getTeam2();
+        Goban board = lobby.getGoban();
+
+        // Determine the winner
+        boolean isTeam1Winner = team1.getTeamScore() > team2.getTeamScore();
+        String winningTeamName = isTeam1Winner ? team1.getTeamName() : team2.getTeamName();
+        String winningPlayers = isTeam1Winner ?
+                team1.getPlayer1().getUsername() + "-|-" + team1.getPlayer2().getUsername() :
+                team2.getPlayer1().getUsername() + "-|-" + team2.getPlayer2().getUsername();
+        String teamWinner = winningTeamName + " (" + winningPlayers + ") wins the game.";
+
+        // Update profiles
+        updateTeamProfiles(team1, isTeam1Winner, team2);
+        updateTeamProfiles(team2, !isTeam1Winner, team1);
+
+        // Reset the lobby state
+        resetLobbyState(lobby);
+
+        // Save updated entities
+        gobanRepository.delete(board);
+        lobbyRepository.save(lobby);
+        saveAllProfiles(team1, team2);
+        teamRepository.save(team1);
+        teamRepository.save(team2);
+
+        String finaleScores = "Final scores are, " + team1.getTeamName() + ": " + team1.getTeamScore() +
+                " and " + team2.getTeamName() + ": " + team2.getTeamScore();
+
+        return ResponseEntity.ok("Game over,\n " + teamWinner + "\n" + finaleScores);
+    }
+
+    private void updateTeamProfiles(Team team, boolean isWinner, Team opponentTeam) {
+        List<Player> players = List.of(team.getPlayer1(), team.getPlayer2());
+        int averageOpponentElo = (opponentTeam.getPlayer1().getProfile().getElo() +
+                opponentTeam.getPlayer2().getProfile().getElo()) / 2;
+
+        for (Player player : players) {
+            TheProfile profile = player.getProfile();
+            theProfileService.updateAfterGame(profile, isWinner, averageOpponentElo);
+            profile.setGames(profile.getGames() + 1); // Increment games played
+        }
+    }
+
+    private void resetLobbyState(Lobby lobby) {
+        lobby.setGoban(null);
+        lobby.setIsGameInitialized(false);
+
+        resetTeamState(lobby.getTeam1());
+        resetTeamState(lobby.getTeam2());
+    }
+
+    private void resetTeamState(Team team) {
+        team.setTeamScore(0.0);
+        team.setStoneCount(41);
+
+        List<Player> players = List.of(team.getPlayer1(), team.getPlayer2());
+        for (Player player : players) {
+            player.setIsTurn(false);
+            player.setIsReady(false);
+        }
+    }
+
+    private void saveAllProfiles(Team team1, Team team2) {
+        List<TheProfile> profiles = List.of(
+                team1.getPlayer1().getProfile(),
+                team1.getPlayer2().getProfile(),
+                team2.getPlayer1().getProfile(),
+                team2.getPlayer2().getProfile()
+        );
+
+        theProfileRepository.saveAll(profiles);
     }
 
     public ResponseEntity<String> placeAStone(Integer userId, Integer x, Integer y) {

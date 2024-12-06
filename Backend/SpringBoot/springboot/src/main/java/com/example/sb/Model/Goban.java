@@ -49,15 +49,13 @@ public class Goban {
 
     // Setter for saving the board as a string
     public void saveBoardString() {
-        //ObjectMapper mapper = new ObjectMapper();
-        //this.boardState = mapper.writeValueAsString(this.board);
         StringBuilder boardString = new StringBuilder();
 
         for (int i = 0; i < 9; i++) {
             for (int j = 0; j < 9; j++) {
                 boardString.append(this.board[i][j].getStoneType()).append(" ");
             }
-            boardString.append("\n");  // New line after each row
+            boardString.append("\n");
         }
 
         this.boardState = boardString.toString();

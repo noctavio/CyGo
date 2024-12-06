@@ -38,13 +38,12 @@ public class UserController {
         return userService.getAllUsers();
     }
 
-    // TODO discuss with team, this method was never necessary.
-    //@Operation(summary = "Get all logged-in users", description = "Fetches the list of all currently logged-in users.")
-    //@ApiResponse(responseCode = "200", description = "List of logged-in users retrieved successfully")
-    //@GetMapping("/loggedIn")
-    //public List<User> getAllLoggedIn() {
-    //    return userService.getAllLoggedIn();
-    //}
+    @Operation(summary = "Get all logged-in users", description = "Fetches the list of all currently logged-in users.")
+    @ApiResponse(responseCode = "200", description = "List of logged-in users retrieved successfully")
+    @GetMapping("/loggedIn")
+    public List<User> getAllLoggedIn() {
+        return userService.getAllLoggedIn();
+    }
 
     @Operation(summary = "Get user by username", description = "Fetches details of a specific user by their username.")
     @ApiResponses(value = {

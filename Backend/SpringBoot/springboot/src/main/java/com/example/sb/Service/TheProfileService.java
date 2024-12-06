@@ -12,6 +12,7 @@ import com.example.sb.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.ResponseEntity;
+import java.util.TreeMap;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -29,6 +30,24 @@ public class TheProfileService {
     private SettingsRepository settingsRepository;
     @Autowired
     private FriendsRepository friendsRepository;
+
+    private static final TreeMap<Integer, String> rankMapping = new TreeMap<>();
+
+    static {
+        int startingElo = 1000; // Elo for 30 kyu
+
+        // Populate kyu ranks (30kyu to 1kyu)
+        for (int kyu = 30; kyu >= 1; kyu--) {
+            rankMapping.put(startingElo, kyu + "kyu");
+            startingElo += 100; // Increment Elo by 100 for each kyu rank
+        }
+
+        // Populate dan ranks (1dan to 10dan)
+        for (int dan = 1; dan <= 10; dan++) {
+            rankMapping.put(startingElo, dan + "dan");
+            startingElo += 100; // Increment Elo by 100 for each dan rank
+        }
+    }
 
     public List<TheProfile> getTop10Players() {
         // Fetch all players from database
@@ -110,6 +129,35 @@ public class TheProfileService {
             else {
                 existingProfile.setUser(user);
                 theProfileRepository.save(existingProfile);
+            }
+        }
+    }
+
+    public void updateAfterGame(TheProfile profile, boolean isWin, int averageOpponentTeamElo) {
+        int k = 30;
+        double expectedScore = 1.0 / (1 + Math.pow(10, (averageOpponentTeamElo - profile.getElo()) / 400.0));
+        int eloChange = (int) Math.round(k * ((isWin ? 1 : 0) - expectedScore));
+
+        // Update Elo
+        profile.setElo(profile.getElo() + eloChange);
+
+        // Track wins/losses
+        if (isWin) {
+            profile.setWins(profile.getWins() + 1);
+        }
+        else {
+            profile.setWins(profile.getLoss() + 1);
+        }
+
+        // Adjust rank
+        adjustRank(profile);
+    }
+
+    // Adjust rank based on current Elo
+    private void adjustRank(TheProfile profile) {
+        for (var entry : rankMapping.entrySet()) {
+            if (profile.getElo() >= entry.getKey()) {
+                profile.setRank(entry.getValue());
             }
         }
     }

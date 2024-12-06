@@ -32,6 +32,7 @@ public class TheProfile {
     private Settings settings;
 
     private String profilePicture;
+    private Integer elo;
     private Integer wins;
     private Integer loss;
     private Integer games;
@@ -41,6 +42,7 @@ public class TheProfile {
         this.user = user;
         this.profilePicture = "-/-";
         this.rank = "30 kyu";
+        this.elo = 1000;
         this.wins = 0;
         this.loss = 0;
         setGamesplayed();
