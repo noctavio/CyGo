@@ -67,19 +67,6 @@ public class TeamController {
         return teamService.updateTeamName(userId, teamJSON);
     }
 
-    @Operation(summary = "Update team score", description = "Updates the score of a team.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Team score updated successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid score"),
-            @ApiResponse(responseCode = "404", description = "User or team not found")
-    })
-    @PutMapping("/{userId}/updateTeamScore/{score}")
-    public ResponseEntity<String> updateTeamScore(
-            @Parameter(description = "ID of the user updating the team score") @PathVariable Integer userId,
-            @Parameter(description = "New score to assign to the team") @PathVariable Integer score) {
-        return teamService.updateTeamScore(userId, score);
-    }
-
     @Operation(summary = "Leave a team", description = "Allows a user to leave their current team.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "User left the team successfully"),

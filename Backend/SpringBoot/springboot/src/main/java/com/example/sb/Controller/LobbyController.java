@@ -56,7 +56,7 @@ public class LobbyController {
             @ApiResponse(responseCode = "200", description = "Players retrieved successfully"),
             @ApiResponse(responseCode = "404", description = "Lobby not found")
     })
-    @GetMapping("all/players/{lobbyId}")
+    @GetMapping("/allPlayers/{lobbyId}")
     public List<Player> getAllPlayersInLobby(
             @Parameter(description = "ID of the lobby to retrieve players from") @PathVariable Integer lobbyId) {
         return lobbyService.getAllPlayersInLobby(lobbyId);
