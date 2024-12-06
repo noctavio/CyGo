@@ -1,6 +1,5 @@
 package com.example.sb.Service;
 
-import com.example.sb.Constants.RankConstants;
 import com.example.sb.Model.Friends;
 import com.example.sb.Model.Settings;
 import com.example.sb.Model.TheProfile;
@@ -11,11 +10,9 @@ import com.example.sb.Repository.TheProfileRepository;
 import com.example.sb.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
-import org.springframework.http.ResponseEntity;
 import java.util.TreeMap;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;

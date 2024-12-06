@@ -3,14 +3,14 @@ package com.example.sb.Service;
 import com.example.sb.Controller.ChatController;
 import com.example.sb.Model.*;
 import com.example.sb.Repository.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import javax.swing.plaf.synth.SynthTextAreaUI;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @Service
@@ -25,8 +25,6 @@ public class LobbyService {
     private UserService userService;
     @Autowired
     private GobanRepository gobanRepository;
-    //@Autowired
-    //private TimerService timerService;
 
     public List<Lobby> getAllLobbies() {
         return lobbyRepository.findAll();
@@ -54,6 +52,7 @@ public class LobbyService {
         else {
             team1 = new Team(lobby, profile.getClub().getClubName(), true);
         }
+
         lobby.setTeam1(team1);
 
         Team emptyTeam2 = new Team(lobby,"-/-", false);
@@ -147,6 +146,7 @@ public class LobbyService {
             return ResponseEntity.ok(profile.getUsername() + " left the lobby!");
         }
         else {
+            // Handles lobby is not found
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Lobby not found!");
         }
     }
@@ -210,6 +210,7 @@ public class LobbyService {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cannot kick player as you are not host.");
         }
         else {
+            // Handles lobby is not found
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Lobby not found!");
         }
     }

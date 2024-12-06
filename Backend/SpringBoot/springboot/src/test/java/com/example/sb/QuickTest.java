@@ -94,28 +94,27 @@ public class QuickTest {
                 .then()
                 .statusCode(200);
 
-        // MAKE ALL PLAYERS SET READY, START GAME, END GAME, ELO TESTING
-            // MAKE ALL PLAYERS SET READY
-            given()
-                    .when()
-                    .put("/lobby/players/1/toggleReady")
-                    .then()
-                    .statusCode(200);
-            given()
-                    .when()
-                    .put("/lobby/players/2/toggleReady")
-                    .then()
-                    .statusCode(200);
-            given()
-                    .when()
-                    .put("/lobby/players/3/toggleReady")
-                    .then()
-                    .statusCode(200);
-            given()
-                    .when()
-                    .put("/lobby/players/4/toggleReady")
-                    .then()
-                    .statusCode(200);
+        // MAKE ALL PLAYERS SET READY
+        given()
+                .when()
+                .put("/lobby/players/1/toggleReady")
+                .then()
+                .statusCode(200);
+        given()
+                .when()
+                .put("/lobby/players/2/toggleReady")
+                .then()
+                .statusCode(200);
+        given()
+                .when()
+                .put("/lobby/players/3/toggleReady")
+                .then()
+                .statusCode(200);
+        given()
+                .when()
+                .put("/lobby/players/4/toggleReady")
+                .then()
+                .statusCode(200);
 
         // Initialize the game(as host) using the players in the lobby alongside whatever configuration.
         // 1, 3, 2, 4
