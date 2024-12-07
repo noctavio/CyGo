@@ -42,11 +42,17 @@ public class LobbyService {
     }
 
     public ResponseEntity<String> createFriendlyLobby(Integer userId) {
+        Team team1;
         TheProfile profile = userService.findProfileById(userId);
 
         // Initializes lobby with host
         Lobby lobby = new Lobby(profile.getUsername());
-        Team team1 = new Team(lobby, profile.getClub().getClubName(), true);
+        if (profile.getClub() == null) {
+            team1 = new Team(lobby, "-/-", true);
+        }
+        else {
+            team1 = new Team(lobby, profile.getClub().getClubName(), true);
+        }
         lobby.setTeam1(team1);
 
         Team emptyTeam2 = new Team(lobby,"-/-", false);

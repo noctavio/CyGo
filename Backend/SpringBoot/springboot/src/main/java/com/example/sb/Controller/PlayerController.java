@@ -23,7 +23,7 @@ public class PlayerController {
             @ApiResponse(responseCode = "200", description = "Players retrieved successfully"),
             @ApiResponse(responseCode = "404", description = "Team not found")
     })
-    @GetMapping("/{teamId}")
+    @GetMapping("/team/{teamId}")
     public List<Player> getPlayersFromTeam(
             @Parameter(description = "ID of the team to retrieve players from") @PathVariable Integer teamId) {
         return playerService.getAllPlayersFromTeam(teamId);
