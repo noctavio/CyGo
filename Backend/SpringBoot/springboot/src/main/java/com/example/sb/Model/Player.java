@@ -27,7 +27,14 @@ public class Player {
     private Boolean isTurn;
     private Boolean recentPassTurn;
     private Boolean hasAbandoned;
-    private Boolean finalizeClaim;
+
+    //@Temporal(TemporalType.TIMESTAMP)
+    //@Column(name = "startedTurn")
+    //private Date startTime;
+
+    //@Temporal(TemporalType.TIMESTAMP)
+    //@Column(name = "endedTurn")
+    //private Date endTime;
 
     @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "profile_id", referencedColumnName = "profile_id")
@@ -52,7 +59,6 @@ public class Player {
         this.muted = new ArrayList<>();
         this.recentPassTurn = false;
         this.hasAbandoned = false;
-        this.finalizeClaim = false;
     }
 
     public String getUsername() {
