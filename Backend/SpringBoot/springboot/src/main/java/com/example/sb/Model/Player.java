@@ -25,6 +25,8 @@ public class Player {
     private Boolean isReady;
     private Boolean castBlackVote;
     private Boolean isTurn;
+    private Boolean recentPassTurn;
+    private Boolean hasAbandoned;
 
     //@Temporal(TemporalType.TIMESTAMP)
     //@Column(name = "startedTurn")
@@ -55,6 +57,8 @@ public class Player {
         this.isReady = false;  // Players are not ready when they join
         this.isTurn = false;
         this.muted = new ArrayList<>();
+        this.recentPassTurn = false;
+        this.hasAbandoned = false;
     }
 
     public String getUsername() {
@@ -66,11 +70,11 @@ public class Player {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Player player = (Player) o;
-        return Objects.equals(player_id, player.player_id) && Objects.equals(isReady, player.isReady) && Objects.equals(castBlackVote, player.castBlackVote) && Objects.equals(isTurn, player.isTurn) && Objects.equals(profile, player.profile) && Objects.equals(team, player.team) && Objects.equals(muted, player.muted);
+        return Objects.equals(player_id, player.player_id) && Objects.equals(isReady, player.isReady) && Objects.equals(castBlackVote, player.castBlackVote) && Objects.equals(isTurn, player.isTurn) && Objects.equals(recentPassTurn, player.recentPassTurn) && Objects.equals(profile, player.profile) && Objects.equals(team, player.team) && Objects.equals(muted, player.muted);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(player_id, isReady, castBlackVote, isTurn, profile, team, muted);
+        return Objects.hash(player_id, isReady, castBlackVote, isTurn, recentPassTurn, profile, team, muted);
     }
 }

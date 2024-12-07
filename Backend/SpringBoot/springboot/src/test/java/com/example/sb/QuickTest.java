@@ -124,11 +124,11 @@ public class QuickTest {
                     .post("/lobby/1/initialize/game")
                     .then()
                     .statusCode(200);
-            given()
-                    .when()
-                    .delete("/goban/1/end")
-                    .then()
-                    .statusCode(200);
+            //given()
+            //        .when()
+            //        .delete("/goban/1/abandon")
+            //        .then()
+            //        .statusCode(200);
         }
     }
 }

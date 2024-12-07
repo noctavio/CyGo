@@ -44,42 +44,74 @@ public class GobanService {
         return null;
     }
 
-    public ResponseEntity<String> endGame(Integer lobbyId) {
+    public ResponseEntity<String> endGame(Integer lobbyId, boolean forfeit) {
         Optional<Lobby> lobbyOptional = lobbyRepository.findById(lobbyId);
         if (lobbyOptional.isEmpty()) {
             return ResponseEntity.ok("Wrong lobby id");
         }
+        String teamWinner;
+        boolean isTeam1Winner = false;
 
         Lobby lobby = lobbyOptional.get();
         Team team1 = lobby.getTeam1();
         Team team2 = lobby.getTeam2();
         Goban board = lobby.getGoban();
 
-        // Determine the winner
-        boolean isTeam1Winner = team1.getTeamScore() > team2.getTeamScore();
-        String winningTeamName = isTeam1Winner ? team1.getTeamName() : team2.getTeamName();
-        String winningPlayers = isTeam1Winner ?
-                team1.getPlayer1().getUsername() + "-|-" + team1.getPlayer2().getUsername() :
-                team2.getPlayer1().getUsername() + "-|-" + team2.getPlayer2().getUsername();
-        String teamWinner = winningTeamName + " (" + winningPlayers + ") wins the game.";
+        // Determine winner if some player abandoned
+        if (team1.getPlayer1().getHasAbandoned() || team1.getPlayer2().getHasAbandoned()) {
+            // Team 1 has a missing player; Team 2 wins
+            String winningTeamName = team2.getTeamName();
+            String winningPlayers = team2.getPlayer1().getUsername() + "-|-" + team2.getPlayer2().getUsername();
+            teamWinner = winningTeamName + " (" + winningPlayers + ") wins the game due to abandonment by " + team1.getTeamName() + ".";
+        }
+        else if (team2.getPlayer1().getHasAbandoned() || team2.getPlayer2().getHasAbandoned()) {
+            // Team 2 has a missing player; Team 1 wins
+            isTeam1Winner = true;
+            String winningTeamName = team1.getTeamName();
+            String winningPlayers = team1.getPlayer1().getUsername() + "-|-" + team1.getPlayer2().getUsername();
+            teamWinner = winningTeamName + " (" + winningPlayers + ") wins the game due to abandonment by " + team2.getTeamName() + ".";
+        }
+        else {
+            // Determine the winner based on scores
+            isTeam1Winner = team1.getTeamScore() > team2.getTeamScore();
+            String winningTeamName = isTeam1Winner ? team1.getTeamName() : team2.getTeamName();
+            String winningPlayers = isTeam1Winner ?
+                    team1.getPlayer1().getUsername() + "-|-" + team1.getPlayer2().getUsername() :
+                    team2.getPlayer1().getUsername() + "-|-" + team2.getPlayer2().getUsername();
+            teamWinner = winningTeamName + " (" + winningPlayers + ") wins the game.";
+        }
 
-        String finaleScores = "Final scores are, " + team1.getTeamName() + ": " + team1.getTeamScore() +
+        String finalScores = "Final scores are, " + team1.getTeamName() + ": " + team1.getTeamScore() +
                 " and " + team2.getTeamName() + ": " + team2.getTeamScore();
-
         // Update profiles
         updateTeamProfiles(team1, isTeam1Winner, team2);
         updateTeamProfiles(team2, !isTeam1Winner, team1);
+        saveAllProfiles(team1, team2);
 
+        if (forfeit) {
+            for (Player currentPlayer: lobby.getPlayersInLobby()){
+                if (currentPlayer.getHasAbandoned()) {
+                    Team currentTeam = currentPlayer.getTeam();
+                    if (currentTeam.getPlayer1() != null && currentTeam.getPlayer1().equals(currentPlayer)) {
+                        currentTeam.setPlayer1(null);
+                    }
+                    else if (currentTeam.getPlayer2() != null && currentTeam.getPlayer2().equals(currentPlayer)) {
+                        currentTeam.setPlayer2(null);
+                    }
+                    teamRepository.save(currentTeam);
+                    playerRepository.delete(currentPlayer);
+                }
+            }
+        }
         // Reset the lobby state
         resetLobbyState(lobby);
 
         // Save updated entities
         gobanRepository.delete(board);
         lobbyRepository.save(lobby);
-        saveAllProfiles(team1, team2);
         teamRepository.save(team1);
         teamRepository.save(team2);
-        return ResponseEntity.ok("Game over,\n " + teamWinner + "\n" + finaleScores);
+        return ResponseEntity.ok("Game over,\n " + teamWinner + "\n" + finalScores);
     }
 
     private void updateTeamProfiles(Team team, boolean isWinner, Team opponentTeam) {
@@ -106,7 +138,13 @@ public class GobanService {
         team.setTeamScore(0.0);
         team.setStoneCount(41);
 
-        List<Player> players = List.of(team.getPlayer1(), team.getPlayer2());
+        List<Player> players = new ArrayList<>();
+        if (team.getPlayer1() != null) {
+            players.add(team.getPlayer1());
+        }
+        if (team.getPlayer2() != null) {
+            players.add(team.getPlayer2());
+        }
         for (Player player : players) {
             player.setIsTurn(false);
             player.setIsReady(false);
@@ -127,6 +165,7 @@ public class GobanService {
     public ResponseEntity<String> placeAStone(Integer userId, Integer x, Integer y) {
         TheProfile profile = userService.findProfileById(userId);
         Player currentPlayer = playerRepository.findByProfile(profile);
+        currentPlayer.setRecentPassTurn(false);
         Goban goban = currentPlayer.getTeam().getLobby().getGoban();
         Team currentTeam = currentPlayer.getTeam();
 
@@ -215,13 +254,50 @@ public class GobanService {
         }
 
         if (currentPlayer.getIsTurn()) {
-            Goban goban = currentPlayer.getTeam().getLobby().getGoban();
+            int passCount = 0;
+            currentPlayer.setRecentPassTurn(true);
+            Lobby currentLobby = currentPlayer.getTeam().getLobby();
+            List<Player> playersInGame = currentLobby.getPlayersInLobby();
+            
+            Goban goban = currentLobby.getGoban();
+            for (Player player : playersInGame) {
+                if (player.getRecentPassTurn()){
+                    passCount++;
+                }
+            }
+            if (passCount == 4) {
+                endGame(currentLobby.getLobby_id(), false);
+                return ResponseEntity.ok(currentPlayer.getUsername() + " passed, everyone in the game has now passed in sequence GAME OVER.");
+            }
             String nextPlayerName = switchToNextPlayer(currentPlayer, goban.getPlayerIdTurnList());
 
             return ResponseEntity.ok(currentPlayer.getUsername() + " passed, it is now " + nextPlayerName + "'s turn." );
         }
 
         return ResponseEntity.ok("It is not " + currentPlayer.getUsername() + "'s turn, cannot pass." );
+    }
+
+    public ResponseEntity<String> abandonGame(Integer userId) {
+        TheProfile profile = userService.findProfileById(userId);
+        Player playerAbandoning = playerRepository.findByProfile(profile);
+        Lobby currentLobby = playerAbandoning.getTeam().getLobby();
+
+        if (!currentLobby.getIsGameInitialized()) {
+            return ResponseEntity.ok("Cannot abandon a game that has not been initialized, you must leave lobby instead.");
+        }
+        playerAbandoning.setHasAbandoned(true);
+        if (playerAbandoning.getUsername().equals(currentLobby.getHostName())) {
+            if (playerAbandoning.equals(playerAbandoning.getTeam().getPlayer1())) {
+                currentLobby.setHostName(playerAbandoning.getTeam().getPlayer2().getUsername());
+            }
+            else {
+                currentLobby.setHostName(playerAbandoning.getTeam().getPlayer1().getUsername());
+            }
+        }
+        playerRepository.save(playerAbandoning);
+
+        endGame(currentLobby.getLobby_id(), true);
+        return ResponseEntity.ok(playerAbandoning.getUsername() + " abandoned, game forfeited.");
     }
 
     //Helper Methods

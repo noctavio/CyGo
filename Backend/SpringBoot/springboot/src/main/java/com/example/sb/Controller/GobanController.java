@@ -51,16 +51,15 @@ public class GobanController {
         return gobanService.pass(userId);
     }
 
-    @Operation(summary = "End the game", description = "Ends the game for the specified lobby.")
+    @Operation(summary = "Allows player to abandon the game", description = "Ends the game for the lobby and removes player from the lobby/game.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Game ended successfully"),
-            @ApiResponse(responseCode = "404", description = "Lobby not found")
+            @ApiResponse(responseCode = "200", description = "Player abandoned successfully and game has closed"),
+            @ApiResponse(responseCode = "404", description = "Player not found")
     })
-    @DeleteMapping("/{lobbyId}/end")
-    public ResponseEntity<String> endGame(
-            @Parameter(description = "ID of the lobby where the game will end") @PathVariable Integer lobbyId) {
-        System.out.println("is there anybody out there");
-        return gobanService.endGame(lobbyId);
+    @DeleteMapping("/{userId}/abandon")
+    public ResponseEntity<String> abandonGame(
+            @Parameter(description = "ID of the player abandoning") @PathVariable Integer userId) {
+        return gobanService.abandonGame(userId);
     }
 }
 

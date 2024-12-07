@@ -124,9 +124,15 @@ public class LobbyService {
         Lobby lobby = teamBeingLeft.getLobby();
 
         if (lobby != null) {
-            if (leavingPlayer.getUsername().equals(lobby.getHostName())) {
+            if (lobby.getIsGameInitialized()) {
+                return ResponseEntity.ok("Cannot leave lobby, must abandon game instead which in turn will remove you from the lobby.");
+            }
+            if (lobby.getPlayersInLobby().size() > 1 && leavingPlayer.getUsername().equals(lobby.getHostName())) {
+                return ResponseEntity.ok("Cannot leave as host while players are in the lobby, transfer host or kick players.");
+            }
+            else if (leavingPlayer.getUsername().equals(lobby.getHostName()) && lobby.getPlayersInLobby().size() == 1) {
                 lobbyRepository.delete(lobby);
-                return ResponseEntity.ok("HOST left the lobby without transferring HOST privileges, lobby deleted!");
+                return ResponseEntity.ok("Lobby deleted!");
             }
             //TODO I couldn't get cascade to work here manually set to null to delete.
             if (teamBeingLeft.getPlayer1() != null && teamBeingLeft.getPlayer1().equals(leavingPlayer)) {
@@ -140,7 +146,6 @@ public class LobbyService {
             return ResponseEntity.ok(profile.getUsername() + " left the lobby!");
         }
         else {
-            // Handles lobby is not found
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Lobby not found!");
         }
     }
