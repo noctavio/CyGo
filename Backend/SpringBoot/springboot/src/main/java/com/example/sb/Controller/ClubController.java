@@ -1,6 +1,7 @@
 package com.example.sb.Controller;
 
 import com.example.sb.Model.Club;
+import com.example.sb.Repository.ClubRepository;
 import com.example.sb.Service.ClubService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -23,6 +24,8 @@ public class ClubController {
 
     @Autowired
     private ClubService clubService; // Service to manage club operations
+    @Autowired
+    private ClubRepository clubRepository;
 
     /**
      * Retrieve a list of all clubs.
@@ -54,6 +57,22 @@ public class ClubController {
         return clubService.getClubByID(id); // Fetch club by ID
     }
 
+    /**
+     * create a club.
+     *
+     * @param club a club json
+     * @return a success message.
+     */
+    @PostMapping("/create")
+    @Operation(summary = "Add new club", description = "create a new club.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Club added successfully"),
+            @ApiResponse(responseCode = "404", description = "Club not created")
+    })
+    public ResponseEntity<String> addClub(@RequestBody Club club) {
+        clubRepository.save(club);// Add a new club
+        return ResponseEntity.ok("Club added successfully.");
+    }
     /**
      * Add a member to a specific club.
      *

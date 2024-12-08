@@ -5,10 +5,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.context.annotation.Profile;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -23,23 +22,32 @@ public class GobanJoseki {
     @Column(name = "board_state", length = 1000)
     private String boardState;
     @Transient
-    private Stone[][] board;
+    private StoneJoseki[][] board;
 
 
     @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "joseki_id", referencedColumnName = "joseki_id")
+    @JoinColumn(name = "profile_id", referencedColumnName = "profile_id")
     @JsonIgnore
-    private Joseki joseki;
+    private TheProfile gobanProfile;
 
-    public GobanJoseki(Lobby lobby)  {
-        this.board = new Stone[9][9];
+    private boolean isBlack;
+    private String currentMove;
+
+    public GobanJoseki(TheProfile profile)  {
+        this.board = new StoneJoseki[9][9];
+        this.gobanProfile = profile;
+        this.isBlack = true;
+        this.currentMove = "0000000000";
 
         for (int i = 0; i < 9; i++) {
             for (int j = 0; j < 9; j++) {
-                this.board[i][j] = new Stone(this, i, j);
+                this.board[i][j] = new StoneJoseki(this, i, j);
             }
         }
         saveBoardString();
+    }
+    public StoneJoseki getStone(int x, int y){
+        return board[x][y];
     }
 
     // Setter for saving the board as a string
@@ -57,11 +65,17 @@ public class GobanJoseki {
 
         this.boardState = boardString.toString();
     }
+    public String getStoneJoseki(int x, int y){
+        return board[x][y].getStoneType();
+    }
+    public void setStone(int x, int y, StoneJoseki stone){
+        board[x][y] = stone;
+    }
 
     // Setter for creating a board object based off the saved string data
     public void loadMatrixFromBoardString() {
         // Split the boardState string by new lines to get each row
-        this.board = new Stone[9][9];
+        this.board = new StoneJoseki[9][9];
         String[] rows = this.boardState.trim().split("\n");
 
         for (int i = 0; i < 9; i++) {
@@ -70,7 +84,7 @@ public class GobanJoseki {
 
             for (int j = 0; j < 9; j++) {
                 // Create a new Stone object and set the board reference and coordinates
-                Stone stone = new Stone(this, i, j);
+                StoneJoseki stone = new StoneJoseki(this, i, j);
 
                 // Set stone attributes based on the parsed stoneType value
                 String type = stoneTypes[j];
@@ -110,11 +124,11 @@ public class GobanJoseki {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         GobanJoseki goban = (GobanJoseki) o;
-        return Objects.equals(board_id, goban.board_id) && Objects.equals(boardState, goban.boardState) && Objects.equals(playerIdTurnList, goban.playerIdTurnList) && Objects.deepEquals(board, goban.board) && Objects.equals(lobby, goban.lobby);
+        return Objects.equals(board_id, goban.board_id) && Objects.equals(boardState, goban.boardState) && Objects.deepEquals(board, goban.board) && Objects.equals(gobanProfile, goban.gobanProfile);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(board_id, boardState, playerIdTurnList, Arrays.deepHashCode(board), lobby);
+        return Objects.hash(board_id, boardState, Arrays.deepHashCode(board), gobanProfile);
     }
 }
