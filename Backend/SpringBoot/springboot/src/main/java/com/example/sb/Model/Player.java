@@ -28,14 +28,6 @@ public class Player {
     private Boolean recentPassTurn;
     private Boolean hasAbandoned;
 
-    //@Temporal(TemporalType.TIMESTAMP)
-    //@Column(name = "startedTurn")
-    //private Date startTime;
-
-    //@Temporal(TemporalType.TIMESTAMP)
-    //@Column(name = "endedTurn")
-    //private Date endTime;
-
     @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "profile_id", referencedColumnName = "profile_id")
     private TheProfile profile;
