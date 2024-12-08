@@ -21,11 +21,13 @@ public class User {
     private String username;
     private String password;
     private Boolean isLoggedIn;
+    private Boolean isAdmin;
 
-    public User (User user, String encodedPassword) {
-        this.username = user.getUsername();
+    public User (User userJSON, String encodedPassword) {
+        this.username = userJSON.getUsername();
         this.password = encodedPassword;
         this.isLoggedIn = false;
+        this.isAdmin = userJSON.getIsAdmin();
     }
 
     @Override
@@ -33,11 +35,11 @@ public class User {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return Objects.equals(user_id, user.user_id) && Objects.equals(username, user.username) && Objects.equals(password, user.password) && Objects.equals(isLoggedIn, user.isLoggedIn);
+        return Objects.equals(user_id, user.user_id) && Objects.equals(username, user.username) && Objects.equals(password, user.password) && Objects.equals(isLoggedIn, user.isLoggedIn) && Objects.equals(isAdmin, user.isAdmin);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(user_id, username, password, isLoggedIn);
+        return Objects.hash(user_id, username, password, isLoggedIn, isAdmin);
     }
 }

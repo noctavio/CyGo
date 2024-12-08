@@ -27,8 +27,8 @@ public class UserController {
     })
     @PostMapping("/register")
     public User registerUser(
-            @Parameter(description = "Details of the user to be registered") @RequestBody User user) {
-        return userService.registerUser(user);
+            @Parameter(description = "Details of the user to be registered") @RequestBody User userJSON) {
+        return userService.registerUser(userJSON);
     }
 
     @Operation(summary = "Get all users", description = "Fetches the list of all registered users.")

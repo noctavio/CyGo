@@ -33,9 +33,9 @@ public class UserService {
     @Autowired
     private UserDetailsServiceAutoConfiguration userDetailsServiceAutoConfiguration;
 
-    public User registerUser(User user) {
-        String encodedPassword = passwordEncoder.encode(user.getPassword());
-        User userObject = new User(user, encodedPassword);
+    public User registerUser(User userJSON) {
+        String encodedPassword = passwordEncoder.encode(userJSON.getPassword());
+        User userObject = new User(userJSON, encodedPassword);
 
         User savedUser = userRepository.save(userObject);
         theProfileService.updateProfileTable();

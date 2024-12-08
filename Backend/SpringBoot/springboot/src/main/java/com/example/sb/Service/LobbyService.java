@@ -232,7 +232,6 @@ public class LobbyService {
 
                     // Sets up the specific ordering for players based on which team is black.
                     if (team1.getIsBlack()) {
-                        team1.setStoneCount(40);
                         team2.setTeamScore(6.5);
                         team1.setIsTeamTurn(true);
                         team1PlayerStarter.setIsTurn(true);
@@ -245,7 +244,6 @@ public class LobbyService {
                         playerTurnList.add(team2.getPlayer2().getProfile().getUser().getUser_id());
                     }
                     else if (team2.getIsBlack()) {
-                        team2.setStoneCount(40);
                         team1.setTeamScore(6.5);
                         team2.setIsTeamTurn(true);
                         team2PlayerStarter.setIsTurn(true);

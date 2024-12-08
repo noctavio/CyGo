@@ -23,7 +23,6 @@ public class Team {
     private String teamName;
     private Double teamScore;
     private Integer playerCount;
-    private Integer stoneCount;
     private Boolean isTeamTurn;
     private long timeRemaining;
 
@@ -43,7 +42,6 @@ public class Team {
 
     public Team(Lobby lobby, String teamName, boolean isBlack) {
         this.isTeamTurn = false;
-        this.stoneCount = 41;
         this.lobby = lobby;
         this.teamName = teamName;
         this.isBlack = isBlack;

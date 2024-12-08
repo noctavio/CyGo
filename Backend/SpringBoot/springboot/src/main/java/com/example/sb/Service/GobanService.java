@@ -136,7 +136,6 @@ public class GobanService {
 
     private void resetTeamState(Team team) {
         team.setTeamScore(0.0);
-        team.setStoneCount(41);
 
         List<Player> players = new ArrayList<>();
         if (team.getPlayer1() != null) {
@@ -169,9 +168,9 @@ public class GobanService {
         Goban goban = currentPlayer.getTeam().getLobby().getGoban();
         Team currentTeam = currentPlayer.getTeam();
 
-        if (x < 0 || y < 0) {
-            //off the board placement check
-            return ResponseEntity.ok("Cannot place a a stone at (" + x + ", " + y + ")," );
+        if (x < 0 || y < 0 || x > 8 || y > 8) {
+            // Consolidated off-the-board placement check
+            return ResponseEntity.ok("Cannot place a stone at (" + x + ", " + y + "), as it is off the board.");
         }
 
         if (!currentPlayer.getTeam().getLobby().getIsGameInitialized()) {
@@ -182,7 +181,7 @@ public class GobanService {
             goban.loadMatrixFromBoardString();
             Stone[][] board = goban.getBoard();
 
-            if (x == 22 && y == 22) { // TODO clears board for testing only
+            if (x == 22 && y == 22) { // TODO clears board for testing only, CURRENTLY HAVE SET TO NOT WORK(out of bounds check)
                 for (int i = 0; i < board.length; i++) {
                     for (int j = 0; j < board[i].length; j++) {
                         Stone stone = board[i][j];
@@ -214,8 +213,6 @@ public class GobanService {
             }
 
             //timerService.stopTimerForTeam(currentTeam);
-            Integer stones = currentTeam.getStoneCount();
-            currentTeam.setStoneCount(stones - 1);
             currentTeam.setIsTeamTurn(false);
             board[x][y] = stone;
 
