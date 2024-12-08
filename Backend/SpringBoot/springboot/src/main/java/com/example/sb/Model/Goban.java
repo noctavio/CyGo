@@ -90,14 +90,6 @@ public class Goban {
                         stone.setStoneType("W");
                         stone.setIsCaptured(false);
                         break;
-                    case "Bc":
-                        stone.setStoneType("Bc");
-                        stone.setIsCaptured(true);
-                        break;
-                    case "Wc":
-                        stone.setStoneType("Wc");
-                        stone.setIsCaptured(true);
-                        break;
                     default:
                         throw new IllegalArgumentException("Unexpected stone type: " + type);
                 }

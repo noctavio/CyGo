@@ -30,6 +30,100 @@ public class GobanService {
     private static final int[] DIR_X = {-1, 1, 0, 0};
     private static final int[] DIR_Y = {0, 0, -1, 1};
 
+    private static final int BOARD_SIZE = 9;
+    private enum PointState { EMPTY, BLACK, WHITE, NEUTRAL }
+
+    public Map<PointState, Integer> countTerritories(Stone[][] board) {
+        boolean[][] visited = new boolean[BOARD_SIZE][BOARD_SIZE];
+        Map<PointState, Integer> territoryCount = new HashMap<>();
+        territoryCount.put(PointState.BLACK, 0);
+        territoryCount.put(PointState.WHITE, 0);
+        territoryCount.put(PointState.NEUTRAL, 0);
+
+        for (int x = 0; x < BOARD_SIZE; x++) {
+            for (int y = 0; y < BOARD_SIZE; y++) {
+                if (!visited[x][y] && board[x][y].getStoneType().equals("X")) {
+                    PointState owner = floodFill(x, y, visited, board);
+                    territoryCount.put(owner, territoryCount.get(owner) + 1);
+                }
+            }
+        }
+
+        return territoryCount;
+    }
+
+    private PointState floodFill(int x, int y, boolean[][] visited, Stone[][] board) {
+        Queue<int[]> queue = new LinkedList<>();
+        queue.add(new int[]{x, y});
+        visited[x][y] = true;
+
+        Set<Integer> borderingColors = new HashSet<>();
+        while (!queue.isEmpty()) {
+            int[] point = queue.poll();
+            int px = point[0], py = point[1];
+
+            for (int[] dir : new int[][]{{0, 1}, {1, 0}, {0, -1}, {-1, 0}}) {
+                int nx = px + dir[0], ny = py + dir[1];
+
+                if (nx >= 0 && ny >= 0 && nx < BOARD_SIZE && ny < BOARD_SIZE) {
+                    if (board[nx][ny].getStoneType().equals("X") && !visited[nx][ny]) {
+                        // Empty spot, continue flood fill
+                        visited[nx][ny] = true;
+                        queue.add(new int[]{nx, ny});
+                    }
+                    else if (!board[nx][ny].getStoneType().equals("X")) {
+                        // Encountered a non-empty stone, add its color
+                        String stoneType = board[nx][ny].getStoneType();
+                        if (stoneType.equals("B")) {
+                            borderingColors.add(1); // Black stone
+                        }
+                        else if (stoneType.equals("W")) {
+                            borderingColors.add(2); // White stone
+                        }
+                    }
+                }
+            }
+        }
+        // After flood fill is done, check the bordering colors
+        if (borderingColors.size() == 1) {
+            // If there's only one bordering color, the territory belongs to that color
+            return borderingColors.contains(1) ? PointState.BLACK : PointState.WHITE;
+        }
+        // If there are no bordering colors or multiple, the territory is neutral
+        return PointState.NEUTRAL;
+    }
+
+    public String calculateScores(Stone[][] board, Team team1, Team team2) {
+        double blackScore;
+        double whiteScore;
+        Map<PointState, Integer> territories = countTerritories(board);
+        int blackTerritory = territories.get(PointState.BLACK);
+        int whiteTerritory = territories.get(PointState.WHITE);
+
+        if (team1.getIsBlack()) {
+            blackScore = team1.getTeamScore();
+            whiteScore = team2.getTeamScore();
+
+            double finalBlackScore = blackTerritory + blackScore;
+            double finalWhiteScore = whiteTerritory + whiteScore;
+
+            return finalBlackScore > finalWhiteScore
+                    ? "Black wins by " + (finalBlackScore - finalWhiteScore) + " points."
+                    : "White wins by " + (finalWhiteScore - finalBlackScore) + " points.";
+        }
+        else {
+            whiteScore = team1.getTeamScore();
+            blackScore = team2.getTeamScore();
+
+            double finalBlackScore = blackTerritory + blackScore;
+            double finalWhiteScore = whiteTerritory + whiteScore;
+
+            return finalBlackScore > finalWhiteScore
+                    ? "Black wins by " + (finalBlackScore - finalWhiteScore) + " points."
+                    : "White wins by " + (finalWhiteScore - finalBlackScore) + " points.";
+        }
+    }
+
     public String getBoardState(Integer lobbyId) {
         Optional<Lobby> lobbyOptional = lobbyRepository.findById(lobbyId);
         if (lobbyOptional.isPresent()) {
@@ -45,44 +139,43 @@ public class GobanService {
     }
 
     public ResponseEntity<String> endGame(Integer lobbyId, boolean forfeit) {
+        String xWinsBy = "";
+        String finalScores = "";
+        String teamWinner = "";
         Optional<Lobby> lobbyOptional = lobbyRepository.findById(lobbyId);
         if (lobbyOptional.isEmpty()) {
             return ResponseEntity.ok("Wrong lobby id");
         }
-        String teamWinner;
         boolean isTeam1Winner = false;
 
         Lobby lobby = lobbyOptional.get();
         Team team1 = lobby.getTeam1();
         Team team2 = lobby.getTeam2();
-        Goban board = lobby.getGoban();
+        Goban goban = lobby.getGoban();
 
         // Determine winner if some player abandoned
         if (team1.getPlayer1().getHasAbandoned() || team1.getPlayer2().getHasAbandoned()) {
             // Team 1 has a missing player; Team 2 wins
             String winningTeamName = team2.getTeamName();
             String winningPlayers = team2.getPlayer1().getUsername() + "-|-" + team2.getPlayer2().getUsername();
-            teamWinner = winningTeamName + " (" + winningPlayers + ") wins the game due to abandonment by " + team1.getTeamName() + ".";
+            teamWinner = winningTeamName + " (" + winningPlayers + ") wins the game due to teammate abandonment by " + team1.getTeamName();
         }
         else if (team2.getPlayer1().getHasAbandoned() || team2.getPlayer2().getHasAbandoned()) {
             // Team 2 has a missing player; Team 1 wins
             isTeam1Winner = true;
             String winningTeamName = team1.getTeamName();
             String winningPlayers = team1.getPlayer1().getUsername() + "-|-" + team1.getPlayer2().getUsername();
-            teamWinner = winningTeamName + " (" + winningPlayers + ") wins the game due to abandonment by " + team2.getTeamName() + ".";
+            teamWinner = winningTeamName + " (" + winningPlayers + ") wins the game due to teammate abandonment by " + team2.getTeamName();
         }
         else {
-            // Determine the winner based on scores
-            isTeam1Winner = team1.getTeamScore() > team2.getTeamScore();
-            String winningTeamName = isTeam1Winner ? team1.getTeamName() : team2.getTeamName();
-            String winningPlayers = isTeam1Winner ?
-                    team1.getPlayer1().getUsername() + "-|-" + team1.getPlayer2().getUsername() :
-                    team2.getPlayer1().getUsername() + "-|-" + team2.getPlayer2().getUsername();
-            teamWinner = winningTeamName + " (" + winningPlayers + ") wins the game.";
+            goban.loadMatrixFromBoardString();
+            Stone[][] board = goban.getBoard();
+            xWinsBy = calculateScores(board, team1, team2);
+            xWinsBy = xWinsBy + "\n";
+            finalScores = xWinsBy + "Final scores are, " + team1.getTeamName() + ": " + team1.getTeamScore() +
+                    " and " + team2.getTeamName() + ": " + team2.getTeamScore();
         }
 
-        String finalScores = "Final scores are, " + team1.getTeamName() + ": " + team1.getTeamScore() +
-                " and " + team2.getTeamName() + ": " + team2.getTeamScore();
         // Update profiles
         updateTeamProfiles(team1, isTeam1Winner, team2);
         updateTeamProfiles(team2, !isTeam1Winner, team1);
@@ -107,11 +200,11 @@ public class GobanService {
         resetLobbyState(lobby);
 
         // Save updated entities
-        gobanRepository.delete(board);
+        gobanRepository.delete(goban);
         lobbyRepository.save(lobby);
         teamRepository.save(team1);
         teamRepository.save(team2);
-        return ResponseEntity.ok("Game over,\n " + teamWinner + "\n" + finalScores);
+        return ResponseEntity.ok("Game over. \n " + teamWinner + "\n" + finalScores);
     }
 
     private void updateTeamProfiles(Team team, boolean isWinner, Team opponentTeam) {
@@ -222,11 +315,8 @@ public class GobanService {
                     if (!board[i][j].getIsCaptured() && checkIfCaptured(board, i, j)) {
                         Stone capturedStone = board[i][j];
                         capturedStone.setIsCaptured(true);
-                        if (capturedStone.getStoneType().equals("B")) {
-                            capturedStone.setStoneType("Wc");
-                        }
-                        else if (capturedStone.getStoneType().equals("W")) {
-                            capturedStone.setStoneType("Bc");
+                        if (capturedStone.getStoneType().equals("B") || capturedStone.getStoneType().equals("W")) {
+                            capturedStone.setStoneType("X");
                         }
                         board[i][j] = capturedStone;
                         currentTeam.setTeamScore(currentTeam.getTeamScore() + 1);
@@ -253,6 +343,8 @@ public class GobanService {
         if (currentPlayer.getIsTurn()) {
             int passCount = 0;
             currentPlayer.setRecentPassTurn(true);
+            playerRepository.save(currentPlayer);
+
             Lobby currentLobby = currentPlayer.getTeam().getLobby();
             List<Player> playersInGame = currentLobby.getPlayersInLobby();
             
@@ -293,8 +385,8 @@ public class GobanService {
         }
         playerRepository.save(playerAbandoning);
 
-        endGame(currentLobby.getLobby_id(), true);
-        return ResponseEntity.ok(playerAbandoning.getUsername() + " abandoned, game forfeited.");
+        ResponseEntity<String> message = endGame(currentLobby.getLobby_id(), true);
+        return ResponseEntity.ok(playerAbandoning.getUsername() + " abandoned, game forfeited. \n" + message);
     }
 
     //Helper Methods
