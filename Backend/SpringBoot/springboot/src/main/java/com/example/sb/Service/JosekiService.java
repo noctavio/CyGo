@@ -59,4 +59,19 @@ public class JosekiService {
         return null;
 
     }
+    public Joseki getCurrentMove(String currentMove) {
+        List<Joseki> allJoseki = josekiRepository.findAll();
+
+
+        for (Joseki joseki : allJoseki) {
+            if (joseki.getMoveNumber().equals(currentMove)) {
+                return joseki;
+            }
+        }
+
+
+
+        return null;
+
+    }
 }

@@ -11,7 +11,6 @@ public class StoneJoseki {
 
     private String stoneType;
     private Boolean isCaptured;
-    //private Boolean isEye; //TODO idk maybe
     private Integer x,y;
 
     private GobanJoseki board;

@@ -18,6 +18,18 @@ public class GobanJosekiController {
 
     @Operation(summary = "Place a stone on the board", description = "Allows a user to place a stone on the board at a specified position.")
     @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Board created successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid position or user action"),
+            @ApiResponse(responseCode = "404", description = "User or board not found")
+    })
+    @PostMapping("/{username}")
+    public ResponseEntity<String> CreateBoard(
+            @Parameter(description = "creates a board for the specified user") @PathVariable String username) {
+        return gobanService.createBoard(username);
+    }
+
+    @Operation(summary = "Place a stone on the board", description = "Allows a user to place a stone on the board at a specified position.")
+    @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Stone placed successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid position or user action"),
             @ApiResponse(responseCode = "404", description = "User or board not found")
@@ -28,6 +40,29 @@ public class GobanJosekiController {
             @Parameter(description = "X-coordinate of the position") @PathVariable Integer x,
             @Parameter(description = "Y-coordinate of the position") @PathVariable Integer y) {
         return gobanService.placeAStone(username, x, y);
+    }
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Stone placed successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid position or user action"),
+            @ApiResponse(responseCode = "404", description = "User or board not found")
+    })
+    @PostMapping("/{username}/undo/{x}/{y}")
+    public ResponseEntity<String> undo(
+            @Parameter(description = "username of the user removing the stone") @PathVariable String username,
+            @Parameter(description = "X-coordinate of the position") @PathVariable Integer x,
+            @Parameter(description = "Y-coordinate of the position") @PathVariable Integer y) {
+        return gobanService.undoMove(username, x, y);
+    }
+    @Operation(summary = "Reset the current board state", description = "Retrieves the current state of the game board for the specified lobby.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Board state retrieved successfully"),
+            @ApiResponse(responseCode = "404", description = "Lobby not found")
+    })
+    @GetMapping("/reset/board/{username}")
+    public String ResetBoardState(
+            @Parameter(description = "username of user who sets the board") @PathVariable String username) {
+        gobanService.resetBoard(username);
+        return gobanService.getBoardState(username);
     }
 
     @Operation(summary = "Get the current board state", description = "Retrieves the current state of the game board for the specified lobby.")

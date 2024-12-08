@@ -61,6 +61,16 @@ public class GobanJosekiService {
         return ResponseEntity.ok("board is reset");
 
     }
+    public ResponseEntity<String> undoMove(String username, int x, int y) {
+        User user = userRepository.findByUsername(username);
+        TheProfile theProfile = theProfileRepository.findByUser(Optional.of(user));
+        GobanJoseki goban = gobanJosekiRepository.findByGobanProfile(theProfile);
+        Joseki currentjoseki = josekiService.getCurrentMove(goban.getCurrentMove());
+        goban.setStone(x, y,new StoneJoseki(goban, x, y));
+
+        goban.setCurrentMove(currentjoseki.getMoveNumber());
+        return ResponseEntity.ok("board is reset");
+    }
 
 
     public ResponseEntity<String> placeAStone(String username, int x, int y) {
