@@ -38,6 +38,9 @@ public class Team {
     @Column(name = "timestamp", nullable = false, updatable = false)
     private LocalDateTime timestamp = LocalDateTime.now(); // Timestamp when the move is made
 
+    @Column(name = "timestamp", nullable = false, updatable = false)
+    private LocalDateTime timestamp = LocalDateTime.now(); // Timestamp when the move is made
+
     @ManyToOne
     @JsonIgnore
     @JoinColumn(name = "lobby_id", referencedColumnName = "lobby_id")
