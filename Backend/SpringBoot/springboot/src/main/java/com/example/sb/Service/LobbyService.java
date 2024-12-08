@@ -3,8 +3,6 @@ package com.example.sb.Service;
 import com.example.sb.Controller.ChatController;
 import com.example.sb.Model.*;
 import com.example.sb.Repository.*;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
