@@ -30,11 +30,11 @@ public class QuickTest {
 
     @Test
     public void basicQuickTest() {
-        String user1JSON = "{\"username\": \"Dummy1\", \"password\": \"password1\"}";
-        String user2JSON = "{\"username\": \"Dummy2\", \"password\": \"password2\"}";
-        String user3JSON = "{\"username\": \"Dummy3\", \"password\": \"password3\"}";
-        String user4JSON = "{\"username\": \"Dummy4\", \"password\": \"password4\"}";
-        String user5JSON = "{\"username\": \"Dummy5\", \"password\": \"password5\"}";
+        String user1JSON = "{\"username\": \"Dummy1\", \"password\": \"password1\"}, \"isAdmin\": \"0\"}";
+        String user2JSON = "{\"username\": \"Dummy2\", \"password\": \"password2\"}, \"isAdmin\": \"0\"}";
+        String user3JSON = "{\"username\": \"Dummy3\", \"password\": \"password3\"}, \"isAdmin\": \"0\"}";
+        String user4JSON = "{\"username\": \"Dummy4\", \"password\": \"password4\"}, \"isAdmin\": \"0\"}";
+        String user5JSON = "{\"username\": \"Dummy5\", \"password\": \"password5\"}, \"isAdmin\": \"0\"}";
         // TODO use later to test timer and such.
         String newConfigJSON = "{ \"gameTime\": \"25\", \"hostName\": \"Dummy3\", \"isFriendly\": \"false\" }";
 
@@ -811,6 +811,40 @@ public class QuickTest {
                 .statusCode(200);
         given()
                 .when()
+                .post("/goban/2/place/7/8")//TODO BLACK
+                .then()
+                .statusCode(200);
+
+        given()// TODO FINAL VERIFICATION OCCURS HERE, no change!
+                .when()
+                .get("/lobby/teams/1")
+                .then()
+                .contentType(ContentType.JSON)
+                .body("[0].teamScore", equalTo(8.0F));
+        given()
+                .when()
+                .get("/lobby/teams/1")
+                .then()
+                .contentType(ContentType.JSON)
+                .body("[1].teamScore", equalTo(14.5F));
+
+        given()
+                .when()
+                .put("/goban/4/pass")// TODO WHITE
+                .then()
+                .statusCode(200);
+        given()
+                .when()
+                .put("/goban/1/pass") //TODO BLACK
+                .then()
+                .statusCode(200);
+        given()
+                .when()
+                .put("/goban/3/pass")// TODO WHITE
+                .then()
+                .statusCode(200);
+        given()
+                .when()
                 .put("/goban/2/pass")//TODO BLACK
                 .then()
                 .statusCode(200);
@@ -821,12 +855,7 @@ public class QuickTest {
                 .statusCode(200);
         // Set of turns end
 
-        // FINAL PASS
-        given()
-                .when()
-                .put("/goban/1/pass")//TODO BLACK
-                .then()
-                .statusCode(200);
+
 
     }
 }

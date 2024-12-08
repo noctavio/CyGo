@@ -1,5 +1,6 @@
 package com.example.sb.Service;
 
+import com.example.sb.Controller.ChatController;
 import com.example.sb.Model.*;
 import com.example.sb.Repository.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -44,6 +45,7 @@ public class GobanService {
             for (int y = 0; y < BOARD_SIZE; y++) {
                 if (!visited[x][y] && board[x][y].getStoneType().equals("X")) {
                     PointState owner = floodFill(x, y, visited, board);
+                    System.out.println(owner.name() + "captured at " +  "(" + x + "," + y + ")");
                     territoryCount.put(owner, territoryCount.get(owner) + 1);
                 }
             }
@@ -58,6 +60,8 @@ public class GobanService {
         visited[x][y] = true;
 
         Set<Integer> borderingColors = new HashSet<>();
+        boolean isNeutral = true;  // Default assumption: the region is neutral
+
         while (!queue.isEmpty()) {
             int[] point = queue.poll();
             int px = point[0], py = point[1];
@@ -67,12 +71,12 @@ public class GobanService {
 
                 if (nx >= 0 && ny >= 0 && nx < BOARD_SIZE && ny < BOARD_SIZE) {
                     if (board[nx][ny].getStoneType().equals("X") && !visited[nx][ny]) {
-                        // Empty spot, continue flood fill
+                        // Continue flood-fill for empty spots
                         visited[nx][ny] = true;
                         queue.add(new int[]{nx, ny});
                     }
                     else if (!board[nx][ny].getStoneType().equals("X")) {
-                        // Encountered a non-empty stone, add its color
+                        // Track bordering colors (Black or White stones)
                         String stoneType = board[nx][ny].getStoneType();
                         if (stoneType.equals("B")) {
                             borderingColors.add(1); // Black stone
@@ -84,43 +88,55 @@ public class GobanService {
                 }
             }
         }
-        // After flood fill is done, check the bordering colors
+
+        // Determine ownership based on the bordering colors
+        if (borderingColors.isEmpty()) {
+            return PointState.NEUTRAL;
+        }
+
+        // If the region is bordered only by black stones
         if (borderingColors.size() == 1) {
-            // If there's only one bordering color, the territory belongs to that color
             return borderingColors.contains(1) ? PointState.BLACK : PointState.WHITE;
         }
-        // If there are no bordering colors or multiple, the territory is neutral
+
+        // If the region is bordered by both black and white stones, it's neutral
         return PointState.NEUTRAL;
     }
 
     public String calculateScores(Stone[][] board, Team team1, Team team2) {
         double blackScore;
         double whiteScore;
+
+        // Count the territories
         Map<PointState, Integer> territories = countTerritories(board);
-        int blackTerritory = territories.get(PointState.BLACK);
-        int whiteTerritory = territories.get(PointState.WHITE);
+        int blackTerritory = territories.getOrDefault(PointState.BLACK, 0);
+        int whiteTerritory = territories.getOrDefault(PointState.WHITE, 0);
 
+        // Assuming team scores are the number of captured stones (prisoners)
+        double blackPrisoners = team1.getTeamScore(); // Assuming method that returns black prisoners count
+        double whitePrisoners = team2.getTeamScore(); // Assuming method that returns white prisoners count
+
+        // Determine the scores based on which team is black
         if (team1.getIsBlack()) {
-            blackScore = team1.getTeamScore();
-            whiteScore = team2.getTeamScore();
-
-            double finalBlackScore = blackTerritory + blackScore;
-            double finalWhiteScore = whiteTerritory + whiteScore;
-
-            return finalBlackScore > finalWhiteScore
-                    ? "Black wins by " + (finalBlackScore - finalWhiteScore) + " points."
-                    : "White wins by " + (finalWhiteScore - finalBlackScore) + " points.";
+            // Team1 is Black
+            whiteScore = whiteTerritory + whitePrisoners;
+            blackScore = blackTerritory + blackPrisoners;
         }
         else {
-            whiteScore = team1.getTeamScore();
-            blackScore = team2.getTeamScore();
+            // Team2 is Black
+            whiteScore = whiteTerritory + whitePrisoners;
+            blackScore = blackTerritory + blackPrisoners;
+        }
 
-            double finalBlackScore = blackTerritory + blackScore;
-            double finalWhiteScore = whiteTerritory + whiteScore;
+        // Output the scores for debugging
+        System.out.println("Black territory: " + blackTerritory + ", Black prisoners: " + blackPrisoners + ", Black score: " + blackScore);
+        System.out.println("White territory: " + whiteTerritory + ", White prisoners: " + whitePrisoners + ", White score: " + whiteScore);
 
-            return finalBlackScore > finalWhiteScore
-                    ? "Black wins by " + (finalBlackScore - finalWhiteScore) + " points."
-                    : "White wins by " + (finalWhiteScore - finalBlackScore) + " points.";
+        // Determine the winner
+        if (blackScore > whiteScore) {
+            return "Black wins by " + (blackScore - whiteScore) + " points.";
+        } else {
+            return "White wins by " + (whiteScore - blackScore) + " points.";
         }
     }
 
@@ -138,14 +154,11 @@ public class GobanService {
         return null;
     }
 
-    public ResponseEntity<String> endGame(Integer lobbyId, boolean forfeit) {
+    public void endGame(Integer lobbyId, boolean forfeit) {
         String xWinsBy = "";
-        String finalScores = "";
+        String bonusMessage = "";
         String teamWinner = "";
         Optional<Lobby> lobbyOptional = lobbyRepository.findById(lobbyId);
-        if (lobbyOptional.isEmpty()) {
-            return ResponseEntity.ok("Wrong lobby id");
-        }
         boolean isTeam1Winner = false;
 
         Lobby lobby = lobbyOptional.get();
@@ -172,7 +185,7 @@ public class GobanService {
             Stone[][] board = goban.getBoard();
             xWinsBy = calculateScores(board, team1, team2);
             xWinsBy = xWinsBy + "\n";
-            finalScores = xWinsBy + "Final scores are, " + team1.getTeamName() + ": " + team1.getTeamScore() +
+            bonusMessage = xWinsBy + "Final scores are, " + team1.getTeamName() + ": " + team1.getTeamScore() +
                     " and " + team2.getTeamName() + ": " + team2.getTeamScore();
         }
 
@@ -196,6 +209,8 @@ public class GobanService {
                 }
             }
         }
+
+        System.out.println(bonusMessage);
         // Reset the lobby state
         resetLobbyState(lobby);
 
@@ -204,7 +219,8 @@ public class GobanService {
         lobbyRepository.save(lobby);
         teamRepository.save(team1);
         teamRepository.save(team2);
-        return ResponseEntity.ok("Game over. \n " + teamWinner + "\n" + finalScores);
+        ChatController chat = new ChatController();
+        chat.sendGameUpdateToPlayers("[ANNOUNCER]: Game over. \n " + teamWinner + "\n" + bonusMessage);
     }
 
     private void updateTeamProfiles(Team team, boolean isWinner, Team opponentTeam) {
@@ -255,6 +271,7 @@ public class GobanService {
     }
 
     public ResponseEntity<String> placeAStone(Integer userId, Integer x, Integer y) {
+        ChatController chat = new ChatController();
         TheProfile profile = userService.findProfileById(userId);
         Player currentPlayer = playerRepository.findByProfile(profile);
         currentPlayer.setRecentPassTurn(false);
@@ -278,7 +295,6 @@ public class GobanService {
                 for (int i = 0; i < board.length; i++) {
                     for (int j = 0; j < board[i].length; j++) {
                         Stone stone = board[i][j];
-                        stone.setIsCaptured(false);
                         stone.setStoneType("X");
                     }
                 }
@@ -304,22 +320,25 @@ public class GobanService {
                     return ResponseEntity.ok("Cannot place a a stone at (" + x + ", " + y + "), as it is occupied." );
                 }
             }
+            chat.sendGameUpdateToPlayers("[ANNOUNCER]: " + currentPlayer.getUsername() + " placed a stone!");
 
             //timerService.stopTimerForTeam(currentTeam);
             currentTeam.setIsTeamTurn(false);
             board[x][y] = stone;
 
+            // Focus only on opposite color groups
+            String lastStoneType = stone.getStoneType();
+            String oppositeStoneType = lastStoneType.equals("B") ? "W" : "B";
+
             for (int i = 0; i < board.length; i++) {
                 for (int j = 0; j < board[i].length; j++) {
-                    // Check if it's not already set to captured, but has been deemed captured then proceed and adjust board/points!
-                    if (!board[i][j].getIsCaptured() && checkIfCaptured(board, i, j)) {
-                        Stone capturedStone = board[i][j];
-                        capturedStone.setIsCaptured(true);
-                        if (capturedStone.getStoneType().equals("B") || capturedStone.getStoneType().equals("W")) {
-                            capturedStone.setStoneType("X");
+                    // Only check opposite color stones that haven't been captured
+                    if (board[i][j].getStoneType().equals(oppositeStoneType)) {
+
+                        if (checkIfCaptured(board, i, j, currentTeam)) {
+                            chat.sendGameUpdateToPlayers("[ANNOUNCER]: " + currentPlayer.getUsername() + " captured stone(s)!");
+                            break;  // Stop after capturing a group to avoid multiple captures
                         }
-                        board[i][j] = capturedStone;
-                        currentTeam.setTeamScore(currentTeam.getTeamScore() + 1);
                     }
                 }
             }
@@ -327,7 +346,9 @@ public class GobanService {
             String nextPlayerName = switchToNextPlayer(currentPlayer,goban.getPlayerIdTurnList());
             teamRepository.save(currentTeam);
             gobanRepository.save(goban);
-            return ResponseEntity.ok(currentPlayer.getUsername() + " placed a stone, it is now " + nextPlayerName + "'s turn.");
+            chat.sendGameUpdateToPlayers("[ANNOUNCER]: It is now " + nextPlayerName + "'s turn!");
+
+            return ResponseEntity.ok("Stone placed successfully.");
         }
         return ResponseEntity.ok("It is not " + currentPlayer.getUsername() + "'s turn, cannot place a stone." );
     }
@@ -360,6 +381,9 @@ public class GobanService {
             }
             String nextPlayerName = switchToNextPlayer(currentPlayer, goban.getPlayerIdTurnList());
 
+            ChatController chat = new ChatController();
+            chat.sendGameUpdateToPlayers("[ANNOUNCER]: " + currentPlayer.getUsername() + " passed, it is now " + nextPlayerName + "'s turn!");
+
             return ResponseEntity.ok(currentPlayer.getUsername() + " passed, it is now " + nextPlayerName + "'s turn." );
         }
 
@@ -385,8 +409,8 @@ public class GobanService {
         }
         playerRepository.save(playerAbandoning);
 
-        ResponseEntity<String> message = endGame(currentLobby.getLobby_id(), true);
-        return ResponseEntity.ok(playerAbandoning.getUsername() + " abandoned, game forfeited. \n" + message);
+        endGame(currentLobby.getLobby_id(), true);
+        return ResponseEntity.ok("You abandoned the game.");
     }
 
     //Helper Methods
@@ -416,54 +440,67 @@ public class GobanService {
         return nextPlayer.getUsername();
     }
 
-    // Checks if a stone is captured
-    public boolean checkIfCaptured(Stone[][] board, int x, int y) {
+    public boolean checkIfCaptured(Stone[][] board, int x, int y, Team currentTeam) {
         String stone = board[x][y].getStoneType();
         if (stone.equals("X")) {
             return false;  // No stone at position
         }
 
-        // Perform a DFS/BFS to find the group of stones
-        boolean[][] visited = new boolean[board.length][board[0].length];
+        // Perform a breadth-first search to find the group of stones
+        Set<String> visited = new HashSet<>();
         Set<String> group = new HashSet<>();
         Set<String> liberties = new HashSet<>();
-        exploreGroup(board, x, y, stone, visited, group, liberties);
 
-        // If there are no liberties, the group is captured
-        return liberties.isEmpty();
-    }
+        Queue<int[]> queue = new LinkedList<>();
+        queue.offer(new int[]{x, y});
 
-    // Explores a group of connected stones and its liberties
-    private void exploreGroup(Stone[][] board, int x, int y, String stone, boolean[][] visited, Set<String> group, Set<String> liberties) {
-        if (x < 0 || x >= board.length || y < 0 || y >= board[0].length || visited[x][y] || !board[x][y].getStoneType().equals(stone)) {
-            return;  // Out of bounds, already visited, or not the same stone
-        }
+        while (!queue.isEmpty()) {
+            int[] current = queue.poll();
+            int curX = current[0];
+            int curY = current[1];
+            String key = curX + "," + curY;
 
-        visited[x][y] = true;
-        group.add(x + "," + y);
+            if (visited.contains(key) || !board[curX][curY].getStoneType().equals(stone)) {
+                continue;
+            }
 
-        // Check all adjacent positions for liberties or more stones in the group
-        for (int i = 0; i < 4; i++) {
-            int newX = x + DIR_X[i];
-            int newY = y + DIR_Y[i];
+            visited.add(key);
+            group.add(key);
 
-            if (newX >= 0 && newX < board.length && newY >= 0 && newY < board[0].length) {
-                if (board[newX][newY].getStoneType().equals("X")) {
-                    liberties.add(newX + "," + newY);  // Add liberty (empty space)
-                } else if (board[newX][newY].getStoneType().equals(stone)) {
-                    exploreGroup(board, newX, newY, stone, visited, group, liberties);  // Recursively explore group
+            // Check all adjacent positions for liberties or more stones in the group
+            for (int i = 0; i < 4; i++) {
+                int newX = curX + DIR_X[i];
+                int newY = curY + DIR_Y[i];
+
+                if (newX >= 0 && newX < board.length && newY >= 0 && newY < board[0].length) {
+                    String newKey = newX + "," + newY;
+
+                    if (board[newX][newY].getStoneType().equals("X")) {
+                        liberties.add(newKey);  // Add liberty (empty space)
+                    }
+                    else if (board[newX][newY].getStoneType().equals(stone) && !visited.contains(newKey)) {
+                        queue.offer(new int[]{newX, newY});  // Add to exploration queue
+                    }
                 }
             }
         }
-    }
 
-    // Capture the group of stones(not complete)
-    public void captureGroup(Stone[][] board, Set<String> group) {
-        for (String position : group) {
-            String[] pos = position.split(",");
-            int x = Integer.parseInt(pos[0]);
-            int y = Integer.parseInt(pos[1]);
-            board[x][y].setStoneType("X");  // Remove the stone //TODO implement capture type, Bc/Wc
+        // If there are no liberties, capture the group
+        if (liberties.isEmpty()) {
+            // Use the group set to specifically capture only the stones in this group
+            for (String groupKey : group) {
+                String[] coords = groupKey.split(",");
+                int groupX = Integer.parseInt(coords[0]);
+                int groupY = Integer.parseInt(coords[1]);
+
+                Stone capturedStone = board[groupX][groupY];
+                capturedStone.setStoneType("X");
+                board[groupX][groupY] = capturedStone;
+                currentTeam.setTeamScore(currentTeam.getTeamScore() + 1);
+            }
+            return true;
         }
+
+        return false;
     }
 }

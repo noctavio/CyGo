@@ -215,4 +215,17 @@ public class ChatController {
         }
         return sb.toString();
     }
+
+    // Method to send message to all connected clients (WebSocket users)
+    public void sendGameUpdateToPlayers(String message) {
+        // Iterate over all WebSocket sessions and send the message
+        sessionUsernameMap.forEach((session, username) -> {
+            try {
+                // Send the update message to the current session
+                session.getBasicRemote().sendText(message);
+            } catch (IOException e) {
+                logger.error("Error sending message to session: " + e.getMessage(), e);
+            }
+        });
+    }
 }

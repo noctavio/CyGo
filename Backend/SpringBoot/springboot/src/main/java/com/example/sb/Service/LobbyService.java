@@ -1,9 +1,8 @@
 package com.example.sb.Service;
 
+import com.example.sb.Controller.ChatController;
 import com.example.sb.Model.*;
 import com.example.sb.Repository.*;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -199,12 +198,13 @@ public class LobbyService {
                 }
                 teamRepository.save(targetTeam);
                 playerRepository.delete(playerBeingKicked);
-                return ResponseEntity.ok(profile.getUsername() + " was kicked from the lobby!");
+                ChatController chat = new ChatController();
+                chat.sendGameUpdateToPlayers("[ANNOUNCER]: " + profile.getUsername() + " was kicked from the lobby!");
+                return ResponseEntity.ok("You kicked a player from the lobby!");
             }
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cannot kick player as you are not host.");
         }
         else {
-            // Handles lobby is not found
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Lobby not found!");
         }
     }
@@ -231,6 +231,7 @@ public class LobbyService {
                     List<Integer> playerTurnList = goban.getPlayerIdTurnList();
 
                     // Sets up the specific ordering for players based on which team is black.
+                    ChatController chat = new ChatController();
                     if (team1.getIsBlack()) {
                         team2.setTeamScore(6.5);
                         team1.setIsTeamTurn(true);
@@ -242,6 +243,7 @@ public class LobbyService {
                         playerTurnList.add(team2PlayerStarter.getProfile().getUser().getUser_id());
                         playerTurnList.add(team1.getPlayer2().getProfile().getUser().getUser_id());
                         playerTurnList.add(team2.getPlayer2().getProfile().getUser().getUser_id());
+                        chat.sendGameUpdateToPlayers("[ANNOUNCER]: Game has been initialized! \n"  + team1.getTeamName() + "is starting first!" );
                     }
                     else if (team2.getIsBlack()) {
                         team1.setTeamScore(6.5);
@@ -253,6 +255,8 @@ public class LobbyService {
                         playerTurnList.add(team1PlayerStarter.getProfile().getUser().getUser_id());
                         playerTurnList.add(team2.getPlayer2().getProfile().getUser().getUser_id());
                         playerTurnList.add(team1.getPlayer2().getProfile().getUser().getUser_id());
+
+                        chat.sendGameUpdateToPlayers("[ANNOUNCER]: Game has been initialized! \n"  + team2.getTeamName() + "is starting first!" );
                     }
                     lobby.setGoban(goban);
                     lobby.setIsGameInitialized(true);

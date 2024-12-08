@@ -9,8 +9,6 @@ import java.util.Objects;
 public class Stone {
 
     private String stoneType;
-    private Boolean isCaptured;
-    //private Boolean isEye; //TODO idk maybe
     private Integer x,y;
 
     private Goban board;
@@ -18,7 +16,6 @@ public class Stone {
     public Stone(Goban board, Integer x, Integer y) {
         this.board = board;
         this.stoneType = "X";
-        this.isCaptured = false;
         this.x = x;
         this.y = y;
     }
@@ -28,11 +25,11 @@ public class Stone {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Stone stone = (Stone) o;
-        return Objects.equals(stoneType, stone.stoneType) && Objects.equals(isCaptured, stone.isCaptured) && Objects.equals(x, stone.x) && Objects.equals(y, stone.y) && Objects.equals(board, stone.board);
+        return Objects.equals(stoneType, stone.stoneType) && Objects.equals(x, stone.x) && Objects.equals(y, stone.y) && Objects.equals(board, stone.board);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(stoneType, isCaptured, x, y, board);
+        return Objects.hash(stoneType, x, y, board);
     }
 }

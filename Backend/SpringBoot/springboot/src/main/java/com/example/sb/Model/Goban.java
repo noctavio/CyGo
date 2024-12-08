@@ -80,15 +80,12 @@ public class Goban {
                 switch (type) {
                     case "X":
                         stone.setStoneType("X");
-                        stone.setIsCaptured(false);
                         break;
                     case "B":
                         stone.setStoneType("B");
-                        stone.setIsCaptured(false);
                         break;
                     case "W":
                         stone.setStoneType("W");
-                        stone.setIsCaptured(false);
                         break;
                     default:
                         throw new IllegalArgumentException("Unexpected stone type: " + type);

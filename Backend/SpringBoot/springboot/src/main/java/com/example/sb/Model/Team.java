@@ -5,6 +5,7 @@ import lombok.*;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -25,6 +26,9 @@ public class Team {
     private Integer playerCount;
     private Boolean isTeamTurn;
     private long timeRemaining;
+
+    @Column(name = "timestamp", nullable = false, updatable = false)
+    private LocalDateTime timestamp = LocalDateTime.now(); // Timestamp when the move is made
 
     @ManyToOne
     @JsonIgnore
