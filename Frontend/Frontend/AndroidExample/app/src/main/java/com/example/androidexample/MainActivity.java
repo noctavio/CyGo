@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             startActivity(intent);
         }
         else if (view.getId() == R.id.Welcome) {
-            Intent intent = new Intent(MainActivity.this, PreLogin.class);
+            Intent intent = new Intent(MainActivity.this, Welcome.class);
             startActivity(intent);
         }
     }

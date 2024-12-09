@@ -18,6 +18,15 @@
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
         </activity>
 
+        <activity android:name=".AuthorsActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+        </activity>
+
+        <activity android:name=".Welcome"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+        </activity>
+
+
         <activity android:name=".Club"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
         </activity>
@@ -61,11 +70,6 @@
             android:name=".Settings"
             android:theme="@style/Theme.AppCompat.Light"
             android:exported="true" />
-        <activity
-            android:name=".PreLogin"
-            android:theme="@style/Theme.AppCompat.Light"
-            android:exported="true" />
-
 
         <activity
             android:name=".MainActivity"
