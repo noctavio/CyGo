@@ -5,6 +5,7 @@ import lombok.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
@@ -22,12 +23,25 @@ public class User {
     private String password;
     private Boolean isLoggedIn;
     private Boolean isAdmin;
+    private Boolean adminPassReset;
+    private Boolean adminNameReset;
+
+    @Column(name = "banTimestamp")
+    private LocalDateTime banTimeStamp;
+    @Column(name = "loginAttemptTimeststamp")
+    private LocalDateTime liftBanTimestamp;
+    private Long banLength;
 
     public User (User userJSON, String encodedPassword) {
         this.username = userJSON.getUsername();
         this.password = encodedPassword;
         this.isLoggedIn = false;
-        this.isAdmin = userJSON.getIsAdmin();
+        this.isAdmin = false;
+        this.adminPassReset = false;
+        this.adminNameReset = false;
+        this.banTimeStamp = null;
+        this.liftBanTimestamp = null;
+        this.banLength = 0L;
     }
 
     @Override

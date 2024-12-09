@@ -71,6 +71,7 @@ public class ClubService {
             throw new ResourceNotFoundException("Club not found with id: " + clubId);
         }
     }
+
     public boolean updateMemberInClub(int clubId, String oldMemberName, String newMemberName) {
         Optional<Club> optionalClub = clubRepository.findById(clubId);
         if (optionalClub.isPresent()) {

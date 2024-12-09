@@ -26,8 +26,6 @@ public class TeamService {
     private PlayerRepository playerRepository;
     @Autowired
     private LobbyRepository lobbyRepository;
-    //@Autowired
-    //private TimerService timerService;
 
     public Long getTimer(Integer teamId) {
         Optional<Team> teamOptional = teamRepository.findById(teamId);

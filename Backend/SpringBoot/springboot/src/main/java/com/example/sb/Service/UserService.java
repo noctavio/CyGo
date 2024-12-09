@@ -7,12 +7,13 @@ import com.example.sb.Repository.PlayerRepository;
 import com.example.sb.Repository.TheProfileRepository;
 import com.example.sb.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,30 +31,116 @@ public class UserService {
     private PlayerRepository playerRepository;
 
     private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-    @Autowired
-    private UserDetailsServiceAutoConfiguration userDetailsServiceAutoConfiguration;
 
-    public User registerUser(User userJSON) {
+    public ResponseEntity<String> registerUser(User userJSON) {
+        // Validate username input
+        if (userJSON.getUsername() == null || userJSON.getUsername().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Username cannot be null or empty.");
+        }
+
+        // Check if username already exists
+        if (getByUsername(userJSON.getUsername()) != null) {
+            return ResponseEntity.badRequest().body("Username is already in use! Please choose a different username.");
+        }
+
+        // Validate password input
+        if (userJSON.getPassword() == null || userJSON.getPassword().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Password cannot be null or empty.");
+        }
+
+        // Encode the password and create a new user object
         String encodedPassword = passwordEncoder.encode(userJSON.getPassword());
         User userObject = new User(userJSON, encodedPassword);
 
-        User savedUser = userRepository.save(userObject);
+        // Save the user and update the profile table
+        userRepository.save(userObject);
         theProfileService.updateProfileTable();
-        return savedUser;
+        return ResponseEntity.ok("User successfully registered!");
     }
 
-    public ResponseEntity<String> authenticateUser(String username, String password) {
+    public String authenticateUser(String username, String password, boolean isLoginAttempt) {
         User user = userRepository.findByUsername(username);
-
-        if (user != null && passwordEncoder.matches(password, user.getPassword())) {
-            if (user.getIsLoggedIn()) {
-                return ResponseEntity.ok("User is already logged in...");
-            }
-            user.setIsLoggedIn(true);
-            userRepository.save(user);
-            return ResponseEntity.ok("Login successful");
+        if (user == null) {
+            return "Invalid credentials";
         }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+
+        if (user.getAdminNameReset() || user.getAdminPassReset()) {
+            if (user.getAdminNameReset() && user.getAdminPassReset()) {
+                return "Username and Password were reset by an admin, please update both.";
+            }
+            else if (user.getAdminNameReset()) {
+                return "Username was reset by an admin, please update username.";
+            }
+            else {
+                return "Password was reset by an admin, please update password.";
+            }
+        }
+
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            return "Invalid credentials";
+        }
+
+        if (user.getIsLoggedIn()) {
+            return "User is already logged in...";
+        }
+        if (user.getLiftBanTimestamp() != null && user.getBanTimeStamp() != null) {
+            if (isLoginAttempt && LocalDateTime.now().isBefore(user.getLiftBanTimestamp())) {
+                user.setBanTimeStamp(LocalDateTime.now());
+                userRepository.save(user);
+                return "You are still banned";
+            }
+        }
+        user.setLiftBanTimestamp(null);
+        user.setBanTimeStamp(null);
+
+        user.setIsLoggedIn(isLoginAttempt);
+        userRepository.save(user);
+        return "User authentication successful.";
+    }
+
+    public ResponseEntity<String> banUser(Integer potentialAdminId, String username, Integer banLengthMinutes) {
+        User targetUser = getByUsername(username);
+        if (targetUser != null) {
+            if (verifyIfAdmin(potentialAdminId)) {
+                if (!targetUser.getIsLoggedIn()) {
+                    // Convert banLengthMinutes (Integer) to milliseconds (Long)
+                    long banLength = (long) banLengthMinutes * 60 * 1000;
+
+                    // Set the ban timestamp to the current time and calculate lift time
+                    targetUser.setBanLength(banLength);
+                    targetUser.setBanTimeStamp(LocalDateTime.now());
+                    userRepository.save(targetUser);;
+                    targetUser.setLiftBanTimestamp(targetUser.getBanTimeStamp().plus(banLength, ChronoUnit.MILLIS));
+
+                    // Save the updated user details
+                    userRepository.save(targetUser);
+
+                    return ResponseEntity.ok("User banned for " + banLengthMinutes + " minutes!");
+                }
+                return ResponseEntity.ok("Target user is currently logged in, target must be logged out to proceed.");
+            }
+            return ResponseEntity.ok("User does not have admin privileges.");
+        }
+        return ResponseEntity.ok("User does not exist...");
+    }
+
+    public ResponseEntity<String> toggleAdmin(Integer userId) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (userOptional.isPresent()) {
+            String msg = "";
+            User user = userOptional.get();
+            if (user.getIsAdmin()) {
+                user.setIsAdmin(false);
+                msg = " administrator privileges have been revoked.";
+            }
+            else {
+                user.setIsAdmin(true);
+                msg = " has been given administrator privileges.";
+            }
+            userRepository.save(user);
+            return ResponseEntity.ok(user.getUsername() + msg);
+        }
+        return ResponseEntity.ok("User not found.");
     }
 
     public ResponseEntity<String> logoutUser(Integer userId) {
@@ -93,13 +180,95 @@ public class UserService {
         return userRepository.findByUsername(username);
     }
 
-    public ResponseEntity<String> deleteByID(Integer userId) {
-        if (userRepository.findById(userId).isPresent()) {
-            TheProfile profileToDelete = findProfileById(userId);
+    public ResponseEntity<String> deleteByID(Integer potentialAdminId, Integer userId) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (userOptional.isPresent()) {
+            if (verifyIfAdmin(potentialAdminId)) {
+                User user = userOptional.get();
+                if (!user.getIsLoggedIn()) {
+                    TheProfile profileToDelete = findProfileById(userId);
 
-            profileRepository.delete(profileToDelete);
-            userRepository.deleteById(userId);
-            return ResponseEntity.ok("User deleted");
+                    profileRepository.delete(profileToDelete);
+                    userRepository.deleteById(userId);
+                    return ResponseEntity.ok("User deleted");
+                }
+                return ResponseEntity.ok("Target user is currently logged in, target must be logged out to proceed with deletion.");
+            }
+            return ResponseEntity.ok("User does not have admin privileges.");
+        }
+        return ResponseEntity.ok("User does not exist...");
+    }
+
+    public ResponseEntity<String> userResetDetails(String username, String password, User userJSON) {
+        // Validate input
+        if (username == null || username.isEmpty()) {
+            return ResponseEntity.badRequest().body("Username cannot be null or empty.");
+        }
+        if (password == null || password.isEmpty()) {
+            return ResponseEntity.badRequest().body("Password cannot be null or empty.");
+        }
+
+        User user = getByUsername(username);
+        if (user == null) {
+            return ResponseEntity.badRequest().body("User does not exist.");
+        }
+
+        // Check if the user is logged in
+        if (user.getIsLoggedIn()) {
+            return ResponseEntity.badRequest().body(
+                    "Target user is currently logged in. Cannot reset here. Use the login screen or settings screen."
+            );
+        }
+
+        // Authenticate the user
+        if (!authenticateUser(username, password, false).equals("User authentication successful.")) {
+            return ResponseEntity.badRequest().body("Old username/password does not match.");
+        }
+
+        boolean updated = false;
+
+        // Update username if provided and valid
+        if (userJSON.getUsername() != null && !userJSON.getUsername().isEmpty()) {
+            user.setUsername(userJSON.getUsername());
+            user.setAdminNameReset(false);
+            updated = true;
+        }
+
+        // Update password if provided and valid
+        if (userJSON.getPassword() != null && !userJSON.getPassword().isEmpty()) {
+            PasswordEncoder encoder = new BCryptPasswordEncoder();
+            user.setPassword(encoder.encode(userJSON.getPassword()));
+            user.setAdminPassReset(false);
+            updated = true;
+        }
+
+        if (!updated) {
+            return ResponseEntity.badRequest().body("You must provide a valid new username or password.");
+        }
+
+        userRepository.save(user);
+        return ResponseEntity.ok("User credentials updated successfully.");
+    }
+
+    public ResponseEntity<String> adminResetUserDetails(Integer potentialAdminId, Integer userId, User userJSON) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (userOptional.isPresent()) {
+            if (verifyIfAdmin(potentialAdminId)) {
+                User user = userOptional.get();
+                if (!user.getIsLoggedIn()) {
+                    if (userJSON.getAdminNameReset()) {
+                        user.setAdminNameReset(true);
+                    }
+                    if (userJSON.getAdminPassReset()) {
+                        user.setAdminPassReset(true);
+                    }
+
+                    userRepository.save(user);
+                    return ResponseEntity.ok("User deleted");
+                }
+                return ResponseEntity.ok("Target user is currently logged in, target must be logged out to proceed with deletion.");
+            }
+            return ResponseEntity.ok("User does not have admin privileges.");
         }
         return ResponseEntity.ok("User does not exist...");
     }
@@ -126,5 +295,14 @@ public class UserService {
             throw new RuntimeException("Player not found for specified profile ");
         }
         return player;
+    }
+
+    public Boolean verifyIfAdmin (Integer potentialAdminId) {
+        Optional<User> userOptional = userRepository.findById(potentialAdminId);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            return user.getIsAdmin();
+        }
+        return false;
     }
 }

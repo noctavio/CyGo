@@ -26,7 +26,7 @@ public class UserController {
             @ApiResponse(responseCode = "400", description = "Invalid user input")
     })
     @PostMapping("/register")
-    public User registerUser(
+    public ResponseEntity<String> registerUser(
             @Parameter(description = "Details of the user to be registered") @RequestBody User userJSON) {
         return userService.registerUser(userJSON);
     }
@@ -63,10 +63,21 @@ public class UserController {
             @ApiResponse(responseCode = "401", description = "Invalid credentials")
     })
     @PutMapping("/login/{username}/{password}")
-    public ResponseEntity<String> login(
+    public String login(
             @Parameter(description = "Username of the user") @PathVariable String username,
             @Parameter(description = "Password of the user") @PathVariable String password) {
-        return userService.authenticateUser(username, password);
+        return userService.authenticateUser(username, password, true);
+    }
+
+    @Operation(summary = "Admin privilege toggle", description = "Toggles administrator attribute for a user")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Granted privileges "),
+            @ApiResponse(responseCode = "401", description = "Invalid ID")
+    })
+    @PutMapping("/toggleAdmin/{userId}")
+    public ResponseEntity<String> toggleAdmin(
+            @Parameter(description = "ID of the user") @PathVariable Integer userId) {
+        return userService.toggleAdmin(userId);
     }
 
     @Operation(summary = "Log out a user", description = "Logs out a specific user based on their ID.")
@@ -80,16 +91,55 @@ public class UserController {
         return userService.logoutUser(userId);
     }
 
+    @Operation(summary = "Admin reset credentials", description = "Resets a players username/password.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Reset successful "),
+            @ApiResponse(responseCode = "404", description = "User not found")
+    })
+    @PutMapping("{adminId}/resetDetails/{userId}")
+    public ResponseEntity<String> adminResetUserDetails(
+            @Parameter(description = "ID of the admin.") @PathVariable Integer adminId,
+            @Parameter(description = "ID of the user to reset.") @PathVariable Integer userId,
+            @Parameter(description = "Specify type of reset") @RequestBody User userJSON) {
+        return userService.adminResetUserDetails(adminId, userId, userJSON);
+    }
+
+    @Operation(summary = "User update details", description = "Updates details after an admin reset them.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Reset successful "),
+            @ApiResponse(responseCode = "404", description = "User not found")
+    })
+    @PutMapping("updateAfterReset/{oldUsername}/{oldPassword}")
+    public ResponseEntity<String> updateDetailsAfterAdminReset(
+            @Parameter(description = "Username of account") @PathVariable String oldUsername,
+            @Parameter(description = "Password of account") @PathVariable String oldPassword,
+            @Parameter(description = "New username/password request body") @RequestBody User newUserJSON) {
+        return userService.userResetDetails(oldUsername, oldPassword, newUserJSON);
+    }
+
+    @Operation(summary = "Suspend a user account", description = "Bans a user for a specified amount of time")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ban successful "),
+            @ApiResponse(responseCode = "404", description = "User not found")
+    })
+    @PutMapping("{adminId}/ban/{username}/length/{minuteLength}")
+    public ResponseEntity<String> banUser(
+            @Parameter(description = "adminId") @PathVariable Integer adminId,
+            @Parameter(description = "Target username") @PathVariable String username,
+            @Parameter(description = "Password of account") @PathVariable Integer minuteLength){
+        return userService.banUser(adminId, username, minuteLength);
+    }
+
     @Operation(summary = "Update a user's details", description = "Updates the details of a specific user.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "User details updated successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid input data"),
             @ApiResponse(responseCode = "404", description = "User not found")
     })
-
-    @DeleteMapping("/hardDelete/{id}")
+    @DeleteMapping("{adminId}/hardDelete/{id}")
     public ResponseEntity<String> deleteByID(
-            @Parameter(description = "ID of the user to delete") @PathVariable Integer id) {
-        return userService.deleteByID(id);
+            @Parameter(description = "ID of the user to delete") @PathVariable Integer id,
+            @Parameter(description = "ID of the potential administrator") @PathVariable Integer adminId){
+        return userService.deleteByID(adminId, id);
     }
 }
