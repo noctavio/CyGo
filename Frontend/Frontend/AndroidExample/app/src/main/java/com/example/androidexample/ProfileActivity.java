@@ -1,29 +1,34 @@
 package com.example.androidexample;
 
+import android.app.AlertDialog;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.InputType;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+// Activity that displays the profile information of a user.
 public class ProfileActivity extends AppCompatActivity {
     private TextView profileName, rank, gamesNumber, winsNumber, lossesNumber;
     private RequestQueue requestQueue;
-    private int userId; // To store the fetched user ID
-    private String username; //
+    private int storedUserId; // To store the fetched user ID
+    // private String username; //
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,64 +37,61 @@ public class ProfileActivity extends AppCompatActivity {
 
         // Initialize views
         profileName = findViewById(R.id.profile_name);
-        rank = findViewById(R.id.rank);
         gamesNumber = findViewById(R.id.games_number);
         winsNumber = findViewById(R.id.wins_number);
         lossesNumber = findViewById(R.id.loss_number);
+        rank = findViewById(R.id.rank);
+
+        ImageButton homeButton = findViewById(R.id.home_image_button);
         Button updateButton = findViewById(R.id.update_button);
+        Button refreshButton = findViewById(R.id.refresh_button);
 
         // Initialize the RequestQueue
         requestQueue = Volley.newRequestQueue(this);
 
+        // Retrieve the username from SharedPreferences
+        SharedPreferences sharedPreferences = getSharedPreferences("LoginSession", MODE_PRIVATE);
+        storedUserId = sharedPreferences.getInt("userId", -1);
+
+        // Set up home button click listener
+        homeButton.setOnClickListener(v -> finish()); 
+
         // Set up update button click listener
         updateButton.setOnClickListener(v -> showUpdateDialog());
 
+        // Set up refresh button click listener
+        refreshButton.setOnClickListener(v -> refreshProfiles());
+
+        // Fetch and display the user's profile data
+        fetchUserProfile(storedUserId);
+
         // Prompt user for ID and fetch profile data
-        promptUserForUsername();
-    }
-
-    // AlertDialog to prompt the user to enter their ID
-    private void promptUserForUsername() {
-        final EditText input = new EditText(this);
-        input.setHint("Enter your id");
-        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
-
-        new AlertDialog.Builder(this)
-                .setTitle("User id Required")
-                .setMessage("Please enter your user id to retrieve your profile.")
-                .setView(input)
-                .setPositiveButton("OK", (dialog, which) -> {
-                    userId = Integer.parseInt(input.getText().toString()); // Parse input to int
-                    fetchUserProfile(userId);
-                })
-                .setNegativeButton("Cancel", (dialog, which) -> dialog.cancel())
-                .setCancelable(false)
-                .show();
+        // promptUserForUsername();
     }
 
     // Fetch user profile from the server
     private void fetchUserProfile(int userId) {
-        String url = "http://10.90.72.226:8080/Profile/" + userId;
-
-        // String url = "https://f0927cec-f851-4cbc-8cb4-2b00cda87dd4.mock.pstmn.io/test"; //
-
-        // String url = "http://coms-3090-051.class.las.iastate.edu:8080/" + username;
+        String url = "http://10.90.72.226:8080/profiles/" + userId;
 
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
                 response -> {
                     try {
-                        int id = response.getInt("id");
-                        String fetchedUsername = response.getString("USERNAME");
-                        String profilePicture = response.getString("PROFILE_PICTURE");
-                        String club = response.getString("CLUB");
-                        String clubPicture = response.getString("CLUB_PICTURE");
-                        int wins = response.getInt("WINS");
-                        int losses = response.getInt("LOSSES");
-                        int gamesPlayed = response.getInt("GAMES_PLAYED");
-                        int rating = response.getInt("RATING");
+                        JSONObject userObject = response.getJSONObject("user");
 
-                        // Update the profile UI with the retrieved data
-                        updateProfileUI(id, fetchedUsername, profilePicture, club, clubPicture, wins, losses, gamesPlayed, rating);
+                        // Extract the profile data from the response
+                        String username = userObject.getString("username");
+                        String rankValue = response.getString("rank");
+                        int games = response.getInt("games");
+                        int wins = response.getInt("wins");
+                        int losses = response.getInt("loss");
+
+                        // Update UI with the extracted data
+                        profileName.setText(username);
+                        rank.setText("Rank: " + rankValue);
+                        gamesNumber.setText("Games: " + games);
+                        winsNumber.setText("Wins: " + wins);
+                        lossesNumber.setText("Losses: " + losses);
+                    
                     } catch (JSONException e) {
                         e.printStackTrace();
                         Toast.makeText(ProfileActivity.this, "Error parsing data", Toast.LENGTH_SHORT).show();
@@ -105,36 +107,49 @@ public class ProfileActivity extends AppCompatActivity {
         requestQueue.add(jsonObjectRequest);
     }
 
-    // Updating the profile UI with the fetched data
-    private void updateProfileUI(int id, String username, String profilePicture, String club, String clubPicture, int wins, int losses, int gamesPlayed, int rating) {
-            profileName.setText(username);
-            rank.setText(String.valueOf(rating));
-            gamesNumber.setText(String.valueOf(gamesPlayed));
-            winsNumber.setText(String.valueOf(wins));
-            lossesNumber.setText(String.valueOf(losses));
-
-    }
-
     //  AlertDialog for updating user profile
     private void showUpdateDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Update Profile");
 
-        final EditText inputClub = new EditText(this);
-        inputClub.setHint("New Club Name");
+        final EditText inputUsername = new EditText(this);
+        inputUsername.setHint("Username");
 
-        // Layout to hold the input fields
+        final EditText inputRank = new EditText(this);
+        inputRank.setHint("Rank");
+
+        final EditText inputGamesPlayed = new EditText(this);
+        inputGamesPlayed.setHint("Games Played");
+        inputGamesPlayed.setInputType(InputType.TYPE_CLASS_NUMBER);
+
+        final EditText inputWins = new EditText(this);
+        inputWins.setHint("Wins");
+        inputWins.setInputType(InputType.TYPE_CLASS_NUMBER);
+
+        final EditText inputLosses = new EditText(this);
+        inputLosses.setHint("Losses");
+        inputLosses.setInputType(InputType.TYPE_CLASS_NUMBER);
+
+        // Create layout to hold the input fields
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
-        layout.addView(inputClub);
+        layout.addView(inputUsername);
+        layout.addView(inputRank);
+        layout.addView(inputGamesPlayed);
+        layout.addView(inputWins);
+        layout.addView(inputLosses);
 
         builder.setView(layout);
 
         // Add buttons
         builder.setPositiveButton("Update", (dialog, which) -> {
-            String club = inputClub.getText().toString();
+            String username = inputUsername.getText().toString();
+            String rank = inputRank.getText().toString();
+            int gamesPlayed = Integer.parseInt(inputGamesPlayed.getText().toString());
+            int wins = Integer.parseInt(inputWins.getText().toString());
+            int losses = Integer.parseInt(inputLosses.getText().toString());
 
-            updateUserProfile(userId, club);
+            updateUserProfile(username, rank, gamesPlayed, wins, losses);
         });
 
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
@@ -144,17 +159,20 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     // PUT request to update user profile
-    private void updateUserProfile(int id, String club) {
-          String url = "http://10.90.72.226:8080/Profile/" + id; // URL for PUT
+    private void updateUserProfile(String username, String rank, int gamesPlayed, int wins, int losses) {
+        String url = "http://10.90.72.226:8080/users/profile/update"; // Adjust as necessary
         JSONObject jsonBody = new JSONObject();
         try {
-            jsonBody.put("CLUB", club); // Uppercase field
-            jsonBody.put("club", club); // Lowercase field
+            jsonBody.put("username", username);
+            jsonBody.put("rank", rank);
+            jsonBody.put("gamesplayed", gamesPlayed);
+            jsonBody.put("wins", wins);
+            jsonBody.put("loss", losses);
 
             JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.PUT, url, jsonBody,
                     response -> {
                         Toast.makeText(ProfileActivity.this, "Profile updated successfully", Toast.LENGTH_SHORT).show();
-                        fetchUserProfile(userId);
+                        fetchUserProfile(storedUserId); // Refresh profile data
                     },
                     error -> Toast.makeText(ProfileActivity.this, "Error updating profile", Toast.LENGTH_SHORT).show()
             );
@@ -164,5 +182,22 @@ public class ProfileActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+
+    private void refreshProfiles() {
+        String url = "http://10.90.72.226:8080/profiles/refresh";
+
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
+                response -> {
+                    Toast.makeText(ProfileActivity.this, "Profiles refreshed successfully!", Toast.LENGTH_SHORT).show();
+                },
+                error -> {
+                    Toast.makeText(ProfileActivity.this, "Failed to refresh profiles.", Toast.LENGTH_SHORT).show();
+                    error.printStackTrace();
+                });
+
+        // Add request to the queue
+        requestQueue.add(stringRequest);
+    }
+
 }
 
