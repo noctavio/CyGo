@@ -1,21 +1,38 @@
 package com.example.androidexample;
 
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
+import static android.content.Context.MODE_PRIVATE;
+
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.InputType;
+import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.nio.charset.StandardCharsets;
 
 /**
  * This class is the activity for users to login to the app
@@ -31,11 +48,14 @@ public class LoginActivity extends AppCompatActivity {
     private EditText passwordEditText;  // Define password EditText variable
     private Button loginButton;         // Define login button variable
     private TextView loginStatusText;   // Define login status TextView variable
+    private Button logoutButton;        // Button for logging user out
     private Button registerButton;      // Register button
     private Button updateButton;        // Update button
     private Button deleteButton;        // Delete button
     private RequestQueue requestQueue;  // Volley request queue
-    private int userId;
+    private int userId;                 // User ID for the currently logged-in user
+    private boolean isAppClosed = false; // Flag to track if the app is closed
+
 
     /**
      * Called when the activity is starting. Initializes UI components
@@ -46,16 +66,36 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
 
+        // Check if user is already logged in
+        SharedPreferences sharedPreferences = getSharedPreferences("LoginSession", MODE_PRIVATE);
+        int storedUserId = sharedPreferences.getInt("userId", -1);
+
+        if (storedUserId != -1) {
+            // User is already logged in, navigate to MainMenuActivity
+            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+            startActivity(intent);
+            finish();
+        } else {
+            // Clear session if needed
+            clearSession(this);
+            // Show the login screen
+            setContentView(R.layout.activity_login);
+            initializeUI();
+        }
+    }
+
+    // Initialize the UI components
+    private void initializeUI() {
         usernameEditText = findViewById(R.id.login_username_edt);
         passwordEditText = findViewById(R.id.login_password_edt);
-        loginButton = findViewById(R.id.login_login_btn);
+        loginButton = findViewById(R.id.loginBtn);
         loginStatusText = findViewById(R.id.login_status_text);
         registerButton = findViewById(R.id.register_user_btn);
         updateButton = findViewById(R.id.update_user_btn);
         deleteButton = findViewById(R.id.delete_user_btn);
         requestQueue = Volley.newRequestQueue(this);
+        logoutButton = findViewById(R.id.logoutBtn);
 
         registerButton.setOnClickListener(v -> showRegisterDialog());
         loginButton.setOnClickListener(v -> {
@@ -66,6 +106,8 @@ public class LoginActivity extends AppCompatActivity {
 
         updateButton.setOnClickListener(v -> showUpdateDialog());
         deleteButton.setOnClickListener(v -> showDeleteDialog());
+
+        logoutButton.setOnClickListener(v -> logoutUser(this));
     }
 
     /**
@@ -137,7 +179,10 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+        builder.setNegativeButton("Cancel", (dialog, which) ->{
+            hideKeyboard(inputId);
+            dialog.cancel();
+        });
         builder.show();
     }
 
@@ -188,10 +233,12 @@ public class LoginActivity extends AppCompatActivity {
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url, jsonBody,
                 response -> {
                     loginStatusText.setText("Registration successful!");
+                    loginStatusText.setTextColor(getResources().getColor(R.color.plain_yellow));
                     loginStatusText.setVisibility(View.VISIBLE);
                 },
                 error -> {
                     loginStatusText.setText("Registration failed: " + error.getMessage());
+                    loginStatusText.setTextColor(getResources().getColor(R.color.plain_yellow));
                     loginStatusText.setVisibility(View.VISIBLE);
                 });
 
@@ -206,7 +253,7 @@ public class LoginActivity extends AppCompatActivity {
      */
     private void loginUser(String username, String password) {
         // Trim whitespace from inputs
-        username = username.trim();
+        final String loginUsername = username.trim();
         password = password.trim();
 
         if (username.isEmpty() || password.isEmpty()) {
@@ -215,20 +262,32 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        String url = "http://10.90.72.226:8080/users/login?username=" + username + "&password=" + password;
-        // String url =  "http://coms-3090-051.class.las.iastate.edu:8080/users/login?username=" + username + "&password=" + password;
+        String loginUrl = "http://10.90.72.226:8080/users/login/" +
+                Uri.encode(loginUsername) + "/" + Uri.encode(password);
 
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
+        StringRequest loginRequest = new StringRequest(Request.Method.PUT, loginUrl,
                 response -> {
+                    getUserId(loginUsername);
+
+                    // Show success message
                     loginStatusText.setText("Login successful!");
+                    loginStatusText.setTextColor(getResources().getColor(R.color.plain_yellow));
                     loginStatusText.setVisibility(View.VISIBLE);
+
+                    // Navigate to the MainActivity after a delay
+                    new Handler().postDelayed(() -> {
+                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                        startActivity(intent);
+                        finish();
+                        }, 2000);
                 },
                 error -> {
                     loginStatusText.setText("Login failed: " + error.getMessage());
+                    loginStatusText.setTextColor(getResources().getColor(R.color.plain_yellow));
                     loginStatusText.setVisibility(View.VISIBLE);
                 });
 
-        requestQueue.add(stringRequest);
+        requestQueue.add(loginRequest);
     }
 
     /**
@@ -253,9 +312,10 @@ public class LoginActivity extends AppCompatActivity {
             return; // Exit the method on error
         }
 
-        JsonObjectRequest updateRequest = new JsonObjectRequest(Request.Method.PUT, updateUrl, jsonBody,
+        StringRequest updateRequest = new StringRequest(Request.Method.PUT, updateUrl,
                 response -> {
                     loginStatusText.setText("User updated successfully!");
+                    loginStatusText.setTextColor(getResources().getColor(R.color.plain_yellow));
                     loginStatusText.setVisibility(View.VISIBLE);
                 },
                 error -> {
@@ -266,9 +326,48 @@ public class LoginActivity extends AppCompatActivity {
                     loginStatusText.setText(errorMessage);
                     loginStatusText.setVisibility(View.VISIBLE);
                 }) {
+            @Override
+            public byte[] getBody() {
+                return jsonBody.toString().getBytes(StandardCharsets.UTF_8);
+            }
+
+            @Override
+            public String getBodyContentType() {
+                return "application/json; charset=utf-8";
+            }
         };
         requestQueue.add(updateRequest);
     }
+
+    // Logs out the currently logged-in user by sending a PUT request
+    public static void logoutUser(Context context) {
+        // Retrieve userId from session
+        SharedPreferences sharedPreferences = context.getSharedPreferences("LoginSession", MODE_PRIVATE);
+        int userId = sharedPreferences.getInt("userId", -1); // Assuming userId is stored in shared preferences
+
+        if (userId == -1) {
+            Toast.makeText(context, "User ID not found. Please log in again.", Toast.LENGTH_SHORT).show();
+            clearSession(context); // Clear session if userId is not found
+            navigateToWelcome(context);
+            return;
+        }
+
+        String url = "http://10.90.72.226:8080/users/logout/" + userId;
+
+        StringRequest stringRequest = new StringRequest(Request.Method.PUT, url,
+                response -> {
+                    Toast.makeText(context, "Logout successful", Toast.LENGTH_SHORT).show();
+                    clearSession(context); // Clear session after logout
+                    navigateToWelcome(context);
+                },
+                error -> {
+                    Toast.makeText(context, "Logout failed: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+
+        RequestQueue requestQueue = Volley.newRequestQueue(context);
+        requestQueue.add(stringRequest);
+    }
+
 
     /**
      * Deletes a user from the server.
@@ -277,19 +376,75 @@ public class LoginActivity extends AppCompatActivity {
      */
     private void deleteUser(int userId) {
 
-        String deleteUrl = "http://10.90.72.226:8080/users/" + userId;
+        String deleteUrl = "http://10.90.72.226:8080/users/hardDelete/" + userId;
 
         StringRequest deleteRequest = new StringRequest(Request.Method.DELETE, deleteUrl,
                 response -> {
                     loginStatusText.setText("User deleted successfully!");
+                    loginStatusText.setTextColor(getResources().getColor(R.color.plain_yellow));
                     loginStatusText.setVisibility(View.VISIBLE);
                 },
                 error -> {
                     loginStatusText.setText("Delete failed: " + error.getMessage());
+                    loginStatusText.setTextColor(getResources().getColor(R.color.plain_yellow));
                     loginStatusText.setVisibility(View.VISIBLE);
                 });
 
         requestQueue.add(deleteRequest);
+    }
+
+    // Hides the keyboard from the screen.
+    private void hideKeyboard(View view) {
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+    }
+
+    // Clears the session data by removing the stored user ID.
+    public static void clearSession(Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences("LoginSession", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.clear(); // Clear all saved data in LoginSession
+        editor.apply();
+        Toast.makeText(context, "Session cleared on app close.", Toast.LENGTH_SHORT).show();
+    }
+
+    // Navigates to the welcome activity.
+    public static void navigateToWelcome(Context context) {
+        Intent intent = new Intent(context, Welcome.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(intent);
+        if (context instanceof Activity) {
+            ((Activity) context).finish();
+        }
+    }
+
+    private void getUserId(String username) {
+        // URL to get the user details using GET method
+        String url = "http://10.90.72.226:8080/users/" + Uri.encode(username);
+
+        JsonObjectRequest getUserIdRequest = new JsonObjectRequest(Request.Method.GET, url, null,
+                response -> {
+                    try {
+                        int userId = response.getInt("user_id");
+
+                        // Save userId and username in SharedPreferences
+                        SharedPreferences sharedPreferences = getSharedPreferences("LoginSession", MODE_PRIVATE);
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putInt("userId", userId);
+                        editor.putString("username", username);
+                        editor.apply();
+
+                    } catch (JSONException e) {
+                        Toast.makeText(this, "Failed to retrieve user data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                },
+                error -> {
+                    Toast.makeText(this, "Failed to retrieve user data: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+
+        requestQueue.add(getUserIdRequest);
     }
 }
 
