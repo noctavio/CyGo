@@ -1,9 +1,11 @@
 package com.example.sb.Service;
 
 import com.example.sb.Constants.RankConstants;
+import com.example.sb.Model.Friends;
 import com.example.sb.Model.Settings;
 import com.example.sb.Model.TheProfile;
 import com.example.sb.Model.User;
+import com.example.sb.Repository.FriendsRepository;
 import com.example.sb.Repository.SettingsRepository;
 import com.example.sb.Repository.TheProfileRepository;
 import com.example.sb.Repository.UserRepository;
@@ -25,6 +27,8 @@ public class TheProfileService {
     private UserRepository userRepository;
     @Autowired
     private SettingsRepository settingsRepository;
+    @Autowired
+    private FriendsRepository friendsRepository;
 
     public List<TheProfile> getTop10Players() {
         // Fetch all players from database
@@ -94,10 +98,14 @@ public class TheProfileService {
                 // If no profile exists, create a new profile
                 TheProfile newProfile = new TheProfile(user);
                 Settings newSettings = new Settings(newProfile);
+                Friends newFriends = new Friends(user);
+
 
                 newProfile.setSettings(newSettings);
                 theProfileRepository.save(newProfile);
                 settingsRepository.save(newSettings);
+                friendsRepository.save(newFriends);
+
             }
             else {
                 existingProfile.setUser(user);

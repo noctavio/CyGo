@@ -1,6 +1,7 @@
 package com.example.sb.Service;
 
 import com.example.sb.Model.Settings;
+import com.example.sb.Model.TheProfile;
 import com.example.sb.Model.User;
 import com.example.sb.Repository.SettingsRepository;
 import com.example.sb.Repository.UserRepository;
@@ -42,4 +43,5 @@ public class SettingsService {
         }
         return ResponseEntity.ok("User does not exist...");
     }
+
 }
