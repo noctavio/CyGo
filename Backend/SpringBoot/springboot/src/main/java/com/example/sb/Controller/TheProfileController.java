@@ -21,17 +21,6 @@ public class TheProfileController {
      * Returns a list of the top 10 players sorted by rank (highest to lowest)
      * @return list
      */
-    @Operation(summary = "Refresh player profiles", description = "Refreshes the profiles table by transferring player usernames and IDs")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Player usernames and IDs have been transferred to the profiles table"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
-    })
-    @PostMapping("/profiles/refresh")
-    public ResponseEntity<String> createProfilesFromUsers() {
-        TheProfileService.updateProfileTable();
-        return ResponseEntity.ok("Player usernames and IDs have been transferred to the profiles table.");
-    }
-
     @Operation(summary = "Get top 10 players", description = "Returns a list of the top 10 players sorted by rank (highest to lowest)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved leaderboard"),

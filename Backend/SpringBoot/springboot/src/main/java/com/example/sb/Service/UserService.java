@@ -93,18 +93,13 @@ public class UserService {
         return userRepository.findByUsername(username);
     }
 
-    /**
-     * This should be the method to delete from ALLLLLLLL Repositories, rows should cascade delete so set the query please!
-     * @param userId user id
-     * @return boolean
-     */
     public ResponseEntity<String> deleteByID(Integer userId) {
         if (userRepository.findById(userId).isPresent()) {
             TheProfile profileToDelete = findProfileById(userId);
 
             profileRepository.delete(profileToDelete);
             userRepository.deleteById(userId);
-            ResponseEntity.ok("User deleted");
+            return ResponseEntity.ok("User deleted");
         }
         return ResponseEntity.ok("User does not exist...");
     }

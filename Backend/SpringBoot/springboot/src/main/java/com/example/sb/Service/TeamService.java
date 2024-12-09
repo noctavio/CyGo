@@ -111,18 +111,6 @@ public class TeamService {
         return ResponseEntity.ok("Specified team does not exist.");
     }
 
-    public ResponseEntity<String> updateTeamScore(Integer userId, Integer score) {
-        TheProfile profile = userService.findProfileById(userId);
-        Player player = playerRepository.findByProfile(profile);
-        Team targetTeam = player.getTeam();
-        if (targetTeam != null) {
-            targetTeam.setTeamScore(targetTeam.getTeamScore() + score);
-            teamRepository.save(targetTeam);
-            return ResponseEntity.ok("Team score updated: " + targetTeam.getTeamScore());
-        }
-        return ResponseEntity.ok("Player team does not exist.");
-    }
-
     public List<Team> getTeams(Integer lobbyId) {
         Optional<Lobby> lobbyOptional = lobbyRepository.findById(lobbyId);
         if (lobbyOptional.isPresent()) {
