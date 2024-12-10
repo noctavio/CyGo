@@ -1,6 +1,8 @@
 package com.example.sb.Controller;
 
 import com.example.sb.Model.Team;
+import com.example.sb.Repository.TeamRepository;
+import com.example.sb.Service.GobanService;
 import com.example.sb.Service.TeamService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -11,12 +13,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RequestMapping("/lobby/teams")
 @RestController
 public class TeamController {
     @Autowired
     private TeamService teamService;
+    @Autowired
+    private GobanService gobanService;
+    @Autowired
+    private TeamRepository teamRepository;
 
     @Operation(summary = "Get team timer", description = "Retrieves the timer value associated with a specific team.")
     @ApiResponses(value = {
@@ -65,6 +72,23 @@ public class TeamController {
             @Parameter(description = "ID of the user updating the team name") @PathVariable Integer userId,
             @Parameter(description = "JSON object containing the new team name") @RequestBody Team teamJSON) {
         return teamService.updateTeamName(userId, teamJSON);
+    }
+
+    @Operation(summary = "Time elapsed for team", description = "Ends the game if a teams timer has elapsed")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Game ended"),
+            @ApiResponse(responseCode = "404", description = "Team not found")
+    })
+    @PutMapping("/{teamId}/timeElapsed")
+    public ResponseEntity<String> timeElapsed(
+            @Parameter(description = "ID of the target team") @PathVariable Integer teamId) {
+        Optional<Team> teamOptional = teamRepository.findById(teamId);
+        if (teamOptional.isPresent()) {
+            Team team = teamOptional.get();
+            gobanService.endGame(team.getLobby().getLobby_id(), false);
+            return ResponseEntity.ok("Game ended by timeElapsed of team: " + team.getTeamName());
+        }
+        return ResponseEntity.ok("No team at specified id: " + teamId);
     }
 
     @Operation(summary = "Leave a team", description = "Allows a user to leave their current team.")
