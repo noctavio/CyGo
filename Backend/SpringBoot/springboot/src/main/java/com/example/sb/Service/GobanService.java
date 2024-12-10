@@ -9,6 +9,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @Service
@@ -155,7 +158,7 @@ public class GobanService {
     }
 
     public void endGame(Integer lobbyId, boolean forfeit) {
-        String xWinsBy = "";
+        String xWinsBy;
         String bonusMessage = "";
         String teamWinner = "";
         Optional<Lobby> lobbyOptional = lobbyRepository.findById(lobbyId);
@@ -166,8 +169,21 @@ public class GobanService {
         Team team2 = lobby.getTeam2();
         Goban goban = lobby.getGoban();
 
+        if (team1.getTimeRemaining() == 0L || team2.getTimeRemaining() == 0L) {
+            if (team1.getTimeRemaining() == 0L) {
+                String winningTeamName = team2.getTeamName();
+                String winningPlayers = team2.getPlayer1().getUsername() + "-|-" + team2.getPlayer2().getUsername();
+                teamWinner = winningTeamName + " (" + winningPlayers + ") wins the game by a time loss from " + team1.getTeamName();
+            }
+            else {
+                String winningTeamName = team1.getTeamName();
+                String winningPlayers = team1.getPlayer1().getUsername() + "-|-" + team1.getPlayer2().getUsername();
+                teamWinner = winningTeamName + " (" + winningPlayers + ") wins the game by a time loss from " + team2.getTeamName();
+                isTeam1Winner = true;
+            }
+        }
         // Determine winner if some player abandoned
-        if (team1.getPlayer1().getHasAbandoned() || team1.getPlayer2().getHasAbandoned()) {
+        else if (team1.getPlayer1().getHasAbandoned() || team1.getPlayer2().getHasAbandoned()) {
             // Team 1 has a missing player; Team 2 wins
             String winningTeamName = team2.getTeamName();
             String winningPlayers = team2.getPlayer1().getUsername() + "-|-" + team2.getPlayer2().getUsername();
@@ -210,7 +226,6 @@ public class GobanService {
             }
         }
 
-        System.out.println(bonusMessage);
         // Reset the lobby state
         resetLobbyState(lobby);
 
@@ -245,6 +260,8 @@ public class GobanService {
 
     private void resetTeamState(Team team) {
         team.setTeamScore(0.0);
+        team.setLastMoveTimestamp(null);
+        team.setTimeRemaining((team.getLobby().getGameTime() / 2) * 60 * 1000);
 
         List<Player> players = new ArrayList<>();
         if (team.getPlayer1() != null) {
@@ -342,6 +359,19 @@ public class GobanService {
                     }
                 }
             }
+            Team oppositeTeam;
+            if (currentTeam.equals(currentTeam.getLobby().getTeam1())) {
+                oppositeTeam = currentTeam.getLobby().getTeam2();
+            }
+            else {
+                oppositeTeam = currentTeam.getLobby().getTeam1();
+            }
+
+            boolean timeElapsed = handleTimer(currentTeam, oppositeTeam, currentPlayer, chat);
+            if (timeElapsed) {
+                return ResponseEntity.ok("Time depleted, you forfeit");
+            }
+
             goban.saveBoardString();
             String nextPlayerName = switchToNextPlayer(currentPlayer,goban.getPlayerIdTurnList());
             teamRepository.save(currentTeam);
@@ -362,9 +392,24 @@ public class GobanService {
         }
 
         if (currentPlayer.getIsTurn()) {
+            ChatController chat = new ChatController();
+            Team currentTeam = currentPlayer.getTeam();
             int passCount = 0;
             currentPlayer.setRecentPassTurn(true);
             playerRepository.save(currentPlayer);
+
+            Team oppositeTeam;
+            if (currentTeam.equals(currentTeam.getLobby().getTeam1())) {
+                oppositeTeam = currentTeam.getLobby().getTeam2();
+            }
+            else {
+                oppositeTeam = currentTeam.getLobby().getTeam1();
+            }
+
+            boolean timeElapsed = handleTimer(currentTeam, oppositeTeam, currentPlayer, chat);
+            if (timeElapsed) {
+                return ResponseEntity.ok("Time depleted, you forfeit");
+            }
 
             Lobby currentLobby = currentPlayer.getTeam().getLobby();
             List<Player> playersInGame = currentLobby.getPlayersInLobby();
@@ -381,7 +426,6 @@ public class GobanService {
             }
             String nextPlayerName = switchToNextPlayer(currentPlayer, goban.getPlayerIdTurnList());
 
-            ChatController chat = new ChatController();
             chat.sendGameUpdateToPlayers("[ANNOUNCER]: " + currentPlayer.getUsername() + " passed, it is now " + nextPlayerName + "'s turn!");
 
             return ResponseEntity.ok(currentPlayer.getUsername() + " passed, it is now " + nextPlayerName + "'s turn." );
@@ -411,6 +455,46 @@ public class GobanService {
 
         endGame(currentLobby.getLobby_id(), true);
         return ResponseEntity.ok("You abandoned the game.");
+    }
+
+    public boolean handleTimer(Team currentTeam, Team oppositeTeam, Player currentPlayer, ChatController chat) {
+        boolean timeElapsed = false;
+        LocalDateTime currentMoveTimestamp = LocalDateTime.now(); // Time at which the move was made
+        long currentTimeRemaining; //Time remaining for current Team
+
+        Duration timePassed; // Time elapsed since last move
+        Long newTimeRemaining;
+
+        if (oppositeTeam.getLastMoveTimestamp() == null) {
+            currentTimeRemaining = currentTeam.getTimeRemaining(); //Time remaining for current Team
+
+            timePassed = Duration.between(currentTeam.getLastMoveTimestamp(), currentMoveTimestamp); // Time elapsed since last move
+            newTimeRemaining = currentTimeRemaining - timePassed.toMillis();
+        }
+        else {
+            currentTimeRemaining = currentTeam.getTimeRemaining(); // Time remaining for current Team
+
+            timePassed = Duration.between(oppositeTeam.getLastMoveTimestamp(), currentMoveTimestamp); // Time elapsed since last move by opposite team
+            newTimeRemaining = currentTimeRemaining - timePassed.toMillis();
+        }
+
+        if (newTimeRemaining < 0) {
+            currentTeam.setTimeRemaining(0L);
+            teamRepository.save(currentTeam);
+            chat.sendGameUpdateToPlayers("[ANNOUNCER]: " + currentPlayer.getUsername() + "has run out of time, game forfeit!");
+            endGame(currentTeam.getLobby().getLobby_id(), false);
+            return true;
+        }
+        else if (newTimeRemaining < 30000) {
+            currentTeam.setTimeRemaining(30000L);
+            chat.sendGameUpdateToPlayers("[ANNOUNCER]: " + currentPlayer.getUsername() + "has entered byo-yomi(sudden death)!");
+        }
+        else {
+            currentTeam.setTimeRemaining(newTimeRemaining);
+        }
+
+        currentTeam.setLastMoveTimestamp(currentMoveTimestamp);
+        return timeElapsed;
     }
 
     //Helper Methods

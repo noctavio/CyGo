@@ -25,12 +25,13 @@ public class User {
     private Boolean isAdmin;
     private Boolean adminPassReset;
     private Boolean adminNameReset;
+    private Long banLength;
 
     @Column(name = "banTimestamp")
     private LocalDateTime banTimeStamp;
     @Column(name = "loginAttemptTimeststamp")
     private LocalDateTime liftBanTimestamp;
-    private Long banLength;
+
 
     public User (User userJSON, String encodedPassword) {
         this.username = userJSON.getUsername();

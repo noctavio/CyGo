@@ -25,10 +25,10 @@ public class Team {
     private Double teamScore;
     private Integer playerCount;
     private Boolean isTeamTurn;
-    private long timeRemaining;
+    private Long timeRemaining;
 
-    @Column(name = "timestamp", nullable = false, updatable = false)
-    private LocalDateTime timestamp = LocalDateTime.now(); // Timestamp when the move is made
+    @Column(name = "lastMoveTimestamp")
+    private LocalDateTime lastMoveTimestamp;
 
     @ManyToOne
     @JsonIgnore
@@ -50,7 +50,7 @@ public class Team {
         this.teamName = teamName;
         this.isBlack = isBlack;
         this.teamScore = 0.0;
-        this.timeRemaining = (long) ((lobby.getGameTime() / 2) * 60);
+        this.timeRemaining = ((lobby.getGameTime() / 2) * 60 * 1000);
         setPlayerCount();
     }
 

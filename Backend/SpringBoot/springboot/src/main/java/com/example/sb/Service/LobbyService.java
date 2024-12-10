@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import javax.swing.plaf.synth.SynthTextAreaUI;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @Service
@@ -158,6 +160,9 @@ public class LobbyService {
 
             if (potentiallyHost.getUsername().equals(lobby.getHostName())) {
                 if (lobbyJSON.getGameTime() != null) {
+                    if (lobbyJSON.getGameTime() < 2L) {
+                        return ResponseEntity.ok("Game time must be at minimum 2 minutes(1 minute for each team).");
+                    }
                     lobby.setGameTime(lobbyJSON.getGameTime());
                 }
                 if (lobbyJSON.getHostName() != null) {
@@ -236,7 +241,9 @@ public class LobbyService {
                         team2.setTeamScore(6.5);
                         team1.setIsTeamTurn(true);
                         team1PlayerStarter.setIsTurn(true);
-                        //team1PlayerStarter.setStartTime(new Date());
+
+                        team1.setLastMoveTimestamp(LocalDateTime.now());
+                        teamRepository.save(team1);
 
                         //timerService.startTimerForTeam(team1);
                         playerTurnList.add(team1PlayerStarter.getProfile().getUser().getUser_id());
@@ -246,11 +253,14 @@ public class LobbyService {
                         chat.sendGameUpdateToPlayers("[ANNOUNCER]: Game has been initialized! \n"  + team1.getTeamName() + "is starting first!" );
                     }
                     else if (team2.getIsBlack()) {
+
                         team1.setTeamScore(6.5);
                         team2.setIsTeamTurn(true);
                         team2PlayerStarter.setIsTurn(true);
-                        //team2PlayerStarter.setStartTime(new Date());
-                        //timerService.startTimerForTeam(team2);
+
+                        team2.setLastMoveTimestamp(LocalDateTime.now());
+                        teamRepository.save(team2);
+
                         playerTurnList.add(team2PlayerStarter.getProfile().getUser().getUser_id());
                         playerTurnList.add(team1PlayerStarter.getProfile().getUser().getUser_id());
                         playerTurnList.add(team2.getPlayer2().getProfile().getUser().getUser_id());

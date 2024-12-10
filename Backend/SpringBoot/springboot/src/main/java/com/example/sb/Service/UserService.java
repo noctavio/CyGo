@@ -86,6 +86,7 @@ public class UserService {
         if (user.getLiftBanTimestamp() != null && user.getBanTimeStamp() != null) {
             if (isLoginAttempt && LocalDateTime.now().isBefore(user.getLiftBanTimestamp())) {
                 user.setBanTimeStamp(LocalDateTime.now());
+                user.setBanLength(0L);
                 userRepository.save(user);
                 return "You are still banned";
             }
