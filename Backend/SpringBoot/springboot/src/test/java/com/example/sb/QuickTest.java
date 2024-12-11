@@ -131,13 +131,13 @@ public class QuickTest {
                 .get("/lobby/teams/1")
                 .then()
                 .contentType(ContentType.JSON)
-                .body("[0].teamScore", equalTo(0.0F));
+                .body("[0].teamCaptures", equalTo(0.0F));
         given()
                 .when()
                 .get("/lobby/teams/1")
                 .then()
                 .contentType(ContentType.JSON)
-                .body("[1].teamScore", equalTo(6.5F));
+                .body("[1].teamCaptures", equalTo(0.0F));
         //VERIFY SCORING!
 
         // Set of turns
@@ -232,13 +232,13 @@ public class QuickTest {
                 .get("/lobby/teams/1")
                 .then()
                 .contentType(ContentType.JSON)
-                .body("[0].teamScore", equalTo(1.0F));
+                .body("[0].teamCaptures", equalTo(1.0F));
         given()
                 .when()
                 .get("/lobby/teams/1")
                 .then()
                 .contentType(ContentType.JSON)
-                .body("[1].teamScore", equalTo(6.5F));
+                .body("[1].teamCaptures", equalTo(0.0F));
         //VERIFY SCORING!
 
         given()
@@ -253,13 +253,13 @@ public class QuickTest {
                 .get("/lobby/teams/1")
                 .then()
                 .contentType(ContentType.JSON)
-                .body("[0].teamScore", equalTo(1.0F));
+                .body("[0].teamCaptures", equalTo(1.0F));
         given()
                 .when()
                 .get("/lobby/teams/1")
                 .then()
                 .contentType(ContentType.JSON)
-                .body("[1].teamScore", equalTo(7.5F));
+                .body("[1].teamCaptures", equalTo(1.0F));
         //VERIFY SCORING!
 
         // Set of turns end
@@ -361,13 +361,13 @@ public class QuickTest {
                 .get("/lobby/teams/1")
                 .then()
                 .contentType(ContentType.JSON)
-                .body("[0].teamScore", equalTo(1.0F));
+                .body("[0].teamCaptures", equalTo(1.0F));
         given()
                 .when()
                 .get("/lobby/teams/1")
                 .then()
                 .contentType(ContentType.JSON)
-                .body("[1].teamScore", equalTo(8.5F));
+                .body("[1].teamCaptures", equalTo(2.0F));
         //VERIFY SCORING!
 
 
@@ -414,13 +414,13 @@ public class QuickTest {
                 .get("/lobby/teams/1")
                 .then()
                 .contentType(ContentType.JSON)
-                .body("[0].teamScore", equalTo(1.0F));
+                .body("[0].teamCaptures", equalTo(1.0F));
         given()
                 .when()
                 .get("/lobby/teams/1")
                 .then()
                 .contentType(ContentType.JSON)
-                .body("[1].teamScore", equalTo(9.5F));
+                .body("[1].teamCaptures", equalTo(3.0F));
         //VERIFY SCORING!
 
         given()
@@ -471,13 +471,13 @@ public class QuickTest {
                 .get("/lobby/teams/1")
                 .then()
                 .contentType(ContentType.JSON)
-                .body("[0].teamScore", equalTo(3.0F));
+                .body("[0].teamCaptures", equalTo(3.0F));
         given()
                 .when()
                 .get("/lobby/teams/1")
                 .then()
                 .contentType(ContentType.JSON)
-                .body("[1].teamScore", equalTo(9.5F));
+                .body("[1].teamCaptures", equalTo(3.0F));
         //VERIFY SCORING!
 
         given()
@@ -491,13 +491,13 @@ public class QuickTest {
                 .get("/lobby/teams/1")
                 .then()
                 .contentType(ContentType.JSON)
-                .body("[0].teamScore", equalTo(3.0F));
+                .body("[0].teamCaptures", equalTo(3.0F));
         given()
                 .when()
                 .get("/lobby/teams/1")
                 .then()
                 .contentType(ContentType.JSON)
-                .body("[1].teamScore", equalTo(10.5F));
+                .body("[1].teamCaptures", equalTo(4.0F));
 
         given()
                 .when()
@@ -615,13 +615,13 @@ public class QuickTest {
                 .get("/lobby/teams/1")
                 .then()
                 .contentType(ContentType.JSON)
-                .body("[0].teamScore", equalTo(4.0F));
+                .body("[0].teamCaptures", equalTo(4.0F));
         given()
                 .when()
                 .get("/lobby/teams/1")
                 .then()
                 .contentType(ContentType.JSON)
-                .body("[1].teamScore", equalTo(10.5F));
+                .body("[1].teamCaptures", equalTo(4.0F));
 
         given()
                 .when()
@@ -639,13 +639,13 @@ public class QuickTest {
                 .get("/lobby/teams/1")
                 .then()
                 .contentType(ContentType.JSON)
-                .body("[0].teamScore", equalTo(5.0F));
+                .body("[0].teamCaptures", equalTo(5.0F));
         given()
                 .when()
                 .get("/lobby/teams/1")
                 .then()
                 .contentType(ContentType.JSON)
-                .body("[1].teamScore", equalTo(10.5F));
+                .body("[1].teamCaptures", equalTo(4.0F));
 
         given()
                 .when()
@@ -658,13 +658,13 @@ public class QuickTest {
                 .get("/lobby/teams/1")
                 .then()
                 .contentType(ContentType.JSON)
-                .body("[0].teamScore", equalTo(5.0F));
+                .body("[0].teamCaptures", equalTo(5.0F));
         given()
                 .when()
                 .get("/lobby/teams/1")
                 .then()
                 .contentType(ContentType.JSON)
-                .body("[1].teamScore", equalTo(11.5F));
+                .body("[1].teamCaptures", equalTo(5.0F));
 
         // Set of turns end
 
@@ -685,13 +685,13 @@ public class QuickTest {
                 .get("/lobby/teams/1")
                 .then()
                 .contentType(ContentType.JSON)
-                .body("[0].teamScore", equalTo(5.0F));
+                .body("[0].teamCaptures", equalTo(5.0F));
         given()
                 .when()
                 .get("/lobby/teams/1")
                 .then()
                 .contentType(ContentType.JSON)
-                .body("[1].teamScore", equalTo(12.5F));
+                .body("[1].teamCaptures", equalTo(6.0F));
 
         given()
                 .when()
@@ -704,13 +704,13 @@ public class QuickTest {
                 .get("/lobby/teams/1")
                 .then()
                 .contentType(ContentType.JSON)
-                .body("[0].teamScore", equalTo(6.0F));
+                .body("[0].teamCaptures", equalTo(6.0F));
         given()
                 .when()
                 .get("/lobby/teams/1")
                 .then()
                 .contentType(ContentType.JSON)
-                .body("[1].teamScore", equalTo(12.5F));
+                .body("[1].teamCaptures", equalTo(6.0F));
 
         given()
                 .when()
@@ -731,13 +731,13 @@ public class QuickTest {
                 .get("/lobby/teams/1")
                 .then()
                 .contentType(ContentType.JSON)
-                .body("[0].teamScore", equalTo(7.0F));
+                .body("[0].teamCaptures", equalTo(7.0F));
         given()
                 .when()
                 .get("/lobby/teams/1")
                 .then()
                 .contentType(ContentType.JSON)
-                .body("[1].teamScore", equalTo(12.5F));
+                .body("[1].teamCaptures", equalTo(6.0F));
 
         given()
                 .when()
@@ -750,13 +750,13 @@ public class QuickTest {
                 .get("/lobby/teams/1")
                 .then()
                 .contentType(ContentType.JSON)
-                .body("[0].teamScore", equalTo(7.0F));
+                .body("[0].teamCaptures", equalTo(7.0F));
         given()
                 .when()
                 .get("/lobby/teams/1")
                 .then()
                 .contentType(ContentType.JSON)
-                .body("[1].teamScore", equalTo(13.5F));
+                .body("[1].teamCaptures", equalTo(7.0F));
 
         given()
                 .when()
@@ -774,13 +774,13 @@ public class QuickTest {
                 .get("/lobby/teams/1")
                 .then()
                 .contentType(ContentType.JSON)
-                .body("[0].teamScore", equalTo(7.0F));
+                .body("[0].teamCaptures", equalTo(7.0F));
         given()
                 .when()
                 .get("/lobby/teams/1")
                 .then()
                 .contentType(ContentType.JSON)
-                .body("[1].teamScore", equalTo(14.5F));
+                .body("[1].teamCaptures", equalTo(8.0F));
 
         // Set of turns end
 
@@ -796,13 +796,13 @@ public class QuickTest {
                 .get("/lobby/teams/1")
                 .then()
                 .contentType(ContentType.JSON)
-                .body("[0].teamScore", equalTo(8.0F));
+                .body("[0].teamCaptures", equalTo(8.0F));
         given()
                 .when()
                 .get("/lobby/teams/1")
                 .then()
                 .contentType(ContentType.JSON)
-                .body("[1].teamScore", equalTo(14.5F));
+                .body("[1].teamCaptures", equalTo(8.0F));
 
         given()
                 .when()
@@ -820,13 +820,13 @@ public class QuickTest {
                 .get("/lobby/teams/1")
                 .then()
                 .contentType(ContentType.JSON)
-                .body("[0].teamScore", equalTo(8.0F));
+                .body("[0].teamCaptures", equalTo(8.0F));
         given()
                 .when()
                 .get("/lobby/teams/1")
                 .then()
                 .contentType(ContentType.JSON)
-                .body("[1].teamScore", equalTo(14.5F));
+                .body("[1].teamCaptures", equalTo(8.0F));
 
         given()
                 .when()
@@ -843,16 +843,6 @@ public class QuickTest {
                 .put("/goban/3/pass")// TODO WHITE
                 .then()
                 .statusCode(200);
-        //given()
-        //        .when()
-        //        .put("/goban/2/pass")//TODO BLACK
-         //       .then()
-         //       .statusCode(200);
-        //given()
-        //        .when()
-        //        .put("/goban/4/pass")// TODO WHITE
-        //        .then()
-        //        .statusCode(200);
-        // Set of turns end
+
     }
 }
