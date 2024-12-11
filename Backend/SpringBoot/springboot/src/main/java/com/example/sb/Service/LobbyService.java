@@ -146,7 +146,6 @@ public class LobbyService {
             return ResponseEntity.ok(profile.getUsername() + " left the lobby!");
         }
         else {
-            // Handles lobby is not found
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Lobby not found!");
         }
     }

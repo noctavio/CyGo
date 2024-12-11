@@ -45,8 +45,8 @@ public class GobanController {
             @ApiResponse(responseCode = "200", description = "Turn passed successfully"),
             @ApiResponse(responseCode = "404", description = "User or game not found")
     })
-            @PutMapping("/{userId}/pass")
-            public ResponseEntity<String> pass(
+    @PutMapping("/{userId}/pass")
+    public ResponseEntity<String> pass(
             @Parameter(description = "ID of the user passing their turn") @PathVariable Integer userId) {
         return gobanService.pass(userId);
     }
