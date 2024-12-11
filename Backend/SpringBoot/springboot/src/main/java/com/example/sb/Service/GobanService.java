@@ -66,6 +66,10 @@ public class GobanService {
             return ResponseEntity.ok("Game is no longer active" );
         }
 
+        if (currentPlayer.getTeam().getTerritoryCount() != null) {
+            return ResponseEntity.ok("In counting phase cannot, place a stone." );
+        }
+
         if (currentPlayer.getIsTurn()) {
             goban.loadMatrixFromBoardString();
             Stone[][] board = goban.getBoard();
@@ -153,11 +157,17 @@ public class GobanService {
             return ResponseEntity.ok("Game is no longer active" );
         }
 
+        if (currentPlayer.getTeam().getTerritoryCount() != null) {
+            return ResponseEntity.ok("In counting phase cannot, pass." );
+        }
+
         if (currentPlayer.getIsTurn()) {
+            int passCount = 0;
+            Lobby currentLobby = currentPlayer.getTeam().getLobby();
             ChatController chat = new ChatController();
             Team currentTeam = currentPlayer.getTeam();
             Lobby lobby = currentTeam.getLobby();
-            int passCount = 0;
+
             currentPlayer.setRecentPassTurn(true);
             playerRepository.save(currentPlayer);
 
@@ -166,34 +176,41 @@ public class GobanService {
             if (timeElapsed) {
                 return ResponseEntity.ok("Time depleted, you forfeit");
             }
-
-            Lobby currentLobby = currentPlayer.getTeam().getLobby();
             List<Player> playersInGame = currentLobby.getPlayersInLobby();
-
-            Goban goban = currentLobby.getGoban();
             for (Player player : playersInGame) {
                 if (player.getRecentPassTurn()){
                     passCount++;
                 }
             }
+
+            Goban goban = currentLobby.getGoban();
             if (passCount == 4) {
                 goban.loadMatrixFromBoardString();
                 Stone[][] board = goban.getBoard();
 
                 Team blackTeam = currentTeam.getIsBlack() ? currentTeam : oppositeTeam;
                 Team whiteTeam = currentTeam.getIsBlack() ? oppositeTeam : currentTeam;
+                int blackCount = 0;
+                int whiteCount = 0;
 
                 for (int x = 0; x < 9; x++) {
                     for (int y = 0; y < 9; y++) {
                         if (board[x][y].getStoneType().equals("B")) {
-                            blackTeam.setTerritoryCount(currentTeam.getTerritoryCount() + 1);
+                            blackTeam.setTerritoryCount(blackCount++);
                         }
                         else if (board[x][y].getStoneType().equals("W")) {
-                            whiteTeam.setTerritoryCount(currentTeam.getTerritoryCount() + 1);
+                            whiteTeam.setTerritoryCount(whiteCount++);
                         }
                     }
                 }
-                endGame(currentLobby.getLobby_id());
+
+                blackTeam.setTimeRemaining(2147483647L);
+                whiteTeam.setTimeRemaining(2147483647L);
+                blackTeam.setTerritoryCount(blackCount);
+                whiteTeam.setTerritoryCount(whiteCount);
+                teamRepository.save(blackTeam);
+                teamRepository.save(whiteTeam);
+                chat.sendGameUpdateToPlayers("[ANNOUNCER]: " + currentPlayer.getUsername() + " passed, everyone in the game has now passed in sequence + \n Now entering Counting Phase!.");
                 return ResponseEntity.ok(currentPlayer.getUsername() + " passed, everyone in the game has now passed in sequence GAME OVER.");
             }
             String nextPlayerName = switchToNextPlayer(currentPlayer, goban.getPlayerIdTurnList());
@@ -214,6 +231,11 @@ public class GobanService {
         if (!currentLobby.getIsGameInitialized()) {
             return ResponseEntity.ok("Cannot abandon a game that has not been initialized, you must leave lobby instead.");
         }
+
+        if (playerAbandoning.getTeam().getTerritoryCount() == null) {
+            return ResponseEntity.ok("In counting phase cannot, abandon." );
+        }
+
         playerAbandoning.setHasAbandoned(true);
         if (playerAbandoning.getUsername().equals(currentLobby.getHostName())) {
             if (playerAbandoning.equals(playerAbandoning.getTeam().getPlayer1())) {
@@ -236,6 +258,10 @@ public class GobanService {
 
             if (!currentPlayer.equals(currentPlayer.getTeam().getPlayer1())) {
                 return ResponseEntity.ok("Only the teamLeader can claim territory!");
+            }
+
+            if (currentPlayer.getTeam().getTerritoryCount() == null) {
+                return ResponseEntity.ok("Not in counting phase.");
             }
 
             Team currentTeam = currentPlayer.getTeam();
@@ -261,13 +287,12 @@ public class GobanService {
             }
             // Attempting to claim prisoner
             else if (board[x][y].getStoneType().equals("B") || board[x][y].getStoneType().equals("W")) {
-                // TODO if player trying to claim enemy stone as prisoner change stone type to Wp/Bp, deduct one point of territory from Opposite team.
-                if (currentTeam.equals(blackTeam)) {
+                if (currentTeam.equals(blackTeam) && board[x][y].getStoneType().equals("W")) {
                     board[x][y].setStoneType("Bp");
                     blackTeam.setTerritoryCount(blackTeam.getTerritoryCount() + 1);
                     whiteTeam.setTerritoryCount(whiteTeam.getTerritoryCount() - 1);
                 }
-                else {
+                else if (currentTeam.equals(whiteTeam) && board[x][y].getStoneType().equals("B")) {
                     board[x][y].setStoneType("Wp");
                     whiteTeam.setTerritoryCount(whiteTeam.getTerritoryCount() + 1);
                     blackTeam.setTerritoryCount(blackTeam.getTerritoryCount() - 1);
@@ -275,13 +300,12 @@ public class GobanService {
             }
             // Attempting to dispute prisoner
             else if (board[x][y].getStoneType().equals("Bp") || board[x][y].getStoneType().equals("Wp")) {
-                // TODO if a player disagrees with Bp/Wp, allow them to reclaim it as W/B, increment one point of territory for current Team!
-                if (currentTeam.equals(blackTeam)) {
+                if (currentTeam.equals(blackTeam) && board[x][y].getStoneType().equals("Wp") ) {
                     board[x][y].setStoneType("B");
                     blackTeam.setTerritoryCount(blackTeam.getTerritoryCount() + 1);
                     whiteTeam.setTerritoryCount(whiteTeam.getTerritoryCount() - 1);
                 }
-                else {
+                else if (currentTeam.equals(whiteTeam) && board[x][y].getStoneType().equals("Bp")) {
                     board[x][y].setStoneType("W");
                     whiteTeam.setTerritoryCount(whiteTeam.getTerritoryCount() + 1);
                     blackTeam.setTerritoryCount(blackTeam.getTerritoryCount() - 1);
@@ -289,8 +313,6 @@ public class GobanService {
             }
             // Attempting to reset a territory.
             else {
-                // TODO if a player tries to claim enemy Bc/Wc don't update board, first come first serve
-                // TODO DO allow Black to UNCLAIM Bc, and White to UNCLAIM Wc.
                 if (currentTeam.equals(blackTeam)) {
                     if (board[x][y].getStoneType().equals("Bc")) {
                         board[x][y].setStoneType("X");
@@ -326,6 +348,10 @@ public class GobanService {
                 return ResponseEntity.ok("Specified player not a team leader!");
             }
 
+            if (currentPlayer.getTeam().getTerritoryCount() == null) {
+                return ResponseEntity.ok("Not in counting phase.");
+            }
+
             currentPlayer.setFinalizeClaim(!currentPlayer.getFinalizeClaim());
             playerRepository.save(currentPlayer);
 
@@ -334,14 +360,13 @@ public class GobanService {
 
             if (oppositeTeam.getPlayer1().getFinalizeClaim() && currentPlayer.getFinalizeClaim()) {
                 endGame(lobby.getLobby_id());
-                chat.sendGameUpdateToPlayers("[ANNOUNCER]: BOTH teams have finished claiming territory!");
                 return ResponseEntity.ok("Both players have finished claiming territory!");
             }
             if (!currentPlayer.getFinalizeClaim()) {
-                chat.sendGameUpdateToPlayers("[ANNOUNCER]: " + currentPlayer.getUsername() + "has started to claim territory again!");
+                chat.sendGameUpdateToPlayers("[ANNOUNCER]: " + currentPlayer.getUsername() + " has started to claim territory again!");
                 return ResponseEntity.ok("Player started claiming again.");
             }
-            chat.sendGameUpdateToPlayers("[ANNOUNCER]: " + currentPlayer.getUsername() + "has finished claiming territory!");
+            chat.sendGameUpdateToPlayers("[ANNOUNCER]: " + currentPlayer.getUsername() + " has finished claiming territory!");
             return ResponseEntity.ok("Player finished claiming territory!");
         }
         return ResponseEntity.ok("Specified player does not exist!");
@@ -469,7 +494,7 @@ public class GobanService {
                 Stone capturedStone = board[groupX][groupY];
                 capturedStone.setStoneType("X");
                 board[groupX][groupY] = capturedStone;
-                currentTeam.setTeamScore(currentTeam.getTeamScore() + 1);
+                currentTeam.setTeamCaptures(currentTeam.getTeamCaptures() + 1);
             }
             return true;
         }
@@ -481,32 +506,29 @@ public class GobanService {
         double cumulativeBlackScore;
         double cumulativeWhiteScore;
 
-        // Determine the scores based on which team is black
-        if (team1.getIsBlack()) {
-            cumulativeBlackScore = team1.getTeamScore() + team1.getTerritoryCount();
-            cumulativeWhiteScore = team2.getTeamScore() + team2.getTerritoryCount();
-        }
-        else {
-            cumulativeBlackScore = team2.getTeamScore() + team2.getTerritoryCount();
-            cumulativeWhiteScore = team1.getTeamScore() + team1.getTerritoryCount();
-        }
+        Team blackTeam = team1.getIsBlack() ? team1 : team2;
+        Team whiteTeam = team1.getIsBlack() ? team2 : team1;
 
-        // Output the scores for debugging
-        System.out.println("Black score: " + cumulativeBlackScore);
-        System.out.println("White score: " + cumulativeWhiteScore);
+        // Determine the scores based on which team is black
+
+        cumulativeBlackScore = blackTeam.getTeamCaptures() + blackTeam.getTerritoryCount();
+        cumulativeWhiteScore = whiteTeam.getTeamCaptures() + whiteTeam.getTerritoryCount() + 6.5;
 
         if (cumulativeBlackScore > cumulativeWhiteScore) {
-            return "Black wins by " + (cumulativeBlackScore - cumulativeWhiteScore) + " points.";
+            return "Black wins by " + (cumulativeBlackScore - cumulativeWhiteScore) + " points." + "\n" + "Final scores are, " +
+                    blackTeam.getTeamName() + ": " + cumulativeBlackScore +
+                    " and " + whiteTeam.getTeamName() + ": " + cumulativeWhiteScore;
         }
         else {
-            return "White wins by " + (cumulativeWhiteScore - cumulativeBlackScore) + " points.";
+            return "White wins by " + (cumulativeWhiteScore - cumulativeBlackScore) + " points." +
+                    "\n" + "Final scores are, " + blackTeam.getTeamName() + ": " + cumulativeBlackScore +
+                    " and " + whiteTeam.getTeamName() + ": " + cumulativeWhiteScore;
         }
     }
 
     public void endGame(Integer lobbyId) {
         boolean forfeit = false;
-        String teamWinsBy;
-        String bonusMessage = "";
+        String teamWinsBy = "";
         String teamWinner = "";
         Optional<Lobby> lobbyOptional = lobbyRepository.findById(lobbyId);
         boolean isTeam1Winner = false;
@@ -548,9 +570,6 @@ public class GobanService {
         }
         else {
             teamWinsBy = calculateScores(team1, team2);
-            teamWinsBy = teamWinsBy + "\n";
-            bonusMessage = teamWinsBy + "Final scores are, " + team1.getTeamName() + ": " + team1.getTeamScore() +
-                    " and " + team2.getTeamName() + ": " + team2.getTeamScore();
         }
 
         // Update profiles
@@ -583,7 +602,7 @@ public class GobanService {
         teamRepository.save(team1);
         teamRepository.save(team2);
         ChatController chat = new ChatController();
-        chat.sendGameUpdateToPlayers("[ANNOUNCER]: Game over. \n " + teamWinner + "\n" + bonusMessage);
+        chat.sendGameUpdateToPlayers("[ANNOUNCER]: Game over. \n " + teamWinner + "\n" + teamWinsBy);
     }
 
     private void updateTeamProfiles(Team team, boolean isWinner, Team opponentTeam) {
@@ -593,7 +612,9 @@ public class GobanService {
 
         for (Player player : players) {
             TheProfile profile = player.getProfile();
-            theProfileService.updateAfterGame(profile, isWinner, averageOpponentElo);
+            if (!team.getLobby().getIsFriendly()) {
+                theProfileService.updateAfterGame(profile, isWinner, averageOpponentElo);
+            }
             profile.setGames(profile.getGames() + 1); // Increment games played
         }
     }
@@ -607,8 +628,11 @@ public class GobanService {
     }
 
     private void resetTeamState(Team team) {
-        team.setTeamScore(0.0);
+        team.setTeamCaptures(0.0);
+        team.setTerritoryCount(null);
         team.setLastMoveTimestamp(null);
+        team.setIsFinishedCounting(false);
+        team.setIsTeamTurn(false);
         team.setTimeRemaining((team.getLobby().getGameTime() / 2) * 60 * 1000);
 
         List<Player> players = new ArrayList<>();
@@ -621,6 +645,8 @@ public class GobanService {
         for (Player player : players) {
             player.setIsTurn(false);
             player.setIsReady(false);
+            player.setFinalizeClaim(false);
+            player.setRecentPassTurn(false);
         }
     }
 

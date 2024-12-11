@@ -44,7 +44,7 @@ public class Lobby {
     //private List<String> invitedPlayers;
 
     public Lobby(String hostname) {
-        this.gameTime = 2L;
+        this.gameTime = 20L;
         this.hostName = hostname;
         this.isFriendly = true;
         this.isGameInitialized = false;
@@ -67,7 +67,6 @@ public class Lobby {
             players.add(team2.getPlayer2());
         }
         return players;
-
     }
 
     @Override

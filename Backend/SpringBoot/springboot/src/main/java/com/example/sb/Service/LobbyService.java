@@ -238,7 +238,6 @@ public class LobbyService {
                     // Sets up the specific ordering for players based on which team is black.
                     ChatController chat = new ChatController();
                     if (team1.getIsBlack()) {
-                        team2.setTeamScore(6.5);
                         team1.setIsTeamTurn(true);
                         team1PlayerStarter.setIsTurn(true);
 
@@ -253,8 +252,6 @@ public class LobbyService {
                         chat.sendGameUpdateToPlayers("[ANNOUNCER]: Game has been initialized! \n"  + team1.getTeamName() + "is starting first!" );
                     }
                     else if (team2.getIsBlack()) {
-
-                        team1.setTeamScore(6.5);
                         team2.setIsTeamTurn(true);
                         team2PlayerStarter.setIsTurn(true);
 
