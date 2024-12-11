@@ -37,15 +37,33 @@ public class GobanJosekiService {
         TheProfile theProfile = theProfileRepository.findByUser(Optional.of(user));
 
         GobanJoseki board = new GobanJoseki(theProfile);
+        gobanJosekiRepository.save(board);
         return ResponseEntity.ok("new board made");
     }
 
     public String getBoardState(String username) {
         User user = userRepository.findByUsername(username);
         TheProfile theProfile = theProfileRepository.findByUser(Optional.of(user));
+        GobanJoseki goban = gobanJosekiRepository.findByGobanProfile(theProfile);
+        List<Joseki> josekiList = josekiService.getAllPlayableMoves(goban.getCurrentMove(), goban);
+        goban.loadMatrixFromBoardString();
+        StoneJoseki board[][] = goban.getBoard();
+        int moveNumber = 1;
+        for (Joseki joseki : josekiList){
+            String move = String.valueOf(moveNumber);
+            board[joseki.getXPosition()][joseki.getYPosition()].setStoneType(move);
+            moveNumber += 1;
+        }
+        StringBuilder boardString = new StringBuilder();
 
-        GobanJoseki board = gobanJosekiRepository.findByGobanProfile(theProfile);
-        return board.getBoardState();
+        for (int i = 0; i < 9; i++) {
+            for (int j = 0; j < 9; j++) {
+                boardString.append(board[i][j].getStoneType()).append(" ");
+            }
+            boardString.append("\n");  // New line after each row
+        }
+
+        return boardString.toString();
     }
 
 
