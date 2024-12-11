@@ -74,19 +74,6 @@ public class GobanService {
             goban.loadMatrixFromBoardString();
             Stone[][] board = goban.getBoard();
 
-            if (x == 22 && y == 22) { // TODO clears board for testing only
-                for (int i = 0; i < board.length; i++) {
-                    for (int j = 0; j < board[i].length; j++) {
-                        Stone stone = board[i][j];
-                        stone.setIsCaptured(false);
-                        stone.setStoneType("X");
-                    }
-                }
-                goban.saveBoardString();
-                gobanRepository.save(goban);
-                return ResponseEntity.ok("Matrix clear method here temp");
-            }
-
             Stone stone = new Stone(goban, x, y);
             if (currentPlayer.getTeam().getIsBlack()) {
                 if (board[x][y].getStoneType().equals("X")) {
