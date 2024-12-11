@@ -47,7 +47,7 @@ public class FriendsController {
     /**
      * Retrieve details of a specific club by its ID.
      *
-     * @param id the ID of the club.
+     * @param user_id the ID of the club.
      * @return the club with the specified ID.
      */
     @GetMapping("/{id}/{user_id}")
@@ -56,8 +56,8 @@ public class FriendsController {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved the club details"),
             @ApiResponse(responseCode = "404", description = "Club not found")
     })
-    public User getFriendById(@PathVariable Integer id, @PathVariable Integer user_id) {
-        return friendsService.getAFriend(id, user_id); // Fetch club by ID
+    public User getFriendById(@PathVariable Integer user_id, @PathVariable String friendName) {
+        return friendsService.getAFriend(user_id, friendName); // Fetch club by ID
     }
 
 
@@ -66,19 +66,19 @@ public class FriendsController {
     /**
      * Add a member to a specific friends list.
      *
-     * @param id the ID of the friends list.
+     * @param user_id         the ID of the friends list.
      * @param friendName the name of the friend to be added.
      * @return a success message.
      */
-    @PostMapping("/{id}/friends")
+    @PostMapping("/{user_id}/{friendName}")
     @Operation(summary = "Add friend to list", description = "Add a new friend to the specified friend list.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Member added successfully"),
             @ApiResponse(responseCode = "404", description = "Club not found")
     })
-    public ResponseEntity<String> addMember(@PathVariable Integer id, @RequestBody String friendName) {
+    public ResponseEntity addMember(@PathVariable Integer user_id, @PathVariable String friendName) {
 
-        return friendsService.addFriends(id, friendName); // Add a friend to the specified user
+        return friendsService.addFriends(user_id, friendName); // Add a friend to the specified user
     }
 
     /**

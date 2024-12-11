@@ -22,9 +22,21 @@ public class FriendsService {
     @Autowired
     private UserRepository userRepository;
 
-    public List<User> getAllFriends(Integer id) {
-        Optional<Friends> friends = friendsRepository.findById(id);
-        List<String> friendsList = friends.get().getFriends();
+    public List<User> getAllFriends(Integer user_id) {
+        Optional<User> optionalUser = userRepository.findById(user_id);
+        Optional<Friends> friends;
+        List<String> friendsList;
+        if(optionalUser.isEmpty()){
+            return null;
+        }else{
+            friends = friendsRepository.findByUser(optionalUser.get());
+        }
+        if (friends.isPresent()) {
+            friendsList = friends.get().getFriends();
+        }
+        else{
+            return null;
+        }
         List<User> userList = new ArrayList<>();
         for (String friendName : friendsList) {
             if (!friendName.equals(null)) {
@@ -35,27 +47,48 @@ public class FriendsService {
         return userList;
     }
 
-    public User getAFriend(Integer id, Integer user_id) {
-        Optional<Friends> friends = friendsRepository.findById(id);
-        List<String> friendsList = friends.get().getFriends();
+    public User getAFriend(Integer user_id, String username ){
+        Optional<User> optionalUser = userRepository.findById(user_id);
+        Optional<Friends> friends;
+        List<String> friendsList;
+        if(optionalUser.isPresent()) {
+            friends = friendsRepository.findByUser(optionalUser.get());
+        }
+        else{
+            return null;
+        }
+        if(friends.isPresent()) {
+            friendsList = friends.get().getFriends();
+        }
+        else{
+            return null;
+        }
         User user = null;
         for (String friendName : friendsList) {
-            user = userRepository.findByUsername(friendName);
-            if (friendName != null && user.getUser_id() == user_id) {
+            user = userRepository.findByUsername(username);
+            if (friendName != null && friendName.equals(user.getUsername())) {
                 return user;
             }
         }
         return user;
     }
 
-    public ResponseEntity addFriends(int friendsId, String friendName) {
-        Optional<Friends> optionalFriends = friendsRepository.findById(friendsId);
+    public ResponseEntity addFriends(Integer user_id, String friendName) {
+        Optional<User> optionalUser = userRepository.findById(user_id);
+        Optional<Friends> optionalFriends;
+        if(optionalUser.isEmpty()){
+            return ResponseEntity.ok("user not found");
+        }
+        else{
+
+            optionalFriends = friendsRepository.findByUser(optionalUser.get());
+        }
         if (optionalFriends.isPresent()) {
             Friends friends = optionalFriends.get();
             friends.getFriends().add(friendName);// Add the new member
             friendsRepository.save(friends); // Save the updated club
         } else {
-            throw new ResourceNotFoundException("user's friends not found with id: " + friendsId);
+            throw new ResourceNotFoundException("user's friends not found with id: " + user_id);
         }
         return ResponseEntity.ok("friend added.");
     }
