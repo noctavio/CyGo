@@ -85,7 +85,7 @@ public class TeamController {
         Optional<Team> teamOptional = teamRepository.findById(teamId);
         if (teamOptional.isPresent()) {
             Team team = teamOptional.get();
-            gobanService.endGame(team.getLobby().getLobby_id(), false);
+            gobanService.endGame(team.getLobby().getLobby_id());
             return ResponseEntity.ok("Game ended by timeElapsed of team: " + team.getTeamName());
         }
         return ResponseEntity.ok("No team at specified id: " + teamId);

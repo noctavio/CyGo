@@ -6,6 +6,7 @@ import com.example.sb.Repository.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.config.annotation.ObjectPostProcessor;
 import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
@@ -34,115 +35,6 @@ public class GobanService {
     private static final int[] DIR_X = {-1, 1, 0, 0};
     private static final int[] DIR_Y = {0, 0, -1, 1};
 
-    private static final int BOARD_SIZE = 9;
-    private enum PointState { EMPTY, BLACK, WHITE, NEUTRAL }
-
-    public Map<PointState, Integer> countTerritories(Stone[][] board) {
-        boolean[][] visited = new boolean[BOARD_SIZE][BOARD_SIZE];
-        Map<PointState, Integer> territoryCount = new HashMap<>();
-        territoryCount.put(PointState.BLACK, 0);
-        territoryCount.put(PointState.WHITE, 0);
-        territoryCount.put(PointState.NEUTRAL, 0);
-
-        for (int x = 0; x < BOARD_SIZE; x++) {
-            for (int y = 0; y < BOARD_SIZE; y++) {
-                if (!visited[x][y] && board[x][y].getStoneType().equals("X")) {
-                    PointState owner = floodFill(x, y, visited, board);
-                    System.out.println(owner.name() + "captured at " +  "(" + x + "," + y + ")");
-                    territoryCount.put(owner, territoryCount.get(owner) + 1);
-                }
-            }
-        }
-
-        return territoryCount;
-    }
-
-    private PointState floodFill(int x, int y, boolean[][] visited, Stone[][] board) {
-        Queue<int[]> queue = new LinkedList<>();
-        queue.add(new int[]{x, y});
-        visited[x][y] = true;
-
-        Set<Integer> borderingColors = new HashSet<>();
-        boolean isNeutral = true;  // Default assumption: the region is neutral
-
-        while (!queue.isEmpty()) {
-            int[] point = queue.poll();
-            int px = point[0], py = point[1];
-
-            for (int[] dir : new int[][]{{0, 1}, {1, 0}, {0, -1}, {-1, 0}}) {
-                int nx = px + dir[0], ny = py + dir[1];
-
-                if (nx >= 0 && ny >= 0 && nx < BOARD_SIZE && ny < BOARD_SIZE) {
-                    if (board[nx][ny].getStoneType().equals("X") && !visited[nx][ny]) {
-                        // Continue flood-fill for empty spots
-                        visited[nx][ny] = true;
-                        queue.add(new int[]{nx, ny});
-                    }
-                    else if (!board[nx][ny].getStoneType().equals("X")) {
-                        // Track bordering colors (Black or White stones)
-                        String stoneType = board[nx][ny].getStoneType();
-                        if (stoneType.equals("B")) {
-                            borderingColors.add(1); // Black stone
-                        }
-                        else if (stoneType.equals("W")) {
-                            borderingColors.add(2); // White stone
-                        }
-                    }
-                }
-            }
-        }
-
-        // Determine ownership based on the bordering colors
-        if (borderingColors.isEmpty()) {
-            return PointState.NEUTRAL;
-        }
-
-        // If the region is bordered only by black stones
-        if (borderingColors.size() == 1) {
-            return borderingColors.contains(1) ? PointState.BLACK : PointState.WHITE;
-        }
-
-        // If the region is bordered by both black and white stones, it's neutral
-        return PointState.NEUTRAL;
-    }
-
-    public String calculateScores(Stone[][] board, Team team1, Team team2) {
-        double blackScore;
-        double whiteScore;
-
-        // Count the territories
-        Map<PointState, Integer> territories = countTerritories(board);
-        int blackTerritory = territories.getOrDefault(PointState.BLACK, 0);
-        int whiteTerritory = territories.getOrDefault(PointState.WHITE, 0);
-
-        // Assuming team scores are the number of captured stones (prisoners)
-        double blackPrisoners = team1.getTeamScore(); // Assuming method that returns black prisoners count
-        double whitePrisoners = team2.getTeamScore(); // Assuming method that returns white prisoners count
-
-        // Determine the scores based on which team is black
-        if (team1.getIsBlack()) {
-            // Team1 is Black
-            whiteScore = whiteTerritory + whitePrisoners;
-            blackScore = blackTerritory + blackPrisoners;
-        }
-        else {
-            // Team2 is Black
-            whiteScore = whiteTerritory + whitePrisoners;
-            blackScore = blackTerritory + blackPrisoners;
-        }
-
-        // Output the scores for debugging
-        System.out.println("Black territory: " + blackTerritory + ", Black prisoners: " + blackPrisoners + ", Black score: " + blackScore);
-        System.out.println("White territory: " + whiteTerritory + ", White prisoners: " + whitePrisoners + ", White score: " + whiteScore);
-
-        // Determine the winner
-        if (blackScore > whiteScore) {
-            return "Black wins by " + (blackScore - whiteScore) + " points.";
-        } else {
-            return "White wins by " + (whiteScore - blackScore) + " points.";
-        }
-    }
-
     public String getBoardState(Integer lobbyId) {
         Optional<Lobby> lobbyOptional = lobbyRepository.findById(lobbyId);
         if (lobbyOptional.isPresent()) {
@@ -155,136 +47,6 @@ public class GobanService {
             return board.getBoardState();
         }
         return null;
-    }
-
-    public void endGame(Integer lobbyId, boolean forfeit) {
-        String xWinsBy;
-        String bonusMessage = "";
-        String teamWinner = "";
-        Optional<Lobby> lobbyOptional = lobbyRepository.findById(lobbyId);
-        boolean isTeam1Winner = false;
-
-        Lobby lobby = lobbyOptional.get();
-        Team team1 = lobby.getTeam1();
-        Team team2 = lobby.getTeam2();
-        Goban goban = lobby.getGoban();
-
-        if (team1.getTimeRemaining() == 0L || team2.getTimeRemaining() == 0L) {
-            if (team1.getTimeRemaining() == 0L) {
-                String winningTeamName = team2.getTeamName();
-                String winningPlayers = team2.getPlayer1().getUsername() + "-|-" + team2.getPlayer2().getUsername();
-                teamWinner = winningTeamName + " (" + winningPlayers + ") wins the game by a time loss from " + team1.getTeamName();
-            }
-            else {
-                String winningTeamName = team1.getTeamName();
-                String winningPlayers = team1.getPlayer1().getUsername() + "-|-" + team1.getPlayer2().getUsername();
-                teamWinner = winningTeamName + " (" + winningPlayers + ") wins the game by a time loss from " + team2.getTeamName();
-                isTeam1Winner = true;
-            }
-        }
-        // Determine winner if some player abandoned
-        else if (team1.getPlayer1().getHasAbandoned() || team1.getPlayer2().getHasAbandoned()) {
-            // Team 1 has a missing player; Team 2 wins
-            String winningTeamName = team2.getTeamName();
-            String winningPlayers = team2.getPlayer1().getUsername() + "-|-" + team2.getPlayer2().getUsername();
-            teamWinner = winningTeamName + " (" + winningPlayers + ") wins the game due to teammate abandonment by " + team1.getTeamName();
-        }
-        else if (team2.getPlayer1().getHasAbandoned() || team2.getPlayer2().getHasAbandoned()) {
-            // Team 2 has a missing player; Team 1 wins
-            isTeam1Winner = true;
-            String winningTeamName = team1.getTeamName();
-            String winningPlayers = team1.getPlayer1().getUsername() + "-|-" + team1.getPlayer2().getUsername();
-            teamWinner = winningTeamName + " (" + winningPlayers + ") wins the game due to teammate abandonment by " + team2.getTeamName();
-        }
-        else {
-            goban.loadMatrixFromBoardString();
-            Stone[][] board = goban.getBoard();
-            xWinsBy = calculateScores(board, team1, team2);
-            xWinsBy = xWinsBy + "\n";
-            bonusMessage = xWinsBy + "Final scores are, " + team1.getTeamName() + ": " + team1.getTeamScore() +
-                    " and " + team2.getTeamName() + ": " + team2.getTeamScore();
-        }
-
-        // Update profiles
-        updateTeamProfiles(team1, isTeam1Winner, team2);
-        updateTeamProfiles(team2, !isTeam1Winner, team1);
-        saveAllProfiles(team1, team2);
-
-        if (forfeit) {
-            for (Player currentPlayer: lobby.getPlayersInLobby()){
-                if (currentPlayer.getHasAbandoned()) {
-                    Team currentTeam = currentPlayer.getTeam();
-                    if (currentTeam.getPlayer1() != null && currentTeam.getPlayer1().equals(currentPlayer)) {
-                        currentTeam.setPlayer1(null);
-                    }
-                    else if (currentTeam.getPlayer2() != null && currentTeam.getPlayer2().equals(currentPlayer)) {
-                        currentTeam.setPlayer2(null);
-                    }
-                    teamRepository.save(currentTeam);
-                    playerRepository.delete(currentPlayer);
-                }
-            }
-        }
-
-        // Reset the lobby state
-        resetLobbyState(lobby);
-
-        // Save updated entities
-        gobanRepository.delete(goban);
-        lobbyRepository.save(lobby);
-        teamRepository.save(team1);
-        teamRepository.save(team2);
-        ChatController chat = new ChatController();
-        chat.sendGameUpdateToPlayers("[ANNOUNCER]: Game over. \n " + teamWinner + "\n" + bonusMessage);
-    }
-
-    private void updateTeamProfiles(Team team, boolean isWinner, Team opponentTeam) {
-        List<Player> players = List.of(team.getPlayer1(), team.getPlayer2());
-        int averageOpponentElo = (opponentTeam.getPlayer1().getProfile().getElo() +
-                opponentTeam.getPlayer2().getProfile().getElo()) / 2;
-
-        for (Player player : players) {
-            TheProfile profile = player.getProfile();
-            theProfileService.updateAfterGame(profile, isWinner, averageOpponentElo);
-            profile.setGames(profile.getGames() + 1); // Increment games played
-        }
-    }
-
-    private void resetLobbyState(Lobby lobby) {
-        lobby.setGoban(null);
-        lobby.setIsGameInitialized(false);
-
-        resetTeamState(lobby.getTeam1());
-        resetTeamState(lobby.getTeam2());
-    }
-
-    private void resetTeamState(Team team) {
-        team.setTeamScore(0.0);
-        team.setLastMoveTimestamp(null);
-        team.setTimeRemaining((team.getLobby().getGameTime() / 2) * 60 * 1000);
-
-        List<Player> players = new ArrayList<>();
-        if (team.getPlayer1() != null) {
-            players.add(team.getPlayer1());
-        }
-        if (team.getPlayer2() != null) {
-            players.add(team.getPlayer2());
-        }
-        for (Player player : players) {
-            player.setIsTurn(false);
-            player.setIsReady(false);
-        }
-    }
-
-    private void saveAllProfiles(Team team1, Team team2) {
-        List<TheProfile> profiles = List.of(
-                team1.getPlayer1().getProfile(),
-                team1.getPlayer2().getProfile(),
-                team2.getPlayer1().getProfile(),
-                team2.getPlayer2().getProfile()
-        );
-
-        theProfileRepository.saveAll(profiles);
     }
 
     public ResponseEntity<String> placeAStone(Integer userId, Integer x, Integer y) {
@@ -394,18 +156,12 @@ public class GobanService {
         if (currentPlayer.getIsTurn()) {
             ChatController chat = new ChatController();
             Team currentTeam = currentPlayer.getTeam();
+            Lobby lobby = currentTeam.getLobby();
             int passCount = 0;
             currentPlayer.setRecentPassTurn(true);
             playerRepository.save(currentPlayer);
 
-            Team oppositeTeam;
-            if (currentTeam.equals(currentTeam.getLobby().getTeam1())) {
-                oppositeTeam = currentTeam.getLobby().getTeam2();
-            }
-            else {
-                oppositeTeam = currentTeam.getLobby().getTeam1();
-            }
-
+            Team oppositeTeam = currentTeam.equals(lobby.getTeam1()) ? lobby.getTeam2() : lobby.getTeam1();
             boolean timeElapsed = handleTimer(currentTeam, oppositeTeam, currentPlayer, chat);
             if (timeElapsed) {
                 return ResponseEntity.ok("Time depleted, you forfeit");
@@ -413,7 +169,7 @@ public class GobanService {
 
             Lobby currentLobby = currentPlayer.getTeam().getLobby();
             List<Player> playersInGame = currentLobby.getPlayersInLobby();
-            
+
             Goban goban = currentLobby.getGoban();
             for (Player player : playersInGame) {
                 if (player.getRecentPassTurn()){
@@ -421,7 +177,23 @@ public class GobanService {
                 }
             }
             if (passCount == 4) {
-                endGame(currentLobby.getLobby_id(), false);
+                goban.loadMatrixFromBoardString();
+                Stone[][] board = goban.getBoard();
+
+                Team blackTeam = currentTeam.getIsBlack() ? currentTeam : oppositeTeam;
+                Team whiteTeam = currentTeam.getIsBlack() ? oppositeTeam : currentTeam;
+
+                for (int x = 0; x < 9; x++) {
+                    for (int y = 0; y < 9; y++) {
+                        if (board[x][y].getStoneType().equals("B")) {
+                            blackTeam.setTerritoryCount(currentTeam.getTerritoryCount() + 1);
+                        }
+                        else if (board[x][y].getStoneType().equals("W")) {
+                            whiteTeam.setTerritoryCount(currentTeam.getTerritoryCount() + 1);
+                        }
+                    }
+                }
+                endGame(currentLobby.getLobby_id());
                 return ResponseEntity.ok(currentPlayer.getUsername() + " passed, everyone in the game has now passed in sequence GAME OVER.");
             }
             String nextPlayerName = switchToNextPlayer(currentPlayer, goban.getPlayerIdTurnList());
@@ -453,8 +225,126 @@ public class GobanService {
         }
         playerRepository.save(playerAbandoning);
 
-        endGame(currentLobby.getLobby_id(), true);
+        endGame(currentLobby.getLobby_id());
         return ResponseEntity.ok("You abandoned the game.");
+    }
+
+    public ResponseEntity<String> disputeTerritory (Integer userId, Integer x, Integer y) {
+        TheProfile profile = userService.findProfileById(userId);
+        Player currentPlayer = playerRepository.findByProfile(profile);
+        if (currentPlayer != null) {
+
+            if (!currentPlayer.equals(currentPlayer.getTeam().getPlayer1())) {
+                return ResponseEntity.ok("Only the teamLeader can claim territory!");
+            }
+
+            Team currentTeam = currentPlayer.getTeam();
+            Lobby lobby = currentTeam.getLobby();
+            Team oppositeTeam = currentTeam.equals(lobby.getTeam1()) ? lobby.getTeam2() : lobby.getTeam1();
+            Team blackTeam = currentTeam.getIsBlack() ? currentTeam : oppositeTeam;
+            Team whiteTeam = currentTeam.getIsBlack() ? oppositeTeam : currentTeam;
+
+            Goban goban = lobby.getGoban();
+            goban.loadMatrixFromBoardString();
+            Stone[][] board = goban.getBoard();
+
+            // Attempting to claim territory
+            if (board[x][y].getStoneType().equals("X")) {
+                if (currentTeam.equals(blackTeam)) {
+                    board[x][y].setStoneType("Bc");
+                    blackTeam.setTerritoryCount(blackTeam.getTerritoryCount() + 1);
+                }
+                else {
+                    board[x][y].setStoneType("Wc");
+                    whiteTeam.setTerritoryCount(whiteTeam.getTerritoryCount() + 1);
+                }
+            }
+            // Attempting to claim prisoner
+            else if (board[x][y].getStoneType().equals("B") || board[x][y].getStoneType().equals("W")) {
+                // TODO if player trying to claim enemy stone as prisoner change stone type to Wp/Bp, deduct one point of territory from Opposite team.
+                if (currentTeam.equals(blackTeam)) {
+                    board[x][y].setStoneType("Bp");
+                    blackTeam.setTerritoryCount(blackTeam.getTerritoryCount() + 1);
+                    whiteTeam.setTerritoryCount(whiteTeam.getTerritoryCount() - 1);
+                }
+                else {
+                    board[x][y].setStoneType("Wp");
+                    whiteTeam.setTerritoryCount(whiteTeam.getTerritoryCount() + 1);
+                    blackTeam.setTerritoryCount(blackTeam.getTerritoryCount() - 1);
+                }
+            }
+            // Attempting to dispute prisoner
+            else if (board[x][y].getStoneType().equals("Bp") || board[x][y].getStoneType().equals("Wp")) {
+                // TODO if a player disagrees with Bp/Wp, allow them to reclaim it as W/B, increment one point of territory for current Team!
+                if (currentTeam.equals(blackTeam)) {
+                    board[x][y].setStoneType("B");
+                    blackTeam.setTerritoryCount(blackTeam.getTerritoryCount() + 1);
+                    whiteTeam.setTerritoryCount(whiteTeam.getTerritoryCount() - 1);
+                }
+                else {
+                    board[x][y].setStoneType("W");
+                    whiteTeam.setTerritoryCount(whiteTeam.getTerritoryCount() + 1);
+                    blackTeam.setTerritoryCount(blackTeam.getTerritoryCount() - 1);
+                }
+            }
+            // Attempting to reset a territory.
+            else {
+                // TODO if a player tries to claim enemy Bc/Wc don't update board, first come first serve
+                // TODO DO allow Black to UNCLAIM Bc, and White to UNCLAIM Wc.
+                if (currentTeam.equals(blackTeam)) {
+                    if (board[x][y].getStoneType().equals("Bc")) {
+                        board[x][y].setStoneType("X");
+                        blackTeam.setTerritoryCount(blackTeam.getTerritoryCount() - 1);
+                    }
+                }
+                else {
+                    if (board[x][y].getStoneType().equals("Wc")) {
+                        board[x][y].setStoneType("X");
+                        whiteTeam.setTerritoryCount(whiteTeam.getTerritoryCount() - 1);
+                    }
+                }
+            }
+
+            goban.saveBoardString();
+            gobanRepository.save(goban);
+            teamRepository.save(blackTeam);
+            teamRepository.save(whiteTeam);
+            return ResponseEntity.ok("temp, should be good!");
+        }
+        return ResponseEntity.ok("User with ID: " + userId + " does not exist.");
+    }
+
+    public ResponseEntity<String> toggleFinalizeClaim(Integer userId) {
+        ChatController chat = new ChatController();
+
+        TheProfile profile = userService.findProfileById(userId);
+        Player currentPlayer = playerRepository.findByProfile(profile);
+
+        if (currentPlayer != null) {
+            Team currentTeam = currentPlayer.getTeam();
+            if (!currentPlayer.equals(currentTeam.getPlayer1())) {
+                return ResponseEntity.ok("Specified player not a team leader!");
+            }
+
+            currentPlayer.setFinalizeClaim(!currentPlayer.getFinalizeClaim());
+            playerRepository.save(currentPlayer);
+
+            Lobby lobby = currentTeam.getLobby();
+            Team oppositeTeam = currentTeam.equals(lobby.getTeam1()) ? lobby.getTeam2() : lobby.getTeam1();
+
+            if (oppositeTeam.getPlayer1().getFinalizeClaim() && currentPlayer.getFinalizeClaim()) {
+                endGame(lobby.getLobby_id());
+                chat.sendGameUpdateToPlayers("[ANNOUNCER]: BOTH teams have finished claiming territory!");
+                return ResponseEntity.ok("Both players have finished claiming territory!");
+            }
+            if (!currentPlayer.getFinalizeClaim()) {
+                chat.sendGameUpdateToPlayers("[ANNOUNCER]: " + currentPlayer.getUsername() + "has started to claim territory again!");
+                return ResponseEntity.ok("Player started claiming again.");
+            }
+            chat.sendGameUpdateToPlayers("[ANNOUNCER]: " + currentPlayer.getUsername() + "has finished claiming territory!");
+            return ResponseEntity.ok("Player finished claiming territory!");
+        }
+        return ResponseEntity.ok("Specified player does not exist!");
     }
 
     public boolean handleTimer(Team currentTeam, Team oppositeTeam, Player currentPlayer, ChatController chat) {
@@ -482,7 +372,7 @@ public class GobanService {
             currentTeam.setTimeRemaining(0L);
             teamRepository.save(currentTeam);
             chat.sendGameUpdateToPlayers("[ANNOUNCER]: " + currentPlayer.getUsername() + "has run out of time, game forfeit!");
-            endGame(currentTeam.getLobby().getLobby_id(), false);
+            endGame(currentTeam.getLobby().getLobby_id());
             return true;
         }
         else if (newTimeRemaining < 30000) {
@@ -497,7 +387,6 @@ public class GobanService {
         return timeElapsed;
     }
 
-    //Helper Methods
     public String switchToNextPlayer(Player currentPlayer, List<Integer> turnSequence) {
         // Find the current player's ID and index in the turn sequence
         Integer currentTurnId = currentPlayer.getProfile().getUser().getUser_id();
@@ -586,5 +475,163 @@ public class GobanService {
         }
 
         return false;
+    }
+
+    public String calculateScores(Team team1, Team team2) {
+        double cumulativeBlackScore;
+        double cumulativeWhiteScore;
+
+        // Determine the scores based on which team is black
+        if (team1.getIsBlack()) {
+            cumulativeBlackScore = team1.getTeamScore() + team1.getTerritoryCount();
+            cumulativeWhiteScore = team2.getTeamScore() + team2.getTerritoryCount();
+        }
+        else {
+            cumulativeBlackScore = team2.getTeamScore() + team2.getTerritoryCount();
+            cumulativeWhiteScore = team1.getTeamScore() + team1.getTerritoryCount();
+        }
+
+        // Output the scores for debugging
+        System.out.println("Black score: " + cumulativeBlackScore);
+        System.out.println("White score: " + cumulativeWhiteScore);
+
+        if (cumulativeBlackScore > cumulativeWhiteScore) {
+            return "Black wins by " + (cumulativeBlackScore - cumulativeWhiteScore) + " points.";
+        }
+        else {
+            return "White wins by " + (cumulativeWhiteScore - cumulativeBlackScore) + " points.";
+        }
+    }
+
+    public void endGame(Integer lobbyId) {
+        boolean forfeit = false;
+        String teamWinsBy;
+        String bonusMessage = "";
+        String teamWinner = "";
+        Optional<Lobby> lobbyOptional = lobbyRepository.findById(lobbyId);
+        boolean isTeam1Winner = false;
+
+        Lobby lobby = lobbyOptional.get();
+        Team team1 = lobby.getTeam1();
+        Team team2 = lobby.getTeam2();
+        Goban goban = lobby.getGoban();
+
+        if (team1.getTimeRemaining() == 0L || team2.getTimeRemaining() == 0L) {
+            // Some team ran out of time
+            if (team1.getTimeRemaining() == 0L) {
+                String winningTeamName = team2.getTeamName();
+                String winningPlayers = team2.getPlayer1().getUsername() + "-|-" + team2.getPlayer2().getUsername();
+                teamWinner = winningTeamName + " (" + winningPlayers + ") wins the game by a time loss from " + team1.getTeamName();
+            }
+            else {
+                String winningTeamName = team1.getTeamName();
+                String winningPlayers = team1.getPlayer1().getUsername() + "-|-" + team1.getPlayer2().getUsername();
+                teamWinner = winningTeamName + " (" + winningPlayers + ") wins the game by a time loss from " + team2.getTeamName();
+                isTeam1Winner = true;
+            }
+        }
+        // Determine winner if some player abandoned
+        else if (team1.getPlayer1().getHasAbandoned() || team1.getPlayer2().getHasAbandoned()) {
+            forfeit = true;
+            // Team 1 has a missing player; Team 2 wins
+            String winningTeamName = team2.getTeamName();
+            String winningPlayers = team2.getPlayer1().getUsername() + "-|-" + team2.getPlayer2().getUsername();
+            teamWinner = winningTeamName + " (" + winningPlayers + ") wins the game due to teammate abandonment by " + team1.getTeamName();
+        }
+        else if (team2.getPlayer1().getHasAbandoned() || team2.getPlayer2().getHasAbandoned()) {
+            forfeit = true;
+            // Team 2 has a missing player; Team 1 wins
+            isTeam1Winner = true;
+            String winningTeamName = team1.getTeamName();
+            String winningPlayers = team1.getPlayer1().getUsername() + "-|-" + team1.getPlayer2().getUsername();
+            teamWinner = winningTeamName + " (" + winningPlayers + ") wins the game due to teammate abandonment by " + team2.getTeamName();
+        }
+        else {
+            teamWinsBy = calculateScores(team1, team2);
+            teamWinsBy = teamWinsBy + "\n";
+            bonusMessage = teamWinsBy + "Final scores are, " + team1.getTeamName() + ": " + team1.getTeamScore() +
+                    " and " + team2.getTeamName() + ": " + team2.getTeamScore();
+        }
+
+        // Update profiles
+        updateTeamProfiles(team1, isTeam1Winner, team2);
+        updateTeamProfiles(team2, !isTeam1Winner, team1);
+        saveAllProfiles(team1, team2);
+
+        if (forfeit) {
+            for (Player currentPlayer: lobby.getPlayersInLobby()){
+                if (currentPlayer.getHasAbandoned()) {
+                    Team currentTeam = currentPlayer.getTeam();
+                    if (currentTeam.getPlayer1() != null && currentTeam.getPlayer1().equals(currentPlayer)) {
+                        currentTeam.setPlayer1(null);
+                    }
+                    else if (currentTeam.getPlayer2() != null && currentTeam.getPlayer2().equals(currentPlayer)) {
+                        currentTeam.setPlayer2(null);
+                    }
+                    teamRepository.save(currentTeam);
+                    playerRepository.delete(currentPlayer);
+                }
+            }
+        }
+
+        // Reset the lobby state
+        resetLobbyState(lobby);
+
+        // Save updated entities
+        gobanRepository.delete(goban);
+        lobbyRepository.save(lobby);
+        teamRepository.save(team1);
+        teamRepository.save(team2);
+        ChatController chat = new ChatController();
+        chat.sendGameUpdateToPlayers("[ANNOUNCER]: Game over. \n " + teamWinner + "\n" + bonusMessage);
+    }
+
+    private void updateTeamProfiles(Team team, boolean isWinner, Team opponentTeam) {
+        List<Player> players = List.of(team.getPlayer1(), team.getPlayer2());
+        int averageOpponentElo = (opponentTeam.getPlayer1().getProfile().getElo() +
+                opponentTeam.getPlayer2().getProfile().getElo()) / 2;
+
+        for (Player player : players) {
+            TheProfile profile = player.getProfile();
+            theProfileService.updateAfterGame(profile, isWinner, averageOpponentElo);
+            profile.setGames(profile.getGames() + 1); // Increment games played
+        }
+    }
+
+    private void resetLobbyState(Lobby lobby) {
+        lobby.setGoban(null);
+        lobby.setIsGameInitialized(false);
+
+        resetTeamState(lobby.getTeam1());
+        resetTeamState(lobby.getTeam2());
+    }
+
+    private void resetTeamState(Team team) {
+        team.setTeamScore(0.0);
+        team.setLastMoveTimestamp(null);
+        team.setTimeRemaining((team.getLobby().getGameTime() / 2) * 60 * 1000);
+
+        List<Player> players = new ArrayList<>();
+        if (team.getPlayer1() != null) {
+            players.add(team.getPlayer1());
+        }
+        if (team.getPlayer2() != null) {
+            players.add(team.getPlayer2());
+        }
+        for (Player player : players) {
+            player.setIsTurn(false);
+            player.setIsReady(false);
+        }
+    }
+
+    private void saveAllProfiles(Team team1, Team team2) {
+        List<TheProfile> profiles = List.of(
+                team1.getPlayer1().getProfile(),
+                team1.getPlayer2().getProfile(),
+                team2.getPlayer1().getProfile(),
+                team2.getPlayer2().getProfile()
+        );
+
+        theProfileRepository.saveAll(profiles);
     }
 }

@@ -87,6 +87,18 @@ public class Goban {
                     case "W":
                         stone.setStoneType("W");
                         break;
+                    case "Bc":
+                        stone.setStoneType("Bc");
+                        break;
+                    case "Wc":
+                        stone.setStoneType("Wc");
+                        break;
+                    case "Bp":
+                        stone.setStoneType("Bp");
+                        break;
+                    case "Wp":
+                        stone.setStoneType("Wp");
+                        break;
                     default:
                         throw new IllegalArgumentException("Unexpected stone type: " + type);
                 }

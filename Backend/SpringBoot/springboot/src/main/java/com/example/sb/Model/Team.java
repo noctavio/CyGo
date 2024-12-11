@@ -26,6 +26,8 @@ public class Team {
     private Integer playerCount;
     private Boolean isTeamTurn;
     private Long timeRemaining;
+    private Boolean isFinishedCounting;
+    private Integer territoryCount;
 
     @Column(name = "lastMoveTimestamp")
     private LocalDateTime lastMoveTimestamp;
@@ -51,6 +53,8 @@ public class Team {
         this.isBlack = isBlack;
         this.teamScore = 0.0;
         this.timeRemaining = ((lobby.getGameTime() / 2) * 60 * 1000);
+        this.isFinishedCounting = false;
+        this.territoryCount = 0;
         setPlayerCount();
     }
 

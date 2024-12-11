@@ -45,10 +45,35 @@ public class GobanController {
             @ApiResponse(responseCode = "200", description = "Turn passed successfully"),
             @ApiResponse(responseCode = "404", description = "User or game not found")
     })
-    @PutMapping("/{userId}/pass")
-    public ResponseEntity<String> pass(
+            @PutMapping("/{userId}/pass")
+            public ResponseEntity<String> pass(
             @Parameter(description = "ID of the user passing their turn") @PathVariable Integer userId) {
         return gobanService.pass(userId);
+    }
+
+    @Operation(summary = "Dispute territory", description = "Allows a user to claim and dispute territory")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Territory disputed"),
+            @ApiResponse(responseCode = "404", description = "User not found")
+    })
+    @PutMapping("/{userId}/territory/{x}/{y}")
+    public ResponseEntity<String> disputeTerritory(
+            @Parameter(description = "ID of the user disputing territory") @PathVariable Integer userId,
+            @Parameter(description = "X-coordinate of the position") @PathVariable Integer x,
+            @Parameter(description = "Y-coordinate of the position") @PathVariable Integer y) {
+        return gobanService.disputeTerritory(userId, x, y);
+    }
+
+
+    @Operation(summary = "Finalize claim", description = "Allows a user to finish claiming territory and potentially end the game")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Attribute toggled"),
+            @ApiResponse(responseCode = "404", description = "User not found")
+    })
+    @PutMapping("/{userId}/toggleFinalizeClaim")
+    public ResponseEntity<String> toggleFinalizeClaim(
+            @Parameter(description = "ID of the user") @PathVariable Integer userId){
+        return gobanService.toggleFinalizeClaim(userId);
     }
 
     @Operation(summary = "Allows player to abandon the game", description = "Ends the game for the lobby and removes player from the lobby/game.")

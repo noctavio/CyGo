@@ -843,19 +843,16 @@ public class QuickTest {
                 .put("/goban/3/pass")// TODO WHITE
                 .then()
                 .statusCode(200);
-        given()
-                .when()
-                .put("/goban/2/pass")//TODO BLACK
-                .then()
-                .statusCode(200);
-        given()
-                .when()
-                .put("/goban/4/pass")// TODO WHITE
-                .then()
-                .statusCode(200);
+        //given()
+        //        .when()
+        //        .put("/goban/2/pass")//TODO BLACK
+         //       .then()
+         //       .statusCode(200);
+        //given()
+        //        .when()
+        //        .put("/goban/4/pass")// TODO WHITE
+        //        .then()
+        //        .statusCode(200);
         // Set of turns end
-
-
-
     }
 }
