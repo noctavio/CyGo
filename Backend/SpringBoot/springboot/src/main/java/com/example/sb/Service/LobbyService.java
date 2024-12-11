@@ -207,7 +207,6 @@ public class LobbyService {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cannot kick player as you are not host.");
         }
         else {
-            // Handles lobby is not found
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Lobby not found!");
         }
     }
