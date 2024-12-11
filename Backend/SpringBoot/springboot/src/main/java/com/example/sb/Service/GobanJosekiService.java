@@ -77,6 +77,7 @@ public class GobanJosekiService {
         User user = userService.getByUsername(username);
         TheProfile theProfile = theProfileRepository.findByUser(Optional.of(user));
         GobanJoseki goban = gobanJosekiRepository.findByGobanProfile(theProfile);
+        goban.loadMatrixFromBoardString();
         List<Joseki> josekiList = josekiService.getAllPlayableMoves(goban.getCurrentMove(), goban);
         boolean isPLaceable = false;
 
@@ -89,30 +90,46 @@ public class GobanJosekiService {
             return ResponseEntity.ok("Cannot place a a stone at (" + x + ", " + y + "),");
         }
         for(Joseki joseki: josekiList){
-            if(joseki.getXPosition() == x && joseki.getYPosition() == y){
+            if(joseki.getXPosition() == x && joseki.getYPosition() == y) {
                 isPLaceable = true;
+
 
             }
         }
 
-        StoneJoseki stone = new StoneJoseki(goban, x, y);
+
+
         if(isPLaceable) {
             if (goban.isBlack()) {
                 if (goban.getStoneJoseki(x, y).equals("X")) {
-                    stone.setStoneType("B");
-                    goban.setBlack(false);
-                } else if (goban.getStoneJoseki(x, y).equals("X")) {
+                    if(goban.getBoard()[x][y] != null) {
+                        goban.getBoard()[x][y].setStoneType("B");
+                        goban.setBlack(false);
+                    }
+                    else{
+                        return ResponseEntity.ok("board is null");
+                    }
+                } else {
                     return ResponseEntity.ok("Cannot place a a stone at (" + x + ", " + y + "), as it is occupied.");
                 }
             }
             else {
                 if (goban.getStoneJoseki(x, y).equals("X")) {
-                    stone.setStoneType("W");
-                    goban.setBlack(true);
-                } else if (!goban.getStoneJoseki(x, y).equals("X")) {
+                    if(goban.getBoard()[x][y] != null) {
+                        goban.getBoard()[x][y].setStoneType("W");
+                        goban.setBlack(true);
+                    }
+                    else{
+                        return ResponseEntity.ok("board is null");
+                    }
+                }
+                else {
                     return ResponseEntity.ok("Cannot place a a stone at (" + x + ", " + y + "), as it is occupied.");
                 }
             }
+        }
+        else{
+            return ResponseEntity.ok("your move was unplaceable");
         }
 
 
