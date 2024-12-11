@@ -16,6 +16,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button RulesBtn;
     private Button LoginBtn;
     private Button WelcomeBtn;
+    private Button JosekiBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +32,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         RulesBtn = findViewById(R.id.Rules);
         LoginBtn = findViewById(R.id.Login);
         WelcomeBtn = findViewById(R.id.Welcome);
+        JosekiBtn = findViewById(R.id.Joseki);
 
         // Set click listeners
         ClubBtn.setOnClickListener(this);
@@ -41,6 +43,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         RulesBtn.setOnClickListener(this);
         LoginBtn.setOnClickListener(this);
         WelcomeBtn.setOnClickListener(this);
+        JosekiBtn.setOnClickListener(this);
     }
 
     @Override
@@ -76,6 +79,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         else if (view.getId() == R.id.Welcome) {
             Intent intent = new Intent(MainActivity.this, Welcome.class);
+            startActivity(intent);
+        }
+        else if (view.getId() == R.id.Joseki) {
+            Intent intent = new Intent(MainActivity.this, Joseki.class);
             startActivity(intent);
         }
     }
