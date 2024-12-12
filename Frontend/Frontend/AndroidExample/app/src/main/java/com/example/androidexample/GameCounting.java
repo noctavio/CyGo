@@ -49,6 +49,7 @@ public class GameCounting extends AppCompatActivity {
     // Global variable for personCounting as player ID
     int personCounting;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,6 +75,7 @@ public class GameCounting extends AppCompatActivity {
         Log.d("JSON Response", jsonResponse);
 
         int hostID = getIntent().getIntExtra("hostUserId", -1);
+        Log.d("HostID Count Response", String.valueOf(hostID));
 
         try {
             JSONArray lobbyData = new JSONArray(jsonResponse);
@@ -155,47 +157,61 @@ public class GameCounting extends AppCompatActivity {
         DoneButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                toggleFinalizeClaim(personCounting);
-                switchPersonCounting();
+                toggleFinalizeClaim(personCounting); // Call method to finalize claim
+                switchPersonCounting(); // Switch to the next player
             }
         });
-}
-    public String toggleFinalizeClaim(Integer userId) {
-        try {
-            // Construct URL for the API endpoint
-            URL url = new URL("http://coms-3090-051.class.las.iastate.edu:8080/goban/" + "/{userId}/toggleFinalizeClaim".replace("{userId}", userId.toString()));
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+    }
+    public void toggleFinalizeClaim(Integer userId) {
+        new AsyncTask<Integer, Void, String>() {
+            @Override
+            protected String doInBackground(Integer... params) {
+                Integer userId = params[0];
+                try {
+                    // Construct URL for the API endpoint
+                    String urlString = "http://coms-3090-051.class.las.iastate.edu:8080/goban/" + userId + "/toggleFinalizeClaim";
+                    URL url = new URL(urlString);
+                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
-            // Set the request method to PUT
-            connection.setRequestMethod("PUT");
-            connection.setRequestProperty("Content-Type", "application/json");
-            connection.setDoOutput(true);  // Allow output for sending data
+                    // Set the request method to PUT
+                    connection.setRequestMethod("PUT");
+                    connection.setRequestProperty("Content-Type", "application/json");
+                    connection.setDoOutput(true);  // Allow output for sending data
 
-            // Connect to the server
-            connection.connect();
+                    // Connect to the server
+                    connection.connect();
 
-            // Get the response code
-            int responseCode = connection.getResponseCode();
+                    // Get the response code
+                    int responseCode = connection.getResponseCode();
 
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                // Read the response from the server
-                BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                String inputLine;
-                StringBuilder response = new StringBuilder();
+                    if (responseCode == HttpURLConnection.HTTP_OK) {
+                        // Read the response from the server
+                        BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                        String inputLine;
+                        StringBuilder response = new StringBuilder();
 
-                while ((inputLine = in.readLine()) != null) {
-                    response.append(inputLine);
+                        while ((inputLine = in.readLine()) != null) {
+                            response.append(inputLine);
+                        }
+                        in.close();
+
+                        return response.toString();  // Return the server response
+                    } else {
+                        return "Error: " + responseCode;
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return "Error: " + e.getMessage();
                 }
-                in.close();
-
-                return response.toString();  // Return the server response
-            } else {
-                return "Error: " + responseCode;
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-            return "Error: " + e.getMessage();
-        }
+
+            @Override
+            protected void onPostExecute(String result) {
+                super.onPostExecute(result);
+                // Show response in a Toast
+                Toast.makeText(GameCounting.this, result, Toast.LENGTH_SHORT).show();
+            }
+        }.execute(userId); // Pass userId to the background task
     }
     private void switchPersonCounting() {
         if (personCounting == playerAId) {
@@ -368,15 +384,25 @@ public class GameCounting extends AppCompatActivity {
                     button.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
+                            // Log the button click event
+                            Log.d("GameCounting", "Button clicked: " + finalX + ", " + finalY);
+
                             int playerID = personCounting;
                             new PlaceStoneTask(playerID, finalX, finalY).execute();
+
+                            // Fetching board state after placing the stone
+                            Log.d("GameCounting", "Fetching board state for lobbyId: " + lobbyId);
                             fetchBoardState(lobbyId);
                         }
                     });
+                    Log.d("GameCounting", "Listener set for button " + buttonID); // Log listener setup
+                } else {
+                    Log.w("GameCounting", "Button not found: " + buttonID); // Log warning if button not found
                 }
             }
         }
     }
+
     private class PlaceStoneTask extends AsyncTask<Void, Void, String> {
         private int userId;
         private int x;
@@ -392,33 +418,47 @@ public class GameCounting extends AppCompatActivity {
         protected String doInBackground(Void... voids) {
             String result = null;
             try {
+                // Constructing the URL for the request
                 String urlString = "http://coms-3090-051.class.las.iastate.edu:8080/goban/" + userId + "/territory/" + x + "/" + y;
+                Log.d("PlaceStoneTask", "Making HTTP request: " + urlString); // Log the request URL
+
                 URL url = new URL(urlString);
                 HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
 
-                urlConnection.setRequestMethod("POST");
+                urlConnection.setRequestMethod("PUT");  // Changed to PUT to align with the backend
                 urlConnection.setDoOutput(true);
 
+                // Getting the response from the server
                 int responseCode = urlConnection.getResponseCode();
+                Log.d("PlaceStoneTask", "Response code: " + responseCode); // Log the response code
+
+                // Handling the response based on the response code
                 if (responseCode == HttpURLConnection.HTTP_OK) {
                     result = "Point placed successfully!";
+                    Log.d("PlaceStoneTask", result); // Log success message
                 } else {
                     result = "Failed to place point!";
+                    Log.d("PlaceStoneTask", result); // Log failure message
                 }
 
-                urlConnection.disconnect();
+                urlConnection.disconnect(); // Disconnect after the request
             } catch (Exception e) {
-                e.printStackTrace();
+                // Handling any errors during the request
+                Log.e("PlaceStoneTask", "Error placing point: " + e.getMessage()); // Log error message
                 result = "Error placing point: " + e.getMessage();
             }
-            return result;
+            return result; // Returning the result to be used in onPostExecute
         }
 
         @Override
         protected void onPostExecute(String result) {
-            Toast.makeText(GameCounting.this, result, Toast.LENGTH_SHORT).show();
+            // Logging and displaying the result on the UI thread
+            Log.d("PlaceStoneTask", "onPostExecute: " + result); // Log the result of the task
+            Toast.makeText(GameCounting.this, result, Toast.LENGTH_SHORT).show(); // Show toast with result
         }
     }
+
+
 
     private void fetchBoardState(int lobbyId) {
         new AsyncTask<Void, Void, String>() {

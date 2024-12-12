@@ -85,7 +85,6 @@ public class PreGameActivity extends AppCompatActivity {
         // Retrieve stored user ID from SharedPreferences
         SharedPreferences sharedPreferences = getSharedPreferences("LoginSession", MODE_PRIVATE);
         storedUserId = sharedPreferences.getInt("userId", -1);
-        username = sharedPreferences.getString("username", "Guest");
 
         // Initialize views and buttons
         btnCreateFriendlyLobby = findViewById(R.id.createFriendlyLobbyBtn);
@@ -115,8 +114,7 @@ public class PreGameActivity extends AppCompatActivity {
         gameBtn.setOnClickListener(v -> {
             // Optionally, pass the storedUserId or other data to MainGameActivity
             Intent intent = new Intent(PreGameActivity.this, MainGame.class);
-            intent.putExtra("username", username);
-            // Start the MainActivity
+            intent.putExtra("hostUserId", storedUserId);  // Ensure the key is the same
             startActivity(intent);
         });
     }

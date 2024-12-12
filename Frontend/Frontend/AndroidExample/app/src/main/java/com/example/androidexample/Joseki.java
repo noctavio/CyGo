@@ -2,6 +2,7 @@ package com.example.androidexample;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.StrictMode;
@@ -19,17 +20,25 @@ import java.net.URL;
 
 public class Joseki extends AppCompatActivity {
     private static final String BASE_URL = "http://coms-3090-051.class.las.iastate.edu:8080/gobanjoseki/";
-    private String testingUsername = "Dummy2";  // Test username
+    private String username;  // Global username
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.joseki);
 
+        // Fetch username from SharedPreferences
+        SharedPreferences sharedPreferences = getSharedPreferences("LoginSession", MODE_PRIVATE);
+        username = sharedPreferences.getString("username", "Guest");  // Default to "Guest" if no username found
+
+        // Now, you can use the 'username' variable in your network requests or wherever you need it.
+        Log.d("Joseki", "Username: " + username);
+
         // Create the board in a background thread
         new Thread(() -> {
             try {
-                System.out.println("Creating board for username: " + testingUsername);
-                String response = createBoard(testingUsername);
+                System.out.println("Creating board for username: " + username);
+                String response = createBoard(username);
                 runOnUiThread(() -> System.out.println("Board created: " + response));
             } catch (Exception e) {
                 e.printStackTrace();
@@ -42,8 +51,8 @@ public class Joseki extends AppCompatActivity {
             backArrowButton.setOnClickListener(v -> {
                 new Thread(() -> {
                     try {
-                        System.out.println("Ending game for username: " + testingUsername);
-                        String response = endGame(testingUsername);  // Call endGame when clicked
+                        System.out.println("Ending game for username: " + username);
+                        String response = endGame(username);  // Call endGame when clicked
                         runOnUiThread(() -> System.out.println("Game ended: " + response));
                         Intent intent = new Intent(Joseki.this, MainActivity.class);
                         startActivity(intent);
@@ -60,10 +69,10 @@ public class Joseki extends AppCompatActivity {
             resetBoardButton.setOnClickListener(v -> {
                 new Thread(() -> {
                     try {
-                        System.out.println("Resetting board for username: " + testingUsername);
-                        String response = resetBoardState(testingUsername);
+                        System.out.println("Resetting board for username: " + username);
+                        String response = resetBoardState(username);
                         runOnUiThread(() -> System.out.println("Reset response: " + response));
-                        fetchBoardState(testingUsername);
+                        fetchBoardState(username);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -77,10 +86,10 @@ public class Joseki extends AppCompatActivity {
             backButton.setOnClickListener(v -> {
                 new Thread(() -> {
                     try {
-                        System.out.println("Undo move for username: " + testingUsername);
-                        String response = undoMove(testingUsername);  // Call undo when clicked
+                        System.out.println("Undo move for username: " + username);
+                        String response = undoMove(username);  // Call undo when clicked
                         runOnUiThread(() -> System.out.println("Move undone: " + response));
-                        fetchBoardState(testingUsername);  // Refresh the board state after undo
+                        fetchBoardState(username);  // Refresh the board state after undo
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -97,8 +106,8 @@ public class Joseki extends AppCompatActivity {
         String jsonResponse = fetchDataFromUrl(url);
         Log.d("JSON Response", jsonResponse);
         setupBoardButtonListeners();
-        Log.d("Joseki", "Username just before fetching board state: " + testingUsername);
-        fetchBoardState(testingUsername);
+        Log.d("Joseki", "Username just before fetching board state: " + username);
+        fetchBoardState(username);
     }
     private String undoMove(String username) {
         String response = null;
@@ -195,7 +204,7 @@ public class Joseki extends AppCompatActivity {
                 if (button != null) {
                     int finalX = x;
                     int finalY = y;
-                    button.setOnClickListener(v -> new PlaceStoneTask(Joseki.this, testingUsername, finalX, finalY).execute());
+                    button.setOnClickListener(v -> new PlaceStoneTask(Joseki.this, username, finalX, finalY).execute());
                 }
             }
         }
