@@ -262,10 +262,16 @@ public class LobbyService {
 
                         chat.sendGameUpdateToPlayers("[ANNOUNCER]: Game has been initialized! \n"  + team2.getTeamName() + "is starting first!" );
                     }
+                    team1.setTeamCaptures(0.0);
+                    team1.setTerritoryCount(null);
+                    team2.setTeamCaptures(0.0);
+                    team2.setTerritoryCount(null);
                     lobby.setGoban(goban);
                     lobby.setIsGameInitialized(true);
                     goban.setPlayerIdTurnList(playerTurnList);
 
+                    teamRepository.save(team1);
+                    teamRepository.save(team2);
                     playerRepository.save(team1PlayerStarter);
                     playerRepository.save(team2PlayerStarter);
                     gobanRepository.save(goban);

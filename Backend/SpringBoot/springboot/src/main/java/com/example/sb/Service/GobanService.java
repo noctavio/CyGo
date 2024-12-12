@@ -612,8 +612,6 @@ public class GobanService {
     }
 
     private void resetTeamState(Team team) {
-        team.setTeamCaptures(0.0);
-        team.setTerritoryCount(null);
         team.setLastMoveTimestamp(null);
         team.setIsTeamTurn(false);
         team.setTimeRemaining((team.getLobby().getGameTime() / 2) * 60 * 1000);
