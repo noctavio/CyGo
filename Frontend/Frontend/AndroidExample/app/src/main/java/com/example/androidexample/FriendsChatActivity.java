@@ -52,10 +52,10 @@ public class FriendsChatActivity extends AppCompatActivity {
 
         // Set click listeners for each button
         homeButton.setOnClickListener(v -> {
-            // Create an Intent to navigate to MainMenuActivity
-            Intent intent = new Intent(FriendsChatActivity.this, MainMenuActivity.class);
+            // Create an Intent to navigate to MainActivity
+            Intent intent = new Intent(FriendsChatActivity.this, MainActivity.class);
 
-            // Start the MainMenuActivity
+            // Start the MainActivity
             startActivity(intent);
         });
 
