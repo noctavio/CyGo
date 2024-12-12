@@ -1,4 +1,4 @@
-package com.example.appdemo;
+package com.example.androidexample;
 
 import static android.content.Context.MODE_PRIVATE;
 import static android.content.Intent.getIntent;

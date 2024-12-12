@@ -157,7 +157,7 @@ public class LoginActivity extends AppCompatActivity {
 
      // Method to perform the actual network request
     private void performToggleAdminRequest(int userId) {
-        String url = "http://10.90.72.226:8080/users/toggleAdmin/" + userId;
+        String url = "http://coms-3090-051.class.las.iastate.edu:8080/users/toggleAdmin/" + userId;
 
         RequestQueue queue = Volley.newRequestQueue(this);
         StringRequest stringRequest = new StringRequest(Request.Method.PUT, url,
@@ -304,7 +304,7 @@ public class LoginActivity extends AppCompatActivity {
      * @param password The password to register.
      */
     private void registerUser(String username, String password) {
-        String url = "http://10.90.72.226:8080/users/register"; // Register URL
+        String url = "http://coms-3090-051.class.las.iastate.edu:8080/users/register"; // Register URL
 
         JSONObject jsonBody = new JSONObject();
         try {
@@ -321,12 +321,18 @@ public class LoginActivity extends AppCompatActivity {
                     loginStatusText.setVisibility(View.VISIBLE);
                 },
                 error -> {
-                    loginStatusText.setText("Registration failed: " + error.getMessage());
-                    loginStatusText.setTextColor(getResources().getColor(R.color.plain_yellow));
-                    loginStatusText.setVisibility(View.VISIBLE);
+                    // Log error response body
+                    if (error.networkResponse != null && error.networkResponse.data != null) {
+                        String responseBody = new String(error.networkResponse.data);
+                        Log.e("Registration Error", "Response: " + responseBody);
+                    }
+//                    loginStatusText.setText("Registration failed: " + error.getMessage());
+//                    loginStatusText.setTextColor(getResources().getColor(R.color.plain_yellow));
+//                    loginStatusText.setVisibility(View.VISIBLE);
                 });
 
         requestQueue.add(jsonObjectRequest);
+
     }
 
     /**
@@ -346,7 +352,7 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        String loginUrl = "http://10.90.72.226:8080/users/login/" +
+        String loginUrl = "http://coms-3090-051.class.las.iastate.edu:8080/users/login/" +
                 Uri.encode(loginUsername) + "/" + Uri.encode(password);
 
         StringRequest loginRequest = new StringRequest(Request.Method.PUT, loginUrl,
@@ -392,7 +398,7 @@ public class LoginActivity extends AppCompatActivity {
      * @param newPassword The new password.
      */
     private void updateUser(int userId, String newUsername, String newPassword) {
-        String updateUrl = "http://10.90.72.226:8080/users/update/" + userId; // Use stored userId
+        String updateUrl = "http://coms-3090-051.class.las.iastate.edu:8080/users/update/" + userId; // Use stored userId
 
         JSONObject jsonBody = new JSONObject();
         try {
@@ -446,7 +452,7 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        String url = "http://10.90.72.226:8080/users/logout/" + userId;
+        String url = "http://coms-3090-051.class.las.iastate.edu:8080/users/logout/" + userId;
 
         StringRequest stringRequest = new StringRequest(Request.Method.PUT, url,
                 response -> {
@@ -470,7 +476,7 @@ public class LoginActivity extends AppCompatActivity {
      */
     private void deleteUser(int userId) {
 
-        String deleteUrl = "http://10.90.72.226:8080/users/hardDelete/" + userId;
+        String deleteUrl = "http://coms-3090-051.class.las.iastate.edu:8080/users/hardDelete/" + userId;
 
         StringRequest deleteRequest = new StringRequest(Request.Method.DELETE, deleteUrl,
                 response -> {
@@ -516,7 +522,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private void getUserId(String username) {
         // URL to get the user details using GET method
-        String url = "http://10.90.72.226:8080/users/" + Uri.encode(username);
+        String url = "http://coms-3090-051.class.las.iastate.edu:8080/users/" + Uri.encode(username);
 
         JsonObjectRequest getUserIdRequest = new JsonObjectRequest(Request.Method.GET, url, null,
                 response -> {

@@ -39,6 +39,7 @@ public class MainGame extends AppCompatActivity {
     String lastMoveColor = "N";
     int lastMoveX = -1, lastMoveY =-1;
     String hostName;
+    int hostID;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,19 +66,36 @@ public class MainGame extends AppCompatActivity {
         String jsonResponse = fetchDataFromUrl(url);
         Log.d("JSON Response", jsonResponse);
 
-        int hostID = getIntent().getIntExtra("hostUserId", -1);
+        String usernameToFind = getIntent().getStringExtra("username");
 
         try {
+            // Parse the JSON response to get the lobby data
             JSONArray lobbyData = new JSONArray(jsonResponse);
             JSONObject targetLobby = null;
 
+            // Loop through each lobby to check if the user is in any team
             for (int i = 0; i < lobbyData.length(); i++) {
                 JSONObject lobby = lobbyData.getJSONObject(i);
+
+                // Check both teams in the lobby for the player
                 JSONObject team1 = lobby.getJSONObject("team1");
                 JSONObject player1 = team1.getJSONObject("player1");
-                int currentHostID = player1.getJSONObject("profile").getJSONObject("user").getInt("user_id");
+                JSONObject player2 = team1.getJSONObject("player2");
 
-                if (currentHostID == hostID) {
+                JSONObject team2 = lobby.getJSONObject("team2");
+                JSONObject player3 = team2.getJSONObject("player1");
+                JSONObject player4 = team2.getJSONObject("player2");
+
+                // Get the usernames of all players in the lobby
+                String player1Username = player1.getJSONObject("profile").getJSONObject("user").getString("username");
+                String player2Username = player2.getJSONObject("profile").getJSONObject("user").getString("username");
+                String player3Username = player3.getJSONObject("profile").getJSONObject("user").getString("username");
+                String player4Username = player4.getJSONObject("profile").getJSONObject("user").getString("username");
+
+                // Compare each player's username with the one you're looking for
+                if (player1Username.equals(usernameToFind) || player2Username.equals(usernameToFind) ||
+                        player3Username.equals(usernameToFind) || player4Username.equals(usernameToFind)) {
+                    // If a match is found, store the lobby
                     targetLobby = lobby;
                     break;
                 }
@@ -103,6 +121,14 @@ public class MainGame extends AppCompatActivity {
                 JSONObject playerB = team1.getJSONObject("player2");
 
                 String playerANameText = playerA.getJSONObject("profile").getString("username");
+
+                JSONObject userProfile = playerA.getJSONObject("profile").getJSONObject("user");
+                if (userProfile.has("user_id")) {
+                    hostID = userProfile.getInt("user_id");
+                    Log.d("HostID", "Host ID: " + hostID); // Check if the value is correct
+                } else {
+                    Log.e("HostID", "user_id key not found in JSON.");
+                }
                 String playerARankText = playerA.getJSONObject("profile").getString("rank");
                 if (playerAName != null && playerARank != null) {
                     playerAName.setText(playerANameText);
@@ -412,13 +438,21 @@ public class MainGame extends AppCompatActivity {
                 for (int i = 1; i <= playerCount1; i++) {
                     JSONObject player = team1.optJSONObject("player" + i);
                     if (player != null && player.optBoolean("isTurn", false)) {
-                        // Get the user_id from the profile's user object
                         JSONObject profile = player.optJSONObject("profile");
                         if (profile != null) {
                             JSONObject user = profile.optJSONObject("user");
                             if (user != null) {
-                                return user.optInt("user_id", -1); // Return the user_id
+                                Integer userId = user.optInt("user_id", -1); // Return the user_id
+                                if (userId != -1) {
+                                    return userId;
+                                } else {
+                                    Log.w("MainGame", "User ID not found in team1 player " + i);
+                                }
+                            } else {
+                                Log.w("MainGame", "User profile is null for team1 player " + i);
                             }
+                        } else {
+                            Log.w("MainGame", "Profile is null for team1 player " + i);
                         }
                     }
                 }
@@ -433,8 +467,17 @@ public class MainGame extends AppCompatActivity {
                         if (profile != null) {
                             JSONObject user = profile.optJSONObject("user");
                             if (user != null) {
-                                return user.optInt("user_id", -1); // Return the user_id
+                                Integer userId = user.optInt("user_id", -1); // Return the user_id
+                                if (userId != -1) {
+                                    return userId;
+                                } else {
+                                    Log.w("MainGame", "User ID not found in team2 player " + i);
+                                }
+                            } else {
+                                Log.w("MainGame", "User profile is null for team2 player " + i);
                             }
+                        } else {
+                            Log.w("MainGame", "Profile is null for team2 player " + i);
                         }
                     }
                 }
@@ -445,6 +488,7 @@ public class MainGame extends AppCompatActivity {
         return null; // Return null if no player with isTurn = true is found
     }
 
+
     public String getPlayerUsernameWithTurn(String jsonResponse) {
         try {
             JSONArray lobbyData = new JSONArray(jsonResponse);
@@ -452,7 +496,7 @@ public class MainGame extends AppCompatActivity {
                 return null;  // Handle empty lobby data case
             }
 
-            JSONObject lobby = lobbyData.optJSONObject(0); // Use optJSONObject instead of getJSONObject
+            JSONObject lobby = lobbyData.optJSONObject(1); // Use optJSONObject instead of getJSONObject
             if (lobby == null) {
                 return null;  // If lobby is null, return early
             }

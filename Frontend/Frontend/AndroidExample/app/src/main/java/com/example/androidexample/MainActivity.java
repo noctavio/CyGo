@@ -41,10 +41,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         LeaderboardBtn = findViewById(R.id.LeaderboardBtn);
         ClubBtn = findViewById(R.id.ClubBtn);
         GameBtn = findViewById(R.id.GameBtn);
-        SettingsBtn = findViewById(R.id.SettingsBtn);  // Initialize SettingsBtn
+        SettingsBtn = findViewById(R.id.SettingsBtn);
         ClubChatBtn = findViewById(R.id.ClubChatBtn);
         RulesBtn = findViewById(R.id.Rules);
-        LoginBtn = findViewById(R.id.Login);
+        LoginBtn = findViewById(R.id.LoginBtn);
         WelcomeBtn = findViewById(R.id.Welcome);
         JosekiBtn = findViewById(R.id.Joseki);
         LogoutBtn = findViewById(R.id.LogoutBtn);
@@ -66,14 +66,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         FriendsBtn.setOnClickListener(this);
         ProfileBtn.setOnClickListener(this);
 
-         // Set onClickListener for logout
-        LogoutBtn.setOnClickListener(view -> {
-            LoginActivity.logoutUser(Welcome.this); // Trigger logout
-        });
+        // Set onClickListener for logout
+        LogoutBtn.setOnClickListener(view -> logoutUser());
 
         displayUsername();
-
     }
+
+    private void logoutUser() {
+        // Clear the login session in SharedPreferences
+        SharedPreferences sharedPreferences = getSharedPreferences("LoginSession", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.clear();  // Clear all saved session data
+        editor.apply();
+
+        // Show a Toast message for feedback
+        Toast.makeText(MainActivity.this, "Logged out successfully!", Toast.LENGTH_SHORT).show();
+
+        // Navigate to the Welcome screen
+        Intent intent = new Intent(MainActivity.this, Welcome.class);
+        startActivity(intent);
+        finish();  // Close the current activity so that the user cannot go back to it
+    }
+
 
     @Override
     public void onClick(View view) {
@@ -102,7 +116,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Intent intent = new Intent(MainActivity.this, RulesActivity.class);
             startActivity(intent);
         }
-        else if (view.getId() == R.id.Login) {
+        else if (view.getId() == R.id.LoginBtn) {
             Intent intent = new Intent(MainActivity.this, LoginActivity.class);
             startActivity(intent);
         }
@@ -115,13 +129,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             startActivity(intent);
         }
         else if (view.getId() == R.id.FriendsBtn) {
-            intent = new Intent(MainMenuActivity.this, FriendsActivity.class);
+            Intent intent = new Intent(MainActivity.this, FriendsActivity.class);
             startActivity(intent);
         } else if (view.getId() == R.id.PreGameBtn) {
-            intent = new Intent(MainMenuActivity.this, PreGameActivity.class);
+            Intent intent = new Intent(MainActivity.this, PreGameActivity.class);
             startActivity(intent);
         } else if (view.getId() == R.id.ProfileBtn) {
-            intent = new Intent(MainMenuActivity.this, ProfileActivity.class);
+            Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
             startActivity(intent);
         }
     }

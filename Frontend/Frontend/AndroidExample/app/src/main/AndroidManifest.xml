@@ -22,7 +22,7 @@
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
         </activity>
 
-        <activity android:name=".Welcome"
+        <activity android:name=".MainActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
         </activity>
 
@@ -74,9 +74,13 @@
             android:name=".Joseki"
             android:theme="@style/Theme.AppCompat.Light"
             android:exported="true" />
+        <activity
+            android:name=".GameCounting"
+            android:theme="@style/Theme.AppCompat.Light"
+            android:exported="true" />
 
         <activity
-            android:name=".MainActivity"
+            android:name=".Welcome"
             android:theme="@style/Theme.AppCompat.Light"
             android:exported="true">
             <intent-filter>

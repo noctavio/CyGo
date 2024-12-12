@@ -103,8 +103,6 @@ public class PreGameActivity extends AppCompatActivity {
         homeButton.setOnClickListener(v -> {
             // Create an Intent to navigate to MainActivity
             Intent intent = new Intent(PreGameActivity.this, MainActivity.class);
-
-            // Start the MainActivity
             startActivity(intent);
         });
 
@@ -117,7 +115,9 @@ public class PreGameActivity extends AppCompatActivity {
         gameBtn.setOnClickListener(v -> {
             // Optionally, pass the storedUserId or other data to MainGameActivity
             Intent intent = new Intent(PreGameActivity.this, MainGame.class);
-            startActivity(intent); // Start MainGameActivity
+            intent.putExtra("username", username);
+            // Start the MainActivity
+            startActivity(intent);
         });
     }
 
@@ -128,7 +128,7 @@ public class PreGameActivity extends AppCompatActivity {
      */
     private void toggleReadyStatus(int userId) {
         // Update the URL with the correct endpoint
-        String url = "http://10.90.72.226:8080/lobby/players/" + userId + "/toggleReady";
+        String url = "http://coms-3090-051.class.las.iastate.edu:8080/lobby/players/" + userId + "/toggleReady";
         Log.d("ReadyStatus", "Sending request to: " + url);
 
         StringRequest stringRequest = new StringRequest(Request.Method.PUT, url,
@@ -172,7 +172,7 @@ public class PreGameActivity extends AppCompatActivity {
      * @param hostId
      */
     private void initializeGame(int hostId) {
-        String url = "http://10.90.72.226:8080/" + hostId + "/initialize/game";
+        String url = "hhttp://coms-3090-051.class.las.iastate.edu:8080/lobby/" + hostId + "/initialize/game";
         Log.d("InitializeGame", "Initializing game with host ID: " + hostId);
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, null,
@@ -255,7 +255,7 @@ public class PreGameActivity extends AppCompatActivity {
      * Creates a new lobby on the server with the stored user ID.
      */
     private void createLobby() {
-        String url = "http://10.90.72.226:8080/lobby/" + storedUserId + "/create";
+        String url = "http://coms-3090-051.class.las.iastate.edu:8080/lobby/" + storedUserId + "/create";
         StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
                 response -> {
                     // Handle the response here
@@ -324,7 +324,7 @@ public class PreGameActivity extends AppCompatActivity {
      * @param lobbyId The ID of the lobby to join.
      */
     private void joinLobby(int lobbyId) {
-        String url = "http://10.90.72.226:8080/lobby/" + storedUserId + "/join/" + lobbyId;
+        String url = "http://coms-3090-051.class.las.iastate.edu:8080/lobby/" + storedUserId + "/join/" + lobbyId;
         StringRequest stringRequest = new StringRequest(Request.Method.PUT, url,
                 response -> {
                     // Handle the response here
@@ -349,7 +349,7 @@ public class PreGameActivity extends AppCompatActivity {
 
                     // Find the statusText TextView and update it to show the error message
                     TextView statusText = findViewById(R.id.statusMessageTextView);
-                    statusText.setText("Failed to join lobby.");
+//                    statusText.setText("Failed to join lobby.");
                     statusText.setVisibility(View.VISIBLE);
                 });
 
@@ -361,7 +361,7 @@ public class PreGameActivity extends AppCompatActivity {
      * Leaves the current lobby using the stored user ID and current lobby ID.
      */
     private void leaveLobby() {
-        String url = "http://10.90.72.226:8080/lobby/" + storedUserId + "/leave";
+        String url = "http://coms-3090-051.class.las.iastate.edu:8080/lobby/" + storedUserId + "/leave";
 
         StringRequest stringRequest = new StringRequest(Request.Method.DELETE, url,
                 response -> {
@@ -397,7 +397,7 @@ public class PreGameActivity extends AppCompatActivity {
      * @param userId     The user ID of the player to be kicked.
      */
     private void kickPlayerFromLobby(int hostUserId, int userId) {
-        String url = "http://10.90.72.226:8080/lobby/" + hostUserId + "/kick/" + userId;
+        String url = "http://coms-3090-051.class.las.iastate.edu:8080/lobby/" + hostUserId + "/kick/" + userId;
         StringRequest stringRequest = new StringRequest(Request.Method.DELETE, url,
                 response -> {
                     // Handle the response here
@@ -431,7 +431,7 @@ public class PreGameActivity extends AppCompatActivity {
      * @param hostUserId The user ID of the host who created the lobby.
      */
     private void deleteLobby(int hostUserId) {
-        String url = "http://10.90.72.226:8080/lobby/" + hostUserId + "/killLobby";
+        String url = "http://coms-3090-051.class.las.iastate.edu:8080/lobby/" + hostUserId + "/killLobby";
         StringRequest stringRequest = new StringRequest(Request.Method.DELETE, url,
                 response -> {
                     // Handle the response here
@@ -485,7 +485,7 @@ public class PreGameActivity extends AppCompatActivity {
 
     private void fetchPlayersInLobby(int lobbyId) {
         // Define the URL to get the players in the lobby
-        String url = "http://10.90.72.226:8080/lobby/allPlayers/" + lobbyId;
+        String url = "http://coms-3090-051.class.las.iastate.edu:8080/lobby/allPlayers/" + lobbyId;
 
         JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null,
                 response -> {
