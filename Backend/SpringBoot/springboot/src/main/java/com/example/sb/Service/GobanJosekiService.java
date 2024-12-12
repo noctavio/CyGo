@@ -74,24 +74,26 @@ public class GobanJosekiService {
         User user = userRepository.findByUsername(username);
         TheProfile theProfile = theProfileRepository.findByUser(Optional.of(user));
         GobanJoseki goban = gobanJosekiRepository.findByGobanProfile(theProfile);
-        for(int i = 0; i < 9; i++){
-            for(int j = 0; j < 9; j++){
-                goban.getStone(i,j).setStoneType("X");
-            }
-        }
-        goban.setCurrentMove("0000000000");
-        return ResponseEntity.ok("board is reset");
+        goban.Reset();
+        gobanJosekiRepository.save(goban);
+        return ResponseEntity.ok(goban.getBoardState());
 
     }
-    public ResponseEntity<String> undoMove(String username, int x, int y) {
+    public ResponseEntity<String> undoMove(String username) {
         User user = userRepository.findByUsername(username);
         TheProfile theProfile = theProfileRepository.findByUser(Optional.of(user));
         GobanJoseki goban = gobanJosekiRepository.findByGobanProfile(theProfile);
+        if(goban.getCurrentMove() == "0000000000"){
+            return ResponseEntity.ok("board has no moves");
+        }
         Joseki currentjoseki = josekiService.getCurrentMove(goban.getCurrentMove());
-        goban.setStone(x, y,new StoneJoseki(goban, x, y));
+        goban.loadMatrixFromBoardString();
+        goban.getBoard()[currentjoseki.getXPosition()][currentjoseki.getYPosition()] = new StoneJoseki(goban, currentjoseki.getXPosition(), currentjoseki.getYPosition());
 
-        goban.setCurrentMove(currentjoseki.getMoveNumber());
-        return ResponseEntity.ok("board is reset");
+        goban.setCurrentMove(currentjoseki.getLastMove());
+        goban.saveBoardString();
+        gobanJosekiRepository.save(goban);
+        return ResponseEntity.ok("board is updated");
     }
 
 
