@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/border_background"
+    android:padding="16dp">
+
+    <!-- Home Icon -->
+    <ImageView
+        android:id="@+id/home_image_button"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:src="@drawable/home_button" />
+
+    <!-- Admin Status -->
+    <TextView
+        android:id="@+id/tvAdminStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Admin Panel"
+        android:textColor="@color/plain_yellow"
+        android:textSize="40sp"
+        android:textStyle="bold" />
+
+    <!-- Delete Account Button -->
+    <Button
+        android:id="@+id/btnDeleteAccount"
+        android:layout_width="match_parent"
+        android:backgroundTint="#00CAFF"
+        android:layout_marginTop="30sp"
+        android:layout_height="wrap_content"
+        android:text="Delete User" />
+
+    <!-- Ban Player Temporarily Button -->
+    <Button
+        android:id="@+id/btnBanPlayer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30sp"
+        android:backgroundTint="#00CAFF"
+        android:text="Ban Player" />
+
+    <!-- Join a Lobby Button -->
+    <Button
+        android:id="@+id/btnJoinLobby"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30sp"
+        android:backgroundTint="#00CAFF"
+        android:text="Join a Lobby" />
+
+    <!-- Spectate Game Button -->
+    <Button
+        android:id="@+id/btnSpectateGame"
+        android:layout_width="match_parent"
+        android:layout_marginTop="30sp"
+        android:backgroundTint="#00CAFF"
+        android:layout_height="wrap_content"
+        android:text="Spectate Game" />
+
+</LinearLayout>
