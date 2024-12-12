@@ -26,7 +26,6 @@ public class Team {
     private Integer playerCount;
     private Boolean isTeamTurn;
     private Long timeRemaining;
-    private Boolean isFinishedCounting;
     private Integer territoryCount;
 
     @Column(name = "lastMoveTimestamp")
@@ -56,7 +55,6 @@ public class Team {
         this.isBlack = isBlack;
         this.teamCaptures = 0.0;
         this.timeRemaining = ((lobby.getGameTime() / 2) * 60 * 1000);
-        this.isFinishedCounting = false;
         this.territoryCount = null;
         setPlayerCount();
     }
@@ -78,11 +76,11 @@ public class Team {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Team team = (Team) o;
-        return Objects.equals(team_id, team.team_id) && Objects.equals(isBlack, team.isBlack) && Objects.equals(teamName, team.teamName) && Objects.equals(teamCaptures, team.teamCaptures) && Objects.equals(playerCount, team.playerCount) && Objects.equals(isTeamTurn, team.isTeamTurn) && Objects.equals(timeRemaining, team.timeRemaining) && Objects.equals(isFinishedCounting, team.isFinishedCounting) && Objects.equals(territoryCount, team.territoryCount) && Objects.equals(lastMoveTimestamp, team.lastMoveTimestamp) && Objects.equals(lobby, team.lobby) && Objects.equals(player1, team.player1) && Objects.equals(player2, team.player2);
+        return Objects.equals(team_id, team.team_id) && Objects.equals(isBlack, team.isBlack) && Objects.equals(teamName, team.teamName) && Objects.equals(teamCaptures, team.teamCaptures) && Objects.equals(playerCount, team.playerCount) && Objects.equals(isTeamTurn, team.isTeamTurn) && Objects.equals(timeRemaining, team.timeRemaining) && Objects.equals(territoryCount, team.territoryCount) && Objects.equals(lastMoveTimestamp, team.lastMoveTimestamp) && Objects.equals(timestamp, team.timestamp) && Objects.equals(lobby, team.lobby) && Objects.equals(player1, team.player1) && Objects.equals(player2, team.player2);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(team_id, isBlack, teamName, teamCaptures, playerCount, isTeamTurn, timeRemaining, isFinishedCounting, territoryCount, lastMoveTimestamp, lobby, player1, player2);
+        return Objects.hash(team_id, isBlack, teamName, teamCaptures, playerCount, isTeamTurn, timeRemaining, territoryCount, lastMoveTimestamp, timestamp, lobby, player1, player2);
     }
 }

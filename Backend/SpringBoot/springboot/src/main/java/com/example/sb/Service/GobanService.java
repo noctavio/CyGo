@@ -185,29 +185,13 @@ public class GobanService {
 
             Goban goban = currentLobby.getGoban();
             if (passCount == 4) {
-                goban.loadMatrixFromBoardString();
-                Stone[][] board = goban.getBoard();
-
                 Team blackTeam = currentTeam.getIsBlack() ? currentTeam : oppositeTeam;
                 Team whiteTeam = currentTeam.getIsBlack() ? oppositeTeam : currentTeam;
-                int blackCount = 0;
-                int whiteCount = 0;
-
-                for (int x = 0; x < 9; x++) {
-                    for (int y = 0; y < 9; y++) {
-                        if (board[x][y].getStoneType().equals("B")) {
-                            blackTeam.setTerritoryCount(blackCount++);
-                        }
-                        else if (board[x][y].getStoneType().equals("W")) {
-                            whiteTeam.setTerritoryCount(whiteCount++);
-                        }
-                    }
-                }
 
                 blackTeam.setTimeRemaining(2147483647L);
+                blackTeam.setTerritoryCount(0);
                 whiteTeam.setTimeRemaining(2147483647L);
-                blackTeam.setTerritoryCount(blackCount);
-                whiteTeam.setTerritoryCount(whiteCount);
+                whiteTeam.setTerritoryCount(0);
                 teamRepository.save(blackTeam);
                 teamRepository.save(whiteTeam);
                 chat.sendGameUpdateToPlayers("[ANNOUNCER]: " + currentPlayer.getUsername() + " passed, everyone in the game has now passed in sequence + \n Now entering Counting Phase!.");
@@ -290,25 +274,25 @@ public class GobanService {
                 if (currentTeam.equals(blackTeam) && board[x][y].getStoneType().equals("W")) {
                     board[x][y].setStoneType("Bp");
                     blackTeam.setTerritoryCount(blackTeam.getTerritoryCount() + 1);
-                    whiteTeam.setTerritoryCount(whiteTeam.getTerritoryCount() - 1);
+                    blackTeam.setTeamCaptures(blackTeam.getTeamCaptures() + 1);
                 }
                 else if (currentTeam.equals(whiteTeam) && board[x][y].getStoneType().equals("B")) {
                     board[x][y].setStoneType("Wp");
                     whiteTeam.setTerritoryCount(whiteTeam.getTerritoryCount() + 1);
-                    blackTeam.setTerritoryCount(blackTeam.getTerritoryCount() - 1);
+                    whiteTeam.setTeamCaptures(whiteTeam.getTeamCaptures() + 1);
                 }
             }
             // Attempting to dispute prisoner
             else if (board[x][y].getStoneType().equals("Bp") || board[x][y].getStoneType().equals("Wp")) {
                 if (currentTeam.equals(blackTeam) && board[x][y].getStoneType().equals("Wp") ) {
                     board[x][y].setStoneType("B");
-                    blackTeam.setTerritoryCount(blackTeam.getTerritoryCount() + 1);
                     whiteTeam.setTerritoryCount(whiteTeam.getTerritoryCount() - 1);
+                    whiteTeam.setTeamCaptures(whiteTeam.getTeamCaptures() - 1);
                 }
                 else if (currentTeam.equals(whiteTeam) && board[x][y].getStoneType().equals("Bp")) {
                     board[x][y].setStoneType("W");
-                    whiteTeam.setTerritoryCount(whiteTeam.getTerritoryCount() + 1);
                     blackTeam.setTerritoryCount(blackTeam.getTerritoryCount() - 1);
+                    blackTeam.setTeamCaptures(blackTeam.getTeamCaptures() - 1);
                 }
             }
             // Attempting to reset a territory.
@@ -331,7 +315,7 @@ public class GobanService {
             gobanRepository.save(goban);
             teamRepository.save(blackTeam);
             teamRepository.save(whiteTeam);
-            return ResponseEntity.ok("temp, should be good!");
+            return ResponseEntity.ok("User ID and coordinate is valid, success");
         }
         return ResponseEntity.ok("User with ID: " + userId + " does not exist.");
     }
@@ -631,7 +615,6 @@ public class GobanService {
         team.setTeamCaptures(0.0);
         team.setTerritoryCount(null);
         team.setLastMoveTimestamp(null);
-        team.setIsFinishedCounting(false);
         team.setIsTeamTurn(false);
         team.setTimeRemaining((team.getLobby().getGameTime() / 2) * 60 * 1000);
 
