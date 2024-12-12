@@ -9,6 +9,16 @@
     android:paddingTop="50dp"
     android:paddingBottom="50dp">
 
+    <!-- Username Display -->
+    <TextView
+        android:id="@+id/userNameDisplay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:textSize="30sp"
+        android:textColor="@color/plain_yellow"
+        android:text="Hello, [Username]!"/>
+
     <!-- Title Text -->
     <TextView
         android:layout_width="wrap_content"
@@ -78,5 +88,50 @@
         android:layout_marginTop="20dp"
         android:layout_gravity="center"
         android:text="Joseki" />
+
+    <!-- Login Button -->
+    <Button
+        android:id="@+id/Login"
+        android:layout_width="200dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="20dp"
+        android:layout_gravity="center"
+        android:text="Login" />
+
+    <!-- Friends Button -->
+    <Button           
+        android:id="@+id/FriendsBtn" 
+        android:layout_width="200dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="20dp"
+        android:layout_gravity="center"
+        android:text="Friends" />
+
+    <!--Lobby Button -->
+    <Button
+        android:id="@+id/PreGameBtn"
+        android:layout_width="0dp"
+        android:layout_width="200dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="20dp"
+        android:layout_gravity="center"
+        android:text="Pre Game" />
+
+<!-- Profile Button -->
+    <Button
+        android:id="@+id/ProfileBtn"
+        android:layout_width="200dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="20dp"
+        android:layout_gravity="center"
+        android:text="Profile" />
+
+   <Button
+        android:id="@+id/LogoutBtn"
+        android:layout_width="200dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="20dp"
+        android:layout_gravity="center"
+        android:text="Logout" />
 
 </androidx.appcompat.widget.LinearLayoutCompat>
