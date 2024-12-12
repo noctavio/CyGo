@@ -6,6 +6,18 @@
 
     android:orientation="vertical">
 
+     <ImageButton
+        android:id="@+id/home_image_button"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_margin="8dp"
+        android:layout_marginStart="28dp"
+        android:layout_marginTop="80dp"
+        android:background="@android:color/transparent"
+        android:contentDescription="Home Button"
+        android:scaleType="fitCenter"
+        android:src="@drawable/home_button" />
+
     <FrameLayout
         android:id="@+id/boardContainer"
         android:layout_width="match_parent"
@@ -44,6 +56,8 @@
             android:layout_width="179dp"
             android:layout_height="114dp"
             android:textStyle="bold"
+            android:background="@color/plain_yellow"
             android:text="Hint" />
     </LinearLayout>
+    
 </LinearLayout>
