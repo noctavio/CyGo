@@ -45,6 +45,9 @@ public class GobanJosekiService {
         User user = userRepository.findByUsername(username);
         TheProfile theProfile = theProfileRepository.findByUser(Optional.of(user));
         GobanJoseki goban = gobanJosekiRepository.findByGobanProfile(theProfile);
+        if(josekiService.getAllPlayableMoves(goban.getCurrentMove(), goban) == null){
+            return goban.getBoardState();
+        }
         List<Joseki> josekiList = josekiService.getAllPlayableMoves(goban.getCurrentMove(), goban);
         goban.loadMatrixFromBoardString();
         StoneJoseki board[][] = goban.getBoard();
@@ -73,9 +76,10 @@ public class GobanJosekiService {
         GobanJoseki goban = gobanJosekiRepository.findByGobanProfile(theProfile);
         for(int i = 0; i < 9; i++){
             for(int j = 0; j < 9; j++){
-               goban.getStone(i,j).setStoneType("X");
+                goban.getStone(i,j).setStoneType("X");
             }
         }
+        goban.setCurrentMove("0000000000");
         return ResponseEntity.ok("board is reset");
 
     }
