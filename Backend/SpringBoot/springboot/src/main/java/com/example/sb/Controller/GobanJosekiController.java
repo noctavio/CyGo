@@ -76,6 +76,12 @@ public class GobanJosekiController {
         return gobanService.getBoardState(username);
     }
 
+    @GetMapping("/{username}/realBoard")
+    public String getRealBoardState(
+            @Parameter(description = "ID of the lobby to retrieve the board state for") @PathVariable String username) {
+        return gobanService.getRealBoardState(username);
+    }
+
     @Operation(summary = "End the game", description = "Ends the game for the specified lobby.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Game ended successfully"),

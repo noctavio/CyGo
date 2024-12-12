@@ -110,6 +110,7 @@ public class GobanJosekiService {
         for(Joseki joseki: josekiList){
             if(joseki.getXPosition() == x && joseki.getYPosition() == y) {
                 isPLaceable = true;
+                goban.setCurrentMove(joseki.getMoveNumber());
 
 
             }
@@ -152,7 +153,6 @@ public class GobanJosekiService {
 
 
         goban.saveBoardString();
-
         gobanJosekiRepository.save(goban);
         return ResponseEntity.ok(theProfile.getUsername() + " placed a stone");
 
@@ -163,5 +163,11 @@ public class GobanJosekiService {
         GobanJoseki goban = gobanJosekiRepository.findByGobanProfile(theProfile);
         gobanJosekiRepository.delete(goban);
         return ResponseEntity.ok(theProfile.getUsername() + "'s Joseki game is deleted");
+    }
+    public String getRealBoardState(String username) {
+        User user = userRepository.findByUsername(username);
+        TheProfile theProfile = theProfileRepository.findByUser(Optional.of(user));
+        GobanJoseki goban = gobanJosekiRepository.findByGobanProfile(theProfile);
+        return goban.getBoardState();
     }
 }
