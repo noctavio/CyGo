@@ -88,7 +88,7 @@ public class FriendsController {
      * @param friendName the name of the member to be removed.
      * @return a success or error message.
      */
-    @DeleteMapping("/{id}/{friendName}")
+    @DeleteMapping("/delete/{id}/{friendName}")
     @Operation(summary = "Remove friend from friend list", description = "Remove a friend from the specified friend list.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "friend removed successfully"),

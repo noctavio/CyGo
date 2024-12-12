@@ -93,13 +93,23 @@ public class FriendsService {
         return ResponseEntity.ok("friend added.");
     }
 
-    public boolean removeFriend(int friendId, String friendsName) {
-        Optional<Friends> optionalFriends = friendsRepository.findById(friendId);
+    public boolean removeFriend(int user_id, String friendsName) {
+        Optional<User> optionalUser = userRepository.findById(user_id);
+        Optional<Friends> optionalFriends;
+        if(optionalUser.isPresent()){
+            optionalFriends = friendsRepository.findByUser(optionalUser.get());
+        }
+        else{
+            return false;
+        }
+
         if (optionalFriends.isPresent()) {
             Friends friends = optionalFriends.get();
-            return friends.getFriends().remove(friendsName); // Remove the member and return the result
+            friends.getFriends().remove(friendsName);
+            friendsRepository.save(friends);
+            return true; // Remove the member and return the result
         } else {
-            throw new ResourceNotFoundException("Club not found with id: " + friendId);
+            throw new ResourceNotFoundException("user not found with id: " + user_id);
         }
     }
 }
