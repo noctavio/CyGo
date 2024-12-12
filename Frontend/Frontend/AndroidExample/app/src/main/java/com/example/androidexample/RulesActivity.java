@@ -1,22 +1,38 @@
 package com.example.androidexample;
 
 import android.app.AlertDialog;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.GridLayout;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * This class represents the activity that is responsible for managing the game board, 
@@ -34,7 +50,8 @@ public class RulesActivity extends AppCompatActivity {
     private RequestQueue requestQueue;
     private boolean isBlackTurn = true; // Black goes first
     private View lastPlacedStone = null; // Track the last placed stone
-    private int userId = 1;
+    private int userId;
+    private String username;
     private static final int EMPTY = 0;
     private static final int BLACK = 1;
     private static final int WHITE = 2;
@@ -50,8 +67,25 @@ public class RulesActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_rules);
 
+        ImageButton homeButton = findViewById(R.id.home_image_button);
+
+
+        // Retrieve the userId from SharedPreferences
+        SharedPreferences sharedPreferences = getSharedPreferences("LoginSession", MODE_PRIVATE);
+        userId = sharedPreferences.getInt("userId", -1);
+        username = sharedPreferences.getString("username", "Guest");
+
         requestQueue = Volley.newRequestQueue(this);
         boardLayout = findViewById(R.id.boardLayout);
+
+        // Set click listeners for each button
+        homeButton.setOnClickListener(v -> {
+            // Create an Intent to navigate to MainMenuActivity
+            Intent intent = new Intent(RulesActivity.this, MainActivity.class);
+
+            // Start the MainMenuActivity
+            startActivity(intent);
+        });
 
         // Initialize the board
         boardLayout.post(() -> {
@@ -104,20 +138,17 @@ public class RulesActivity extends AppCompatActivity {
      * @param stoneButton  The button representing the stone to be placed.
      */
     private void placeStone(int x, int y, ImageButton stoneButton) {
-        String url = serverUrl + "/" + userId + "/place/" + x + "/" + y;
+        // Check if the position is already occupied
+        if (boardState[x][y] != EMPTY) {
+            Toast.makeText(this, "Position already occupied", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        StringRequest postRequest = new StringRequest(Request.Method.POST, url,
-                response -> {
-                    // Handle valid move
-                    updateBoardWithStone(x, y, stoneButton);
-                    stoneButton.setEnabled(false);
-                },
-                error -> {
-                    // Handle invalid move
-                    Toast.makeText(this, "Move not valid", Toast.LENGTH_SHORT).show();
-                });
+        // Update the board with the stone
+        updateBoardWithStone(x, y, stoneButton);
 
-        requestQueue.add(postRequest);
+        // Disable the button after placement
+        stoneButton.setEnabled(false);
     }
 
     /**
@@ -157,6 +188,7 @@ public class RulesActivity extends AppCompatActivity {
                 .create()
                 .show();
     }
+
 
     /**
      * Generates a hint message based on the current board state, offering strategic advice.
