@@ -31,6 +31,7 @@ public class GobanJoseki {
     private TheProfile gobanProfile;
 
     private boolean isBlack;
+    @Column(name = "current_move")
     private String currentMove;
 
     public GobanJoseki(TheProfile profile)  {
@@ -45,9 +46,6 @@ public class GobanJoseki {
             }
         }
         saveBoardString();
-    }
-    public StoneJoseki getStone(int x, int y){
-        return board[x][y];
     }
 
     // Setter for saving the board as a string
@@ -67,9 +65,6 @@ public class GobanJoseki {
     }
     public String getStoneJoseki(int x, int y){
         return board[x][y].getStoneType();
-    }
-    public void setStone(int x, int y, StoneJoseki stone){
-        board[x][y] = stone;
     }
 
     // Setter for creating a board object based off the saved string data
@@ -118,7 +113,18 @@ public class GobanJoseki {
             }
         }
     }
+    public void Reset(){
+        loadMatrixFromBoardString();
+        for (int i = 0; i < 9; i++) {
+            for (int j = 0; j < 9; j++) {
+                this.board[i][j] = new StoneJoseki(this, i, j);
+            }
+        }
+        this.currentMove = "0000000000";
+        this.isBlack = true;
+        saveBoardString();
 
+    }
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

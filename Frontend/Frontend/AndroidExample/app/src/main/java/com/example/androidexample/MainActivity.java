@@ -1,10 +1,20 @@
 package com.example.androidexample;
 
-import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -17,6 +27,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button LoginBtn;
     private Button WelcomeBtn;
     private Button JosekiBtn;
+    private Button LogoutBtn;
+    private Button PreGameBtn;
+    private Button FriendsBtn;
+    private Button ProfileBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +47,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         LoginBtn = findViewById(R.id.Login);
         WelcomeBtn = findViewById(R.id.Welcome);
         JosekiBtn = findViewById(R.id.Joseki);
+        LogoutBtn = findViewById(R.id.LogoutBtn);
+        PreGameBtn = findViewById(R.id.PreGameBtn);
+        FriendsBtn = findViewById(R.id.FriendsBtn);
+        ProfileBtn = findViewById(R.id.ProfileBtn);
 
         // Set click listeners
         ClubBtn.setOnClickListener(this);
@@ -44,6 +62,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         LoginBtn.setOnClickListener(this);
         WelcomeBtn.setOnClickListener(this);
         JosekiBtn.setOnClickListener(this);
+        PreGameBtn.setOnClickListener(this);
+        FriendsBtn.setOnClickListener(this);
+        ProfileBtn.setOnClickListener(this);
+
+         // Set onClickListener for logout
+        LogoutBtn.setOnClickListener(view -> {
+            LoginActivity.logoutUser(Welcome.this); // Trigger logout
+        });
+
+        displayUsername();
+
     }
 
     @Override
@@ -85,5 +114,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Intent intent = new Intent(MainActivity.this, Joseki.class);
             startActivity(intent);
         }
+        else if (view.getId() == R.id.FriendsBtn) {
+            intent = new Intent(MainMenuActivity.this, FriendsActivity.class);
+            startActivity(intent);
+        } else if (view.getId() == R.id.PreGameBtn) {
+            intent = new Intent(MainMenuActivity.this, PreGameActivity.class);
+            startActivity(intent);
+        } else if (view.getId() == R.id.ProfileBtn) {
+            intent = new Intent(MainMenuActivity.this, ProfileActivity.class);
+            startActivity(intent);
+        }
+    }
+
+    private void displayUsername() {
+        // Retrieve the username from SharedPreferences
+        SharedPreferences sharedPreferences = getSharedPreferences("LoginSession", MODE_PRIVATE);
+        String username = sharedPreferences.getString("username", "Guest");
+
+        // Display the username at the top of the screen
+        TextView usernameDisplay = findViewById(R.id.userNameDisplay);
+        usernameDisplay.setText("Welcome, " + username + "!");
     }
 }

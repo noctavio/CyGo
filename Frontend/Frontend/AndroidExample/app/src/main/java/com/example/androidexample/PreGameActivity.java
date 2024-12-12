@@ -1,18 +1,38 @@
 package com.example.androidexample;
 
-import com.android.volley.Request;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
+import static android.content.Intent.getIntent;
+
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
+import java.util.List;
+
+import com.android.volley.Request;
+import com.android.volley.Response;
+
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.Volley;
+import com.android.volley.toolbox.JsonObjectRequest;
+
 import androidx.appcompat.app.AppCompatActivity;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * This class represents the activity which handles the functionality of the pre-game lobby 
@@ -25,75 +45,80 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class PreGameActivity extends AppCompatActivity {
 
-    // UI elements
-    private Button btnCreateFriendlyLobby, btnJoinLobby, btnInvitePlayer, btnReady, btnLeaveLobby, btnKickPlayer, btnDeleteLobby, gameBtn;
-    private TextView statusText;
-    private int userId; 
+    private int storedUserId; // Logged-in user ID
+
+    private String username; // Logged-in user's username
+
+    private Button btnCreateFriendlyLobby; // Button to create a friendly lobby
+
+    private Button btnJoinLobby; // Button to join an existing lobby
+
+    private Button btnLeaveLobby; // Button to leave the lobby
+
+    private Button btnKickPlayer; // Button to kick a player from the lobby
+
+    private Button btnDeleteLobby; // Button to delete the lobby
+
+    private TextView statusText; // Text view to display ready message
+
+    private Button gameBtn; // Button to start the game
+
+    private Button showPlayersBtn; // Button to show players in the lobby
+
+    private TextView playersTextView; // Text view to display players in the lobby
+
+    private TextView statusMessageTextView; // Text view to display status messages
 
     /**
-     * Initializes the activity, binds views, and sets up click listeners for buttons.
+     * Called when the activity is starting. Initializes the UI components and sets
+     * click listeners for various lobby management actions.
      *
-     * @param savedInstanceState the saved instance state
+     * @param savedInstanceState If the activity is being re-initialized after
+     * previously being shut down, this Bundle contains
+     * the data it most recently supplied.
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pre_game);
 
+        // Retrieve stored user ID from SharedPreferences
+        SharedPreferences sharedPreferences = getSharedPreferences("LoginSession", MODE_PRIVATE);
+        storedUserId = sharedPreferences.getInt("userId", -1);
+        username = sharedPreferences.getString("username", "Guest");
+
         // Initialize views and buttons
         btnCreateFriendlyLobby = findViewById(R.id.createFriendlyLobbyBtn);
         btnJoinLobby = findViewById(R.id.joinLobbyBtn);
-        btnInvitePlayer = findViewById(R.id.invitePlayerBtn);
-        btnReady = findViewById(R.id.readyBtn);
         btnLeaveLobby = findViewById(R.id.btnLeaveLobby);
         btnKickPlayer = findViewById(R.id.btnKickPlayer);
         btnDeleteLobby = findViewById(R.id.btnDeleteLobby);
-        statusText = findViewById(R.id.statusText);
         gameBtn = findViewById(R.id.GameBtn);
+        statusMessageTextView = findViewById(R.id.statusMessageTextView);
+        showPlayersBtn = findViewById(R.id.button_show_players);
+        playersTextView = findViewById(R.id.textview_lobby_players);
+        ImageButton homeButton = findViewById(R.id.home_image_button);
 
-        // Set click listeners for buttons
-        btnCreateFriendlyLobby.setOnClickListener(v -> showCreateLobbyDialog());
+        // Set click listeners for each button
+        homeButton.setOnClickListener(v -> {
+            // Create an Intent to navigate to MainActivity
+            Intent intent = new Intent(PreGameActivity.this, MainActivity.class);
+
+            // Start the MainActivity
+            startActivity(intent);
+        });
+
+        btnCreateFriendlyLobby.setOnClickListener(v -> createLobby());
         btnJoinLobby.setOnClickListener(v -> showJoinLobbyDialog());
-        btnInvitePlayer.setOnClickListener(v -> showInvitePlayerDialog());
-        btnLeaveLobby.setOnClickListener(v -> showLeaveLobbyDialog());
+        btnLeaveLobby.setOnClickListener(v -> leaveLobby());
         btnKickPlayer.setOnClickListener(v -> showKickPlayerDialog());
-        btnDeleteLobby.setOnClickListener(v -> showDeleteLobbyDialog());
+        showPlayersBtn.setOnClickListener(v -> getLobbyIdDialog());
 
-        // Handle btnReady click for toggling ready status
-        btnReady.setOnClickListener(v -> {
-            // Prompt user to enter their user ID
-            promptForUserId();
+        gameBtn.setOnClickListener(v -> {
+            // Optionally, pass the storedUserId or other data to MainGameActivity
+            Intent intent = new Intent(PreGameActivity.this, MainGame.class);
+            startActivity(intent); // Start MainGameActivity
         });
-    }
-
-    /**
-     * Displays a dialog for the user to input their user ID and then toggles their ready status.
-     */
-    private void promptForUserId() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Enter Your User ID");
-
-        final EditText input = new EditText(this);
-        input.setHint("Enter User ID");
-        builder.setView(input);
-
-        builder.setPositiveButton("OK", (dialog, which) -> {
-            String userIdString = input.getText().toString();
-            if (!userIdString.isEmpty()) {
-                try {
-                    userId = Integer.parseInt(userIdString);  // Parse the input to an integer
-                    toggleReadyStatus(userId); // Call the method to toggle the ready status
-                } catch (NumberFormatException e) {
-                    Toast.makeText(PreGameActivity.this, "Invalid User ID", Toast.LENGTH_SHORT).show();
-                }
-            } else {
-                Toast.makeText(PreGameActivity.this, "User ID cannot be empty", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
-
-        builder.show();
     }
 
     /**
@@ -103,26 +128,39 @@ public class PreGameActivity extends AppCompatActivity {
      */
     private void toggleReadyStatus(int userId) {
         // Update the URL with the correct endpoint
-        String url = "http://coms-3090-051.class.las.iastate.edu:8080/lobby/players/" + userId + "/toggleReady";
+        String url = "http://10.90.72.226:8080/lobby/players/" + userId + "/toggleReady";
         Log.d("ReadyStatus", "Sending request to: " + url);
 
         StringRequest stringRequest = new StringRequest(Request.Method.PUT, url,
                 response -> {
                     // Log the response for debugging
                     Log.d("ReadyStatus", "Response: " + response);
-                    if (response.contains("Success")) {  // Assuming a success message is returned
-                        Toast.makeText(PreGameActivity.this, "Ready status toggled successfully", Toast.LENGTH_SHORT).show();
+
+                    // Check if the response contains the expected message format
+                    if (response.contains("is now:")) {
+                        // Extract the username and status message from the response
+                        String[] parts = response.split(" is now: ");
+                        String username = parts[0];
+                        String status = parts[1];
+
+                        // Show a success message with the username and status
+                        Toast.makeText(PreGameActivity.this, username + " is now: " + status, Toast.LENGTH_SHORT).show();
                     } else {
+                        // Handle the case where the response is unexpected
                         Toast.makeText(PreGameActivity.this, "Failed to toggle ready status", Toast.LENGTH_SHORT).show();
                     }
                 },
                 error -> {
-                    // Log the error and response status code
-                    Log.e("ReadyStatus", "Error: " + error.getMessage());
+                    // Log the error details
+                    String errorMessage = "Failed to toggle ready status";
                     if (error.networkResponse != null) {
-                        Log.e("ReadyStatus", "Error Code: " + error.networkResponse.statusCode);
+                        errorMessage += " (Status Code: " + error.networkResponse.statusCode + ")";
+                        String responseBody = new String(error.networkResponse.data);
+                        Log.e("ReadyStatus", "Error Response Body: " + responseBody);
+                    } else {
+                        Log.e("ReadyStatus", "No network response (likely timeout or connectivity issue).");
                     }
-                    Toast.makeText(PreGameActivity.this, "Failed to toggle ready status", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(PreGameActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
                 });
 
         // Add the request to the Volley request queue
@@ -130,127 +168,62 @@ public class PreGameActivity extends AppCompatActivity {
     }
 
     /**
-     * Displays a dialog for creating a lobby and sends a POST request to the server.
+     * Initializes the game on the server using the specified host ID.
+     * @param hostId
      */
-    private void showCreateLobbyDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Create Lobby");
+    private void initializeGame(int hostId) {
+        String url = "http://10.90.72.226:8080/" + hostId + "/initialize/game";
+        Log.d("InitializeGame", "Initializing game with host ID: " + hostId);
 
-        final EditText input = new EditText(this);
-        input.setHint("Enter User ID to create lobby");
-        builder.setView(input);
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, null,
+                response -> {
+                    // Handle success
+                    Log.d("InitializeGame", "Game initialized successfully: " + response);
+                    TextView statusText = findViewById(R.id.statusMessageTextView);
+                    statusText.setText("Game initialized successfully!");
+                    statusText.setTextColor(Color.parseColor("#FFFFCA00")); // Yellow
+                    statusText.setVisibility(View.VISIBLE);
+                },
+                error -> {
+                    // Handle error
+                    String errorMsg = "Failed to initialize game.";
+                    if (error.networkResponse != null) {
+                        errorMsg += " Status Code: " + error.networkResponse.statusCode;
+                    }
+                    Log.e("InitializeGame", errorMsg);
 
-        builder.setPositiveButton("Create", (dialog, which) -> {
-            String userIdString = input.getText().toString();
-            int userId = Integer.parseInt(userIdString);
-            createLobby(userId);
+                    TextView statusText = findViewById(R.id.statusMessageTextView);
+                    statusText.setText(errorMsg);
+                    statusText.setTextColor(Color.RED); // Red for error
+                    statusText.setVisibility(View.VISIBLE);
+                });
 
-            gameBtn.setOnClickListener(v -> {
-                Intent intent = new Intent(PreGameActivity.this, MainGame.class);
-                intent.putExtra("hostUserId", userId);
-                startActivity(intent);
-            });
-        });
-        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
-
-        builder.show();
+        Volley.newRequestQueue(this).add(request);
     }
 
     /**
-     * Displays a dialog for joining a lobby and sends a PUT request to the server.
-     */
-    private void showJoinLobbyDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Join Lobby");
-
-        final EditText lobbyIdInputField = new EditText(this);
-        lobbyIdInputField.setHint("Enter Lobby ID");
-        final EditText userIdInputField = new EditText(this);
-        userIdInputField.setHint("Enter User ID");
-
-        LinearLayout layout = new LinearLayout(this);
-        layout.setOrientation(LinearLayout.VERTICAL);
-        layout.addView(lobbyIdInputField);
-        layout.addView(userIdInputField);
-
-        builder.setView(layout);
-
-        builder.setPositiveButton("Join", (dialog, which) -> {
-            String lobbyId = lobbyIdInputField.getText().toString();
-            String userId = userIdInputField.getText().toString();
-            int lobbyIdInt = Integer.parseInt(lobbyId);
-            int userIdInt = Integer.parseInt(userId);
-            joinLobby(lobbyIdInt, userIdInt);
-        });
-        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
-
-        builder.show();
-    }
-
-    /**
-     * Displays a dialog for inviting a player to the lobby and sends a POST request to the server.
-     */
-    private void showInvitePlayerDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Invite Player");
-
-        final EditText inviteInput = new EditText(this);
-        inviteInput.setHint("Enter Player User ID");
-        builder.setView(inviteInput);
-
-        builder.setPositiveButton("Invite", (dialog, which) -> {
-            String playerId = inviteInput.getText().toString();
-            invitePlayer(Integer.parseInt(playerId));
-        });
-        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
-
-        builder.show();
-    }
-
-    /**
-     * Displays a dialog for leaving a lobby and sends a DELETE request to the server.
-     */
-    private void showLeaveLobbyDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Leave Lobby");
-
-        final EditText input = new EditText(this);
-        input.setHint("Enter User ID to leave lobby");
-        builder.setView(input);
-
-        builder.setPositiveButton("Leave", (dialog, which) -> {
-            String userIdString = input.getText().toString();
-            int userId = Integer.parseInt(userIdString);
-            leaveLobby(userId);
-        });
-        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
-
-        builder.show();
-    }
-
-    /**
-     * Displays a dialog for kicking a player from the lobby and sends a DELETE request to the server.
+     * Displays a dialog to kick a player from the lobby by entering the host
+     * and player user IDs.
      */
     private void showKickPlayerDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Kick Player");
 
-        final EditText hostUserIdInput = new EditText(this);
-        hostUserIdInput.setHint("Enter Host User ID");
+        // Create input fields
         final EditText playerUserIdInput = new EditText(this);
-        playerUserIdInput.setHint("Enter Player User ID");
+        playerUserIdInput.setHint("Enter Player User ID"); // Hint for Player User ID input
 
+        // Create a vertical LinearLayout to hold the input fields
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
-        layout.addView(hostUserIdInput);
         layout.addView(playerUserIdInput);
 
         builder.setView(layout);
 
         builder.setPositiveButton("Kick", (dialog, which) -> {
-            String hostUserId = hostUserIdInput.getText().toString();
             String playerUserId = playerUserIdInput.getText().toString();
-            kickPlayerFromLobby(Integer.parseInt(hostUserId), Integer.parseInt(playerUserId));
+
+            kickPlayerFromLobby(Integer.parseInt(String.valueOf(storedUserId)), Integer.parseInt(playerUserId));
         });
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
 
@@ -258,14 +231,15 @@ public class PreGameActivity extends AppCompatActivity {
     }
 
     /**
-     * Displays a dialog for deleting a lobby and sends a DELETE request to the server.
+     * Displays a dialog to delete the current lobby by entering the host user ID.
      */
     private void showDeleteLobbyDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Delete Lobby");
 
+        // Create input field
         final EditText input = new EditText(this);
-        input.setHint("Enter Host User ID to delete lobby");
+        input.setHint("Enter Host User ID to delete lobby"); // Hint text for user input
         builder.setView(input);
 
         builder.setPositiveButton("Delete", (dialog, which) -> {
@@ -278,21 +252,34 @@ public class PreGameActivity extends AppCompatActivity {
     }
 
     /**
-     * Creates a new lobby for the specified user.
-     * Sends a POST request to the backend server to create a lobby for the user.
-     * 
-     * @param userId the ID of the user who is creating the lobby
-     */ 
-    private void createLobby(int userId) {
-        String url = "http://10.90.72.226:8080/lobby/" + userId + "/create";
+     * Creates a new lobby on the server with the stored user ID.
+     */
+    private void createLobby() {
+        String url = "http://10.90.72.226:8080/lobby/" + storedUserId + "/create";
         StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
                 response -> {
                     // Handle the response here
                     Log.d("CreateLobby", "Successfully created lobby: " + response);
+
+                    // Automatically toggle ready status for the user
+                    toggleReadyStatus(storedUserId);
+
+                    // Find the statusText TextView in your layout
+                    TextView statusText = findViewById(R.id.statusMessageTextView);
+
+                    // Update the statusText with a message
+                    statusText.setText(username + " created the lobby.");
+                    statusText.setVisibility(View.VISIBLE);
+
                 },
                 error -> {
                     // Handle the error here
                     Log.e("CreateLobby", "Error: " + error.getMessage());
+
+                    // Find the statusText TextView and update it to show the error message
+                    TextView statusText = findViewById(R.id.statusMessageTextView);
+                    statusText.setText("Failed to create lobby.");
+                    statusText.setVisibility(View.VISIBLE);
                 });
 
         // Add the request to the Volley request queue
@@ -300,22 +287,70 @@ public class PreGameActivity extends AppCompatActivity {
     }
 
     /**
-     * Joins an existing lobby for the specified user.
-     * Sends a PUT request to the backend server to join a specific lobby.
-     * 
-     * @param lobbyId the ID of the lobby the user is joining
-     * @param userId the ID of the user who is joining the lobby
+     * Displays a dialog for joining a lobby and sends a PUT request to the server.
      */
-    private void joinLobby(int lobbyId, int userId) {
-        String url = "http://10.90.72.226:8080/lobby/" + userId + "/join/" + lobbyId;
+    private void showJoinLobbyDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Join Lobby");
+
+        // Input field for Lobby ID
+        final EditText lobbyIdInputField = new EditText(this);
+        lobbyIdInputField.setHint("Enter Lobby ID"); // Hint for Lobby ID input
+        builder.setView(lobbyIdInputField);
+
+        builder.setPositiveButton("Join", (dialog, which) -> {
+            String lobbyId = lobbyIdInputField.getText().toString();
+
+            if (!lobbyId.isEmpty()) {
+                try {
+                    int lobbyIdInt = Integer.parseInt(lobbyId);
+
+                    joinLobby(lobbyIdInt); // Pass the parsed lobbyId
+                } catch (NumberFormatException e) {
+                    Toast.makeText(PreGameActivity.this, "Invalid Lobby ID", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                Toast.makeText(PreGameActivity.this, "Lobby ID cannot be empty", Toast.LENGTH_SHORT).show();
+            }
+        });
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+
+        builder.show();
+    }
+
+    /**
+     * Joins an existing lobby on the server using the specified lobby ID.
+     *
+     * @param lobbyId The ID of the lobby to join.
+     */
+    private void joinLobby(int lobbyId) {
+        String url = "http://10.90.72.226:8080/lobby/" + storedUserId + "/join/" + lobbyId;
         StringRequest stringRequest = new StringRequest(Request.Method.PUT, url,
                 response -> {
                     // Handle the response here
-                    Log.d("JoinLobby", "Successfully joined lobby: " + response);
+                    Log.d("JoinLobby", "Successfully joined the lobby: " + response);
+
+                    // Automatically toggle ready status for the user
+                    toggleReadyStatus(storedUserId);
+
+                    // Find the statusText TextView in your layout
+                    TextView statusText = findViewById(R.id.statusMessageTextView);
+
+                    // Update the statusText with a success message
+                    statusText.setText(username + " joined the lobby.");
+                    statusText.setVisibility(View.VISIBLE);
                 },
                 error -> {
                     // Handle the error here
                     Log.e("JoinLobby", "Error: " + error.getMessage());
+
+                    // Automatically toggle ready status for the user
+                    toggleReadyStatus(storedUserId);
+
+                    // Find the statusText TextView and update it to show the error message
+                    TextView statusText = findViewById(R.id.statusMessageTextView);
+                    statusText.setText("Failed to join lobby.");
+                    statusText.setVisibility(View.VISIBLE);
                 });
 
         // Add the request to the Volley request queue
@@ -323,43 +358,32 @@ public class PreGameActivity extends AppCompatActivity {
     }
 
     /**
-     * Invites a player to join the lobby.
-     * Sends a POST request to the backend server to invite a player to a specific lobby.
-     * 
-     * @param playerId the ID of the player being invited to the lobby
+     * Leaves the current lobby using the stored user ID and current lobby ID.
      */
-    private void invitePlayer(int playerId) {
-        String url = "http://10.90.72.226:8080/lobby/invite/" + playerId;
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
-                response -> {
-                    // Handle the response here
-                    Log.d("InvitePlayer", "Successfully invited player: " + response);
-                },
-                error -> {
-                    // Handle the error here
-                    Log.e("InvitePlayer", "Error: " + error.getMessage());
-                });
+    private void leaveLobby() {
+        String url = "http://10.90.72.226:8080/lobby/" + storedUserId + "/leave";
 
-        // Add the request to the Volley request queue
-        Volley.newRequestQueue(this).add(stringRequest);
-    }
-
-    /**
-     * Allows the user to leave the current lobby.
-     * Sends a DELETE request to the backend server to remove the user from the lobby.
-     * 
-     * @param userId the ID of the user who is leaving the lobby
-     */
-    private void leaveLobby(int userId) {
-        String url = "http://10.90.72.226:8080/lobby/" + userId + "/leave";
         StringRequest stringRequest = new StringRequest(Request.Method.DELETE, url,
                 response -> {
                     // Handle the response here
                     Log.d("LeaveLobby", "Successfully left the lobby: " + response);
+
+                    // Find the statusText TextView in your layout
+                    TextView statusText = findViewById(R.id.statusMessageTextView);
+
+                    // Update the statusText with a message
+                    statusText.setText(username + " left the lobby.");
+                    statusText.setVisibility(View.VISIBLE);
+
                 },
                 error -> {
                     // Handle the error here
                     Log.e("LeaveLobby", "Error: " + error.getMessage());
+
+                    // Find the statusText TextView and update it to show the error message
+                    TextView statusText = findViewById(R.id.statusMessageTextView);
+                    statusText.setText("Failed to leave the lobby.");
+                    statusText.setVisibility(View.VISIBLE);
                 });
 
         // Add the request to the Volley request queue
@@ -367,11 +391,10 @@ public class PreGameActivity extends AppCompatActivity {
     }
 
     /**
-     * Kicks a player from the lobby.
-     * Sends a DELETE request to the backend server to kick a player out of the lobby.
-     * 
-     * @param hostUserId the ID of the host user who is performing the kick operation
-     * @param userId the ID of the player being kicked from the lobby
+     * Kicks a player from the lobby using the specified host user ID and player user ID.
+     *
+     * @param hostUserId The user ID of the host.
+     * @param userId     The user ID of the player to be kicked.
      */
     private void kickPlayerFromLobby(int hostUserId, int userId) {
         String url = "http://10.90.72.226:8080/lobby/" + hostUserId + "/kick/" + userId;
@@ -379,21 +402,33 @@ public class PreGameActivity extends AppCompatActivity {
                 response -> {
                     // Handle the response here
                     Log.d("KickPlayer", "Successfully kicked player: " + response);
+
+                    TextView statusText = findViewById(R.id.statusMessageTextView);
+
+                    // Update the statusText with the kicked out message
+                    String kickedMessage = "Successfully kicked out of the lobby!";
+                    statusText.setText(kickedMessage);
+                    statusText.setTextColor(Color.parseColor("#FFFFCA00")); // Set to yellow text color
+                    statusText.setVisibility(View.VISIBLE);
                 },
                 error -> {
                     // Handle the error here
                     Log.e("KickPlayer", "Error: " + error.getMessage());
+
+                    TextView statusText = findViewById(R.id.statusMessageTextView);
+                    statusText.setText("Failed to kick player");
+                    statusText.setTextColor(Color.parseColor("#FFFFCA00")); // Set to yellow text color
+                    statusText.setVisibility(View.VISIBLE);
                 });
 
         // Add the request to the Volley request queue
         Volley.newRequestQueue(this).add(stringRequest);
     }
 
-    /**
-     * Deletes the lobby created by the host user.
-     * Sends a DELETE request to the backend server to delete the specified lobby.
-     * 
-     * @param hostUserId the ID of the host user who is deleting the lobby
+     /**
+     * Deletes the current lobby on the server using the specified host user ID.
+     *
+     * @param hostUserId The user ID of the host who created the lobby.
      */
     private void deleteLobby(int hostUserId) {
         String url = "http://10.90.72.226:8080/lobby/" + hostUserId + "/killLobby";
@@ -410,4 +445,105 @@ public class PreGameActivity extends AppCompatActivity {
         // Add the request to the Volley request queue
         Volley.newRequestQueue(this).add(stringRequest);
     }
+
+    /**
+     * Displays a dialog to get the lobby ID from the user.
+     */
+    private void getLobbyIdDialog() {
+        // Create an AlertDialog to prompt the user for the lobby ID
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Enter Lobby ID");
+
+        // Create an EditText to allow the user to input the lobby ID
+        final EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_CLASS_NUMBER); // Ensure it's a number
+        builder.setView(input);
+
+        // Set up the dialog buttons
+        builder.setPositiveButton("OK", (dialog, which) -> {
+            String lobbyIdStr = input.getText().toString();
+            if (!lobbyIdStr.isEmpty()) {
+                try {
+                    // Convert the input to an integer
+                    int lobbyId = Integer.parseInt(lobbyIdStr);
+                    // Call the method to fetch players in the given lobby
+                    fetchPlayersInLobby(lobbyId);
+                } catch (NumberFormatException e) {
+                    // Handle invalid input
+                    Toast.makeText(this, "Invalid Lobby ID. Please enter a valid number.", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                Toast.makeText(this, "Please enter a Lobby ID.", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
+
+        // Show the dialog
+        builder.show();
+    }
+
+    private void fetchPlayersInLobby(int lobbyId) {
+        // Define the URL to get the players in the lobby
+        String url = "http://10.90.72.226:8080/lobby/allPlayers/" + lobbyId;
+
+        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null,
+                response -> {
+                    // Handle the response
+                    Log.d("GetPlayers", "Successfully fetched players: " + response.toString());
+
+                    // Process the response and display player names
+                    StringBuilder playersList = new StringBuilder("Players in Lobby:\n");
+
+                    try {
+                        // Iterate over the JSON array and build a list of player names
+                        for (int i = 0; i < response.length(); i++) {
+                            JSONObject player = response.getJSONObject(i);
+                            String playerName = player.getString("username");  // Assuming player object contains "username"
+                            playersList.append(playerName).append("\n");
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                    // Display the list of players in the TextView
+                    playersTextView.setText(playersList.toString());
+                    playersTextView.setTextColor(Color.parseColor("#FFFFCA00")); // Yellow color
+                    playersTextView.setVisibility(View.VISIBLE);
+                },
+                error -> {
+                    // Handle the error here
+                    Log.e("GetPlayers", "Error: " + error.getMessage());
+                    playersTextView.setText("Failed to fetch players.");
+                    playersTextView.setVisibility(View.VISIBLE);
+                });
+
+        // Add the request to the Volley request queue
+        Volley.newRequestQueue(this).add(request);
+    }
+
+    private void displayPlayers(JSONArray players) {
+        // Find the TextView where players will be shown
+        TextView playersTextView = findViewById(R.id.textview_lobby_players);
+
+        // Clear the previous text
+        playersTextView.setText("");
+
+        // Iterate through the JSON array and display each player
+        try {
+            StringBuilder playersList = new StringBuilder("Players in Lobby:\n");
+
+            for (int i = 0; i < players.length(); i++) {
+                JSONObject player = players.getJSONObject(i);
+                String username = player.getJSONObject("profile").getString("username");
+                playersList.append(username).append("\n");
+            }
+
+            // Set the formatted list to the TextView
+            playersTextView.setText(playersList.toString());
+            playersTextView.setVisibility(View.VISIBLE);
+        } catch (JSONException e) {
+            Log.e("DisplayPlayers", "Error parsing players: " + e.getMessage());
+        }
+    }   
 }

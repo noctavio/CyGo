@@ -46,12 +46,10 @@ public class GobanJosekiController {
             @ApiResponse(responseCode = "400", description = "Invalid position or user action"),
             @ApiResponse(responseCode = "404", description = "User or board not found")
     })
-    @PostMapping("/{username}/undo/{x}/{y}")
+    @PostMapping("/{username}/undo")
     public ResponseEntity<String> undo(
-            @Parameter(description = "username of the user removing the stone") @PathVariable String username,
-            @Parameter(description = "X-coordinate of the position") @PathVariable Integer x,
-            @Parameter(description = "Y-coordinate of the position") @PathVariable Integer y) {
-        return gobanService.undoMove(username, x, y);
+            @Parameter(description = "username of the user removing the stone") @PathVariable String username) {
+        return gobanService.undoMove(username);
     }
     @Operation(summary = "Reset the current board state", description = "Retrieves the current state of the game board for the specified lobby.")
     @ApiResponses(value = {
@@ -74,6 +72,12 @@ public class GobanJosekiController {
     public String getBoardState(
             @Parameter(description = "ID of the lobby to retrieve the board state for") @PathVariable String username) {
         return gobanService.getBoardState(username);
+    }
+
+    @GetMapping("/{username}/realBoard")
+    public String getRealBoardState(
+            @Parameter(description = "ID of the lobby to retrieve the board state for") @PathVariable String username) {
+        return gobanService.getRealBoardState(username);
     }
 
     @Operation(summary = "End the game", description = "Ends the game for the specified lobby.")
