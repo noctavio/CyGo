@@ -1,5 +1,6 @@
 package com.example.androidexample;
 
+
 import static android.content.Context.MODE_PRIVATE;
 
 import android.app.Activity;
@@ -51,7 +52,8 @@ public class LoginActivity extends AppCompatActivity {
     private Button logoutButton;        // Button for logging user out
     private Button registerButton;      // Register button
     private Button updateButton;        // Update button
-    private Button deleteButton;        // Delete button
+    private Button deleteButton;        // Delete 
+    private Button btnToggleAdmin;    // Button for toggling admin status.
     private RequestQueue requestQueue;  // Volley request queue
     private int userId;                 // User ID for the currently logged-in user
     private boolean isAppClosed = false; // Flag to track if the app is closed
@@ -67,9 +69,18 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        setContentView(R.layout.activity_login);
+
         // Check if user is already logged in
         SharedPreferences sharedPreferences = getSharedPreferences("LoginSession", MODE_PRIVATE);
         int storedUserId = sharedPreferences.getInt("userId", -1);
+
+        btnToggleAdmin = findViewById(R.id.btn_toggle_admin);
+
+        btnToggleAdmin.setOnClickListener(v -> {
+            Log.d("LoginActivity", "Button clicked");  // Log button click
+            toggleAdminStatus();
+        });
 
         if (storedUserId != -1) {
             // User is already logged in, navigate to MainMenuActivity
@@ -79,11 +90,84 @@ public class LoginActivity extends AppCompatActivity {
         } else {
             // Clear session if needed
             clearSession(this);
-            // Show the login screen
-            setContentView(R.layout.activity_login);
             initializeUI();
         }
     }
+
+    private void toggleAdminStatus() {
+        // Create the EditText views for user ID and password inside the dialog
+        EditText userIdInput = new EditText(this);
+        userIdInput.setInputType(InputType.TYPE_CLASS_NUMBER);
+
+        EditText passwordInput = new EditText(this);
+        passwordInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+
+        // Create TextViews to guide the user
+        TextView userIdText = new TextView(this);
+        userIdText.setText("Enter User ID:");
+
+        TextView passwordText = new TextView(this);
+        passwordText.setText("Enter admin password:");
+
+        // Create a LinearLayout to contain both TextViews and EditText fields
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+
+        // Add the TextViews and EditTexts to the layout
+        layout.addView(userIdText);
+        layout.addView(userIdInput);
+        layout.addView(passwordText);
+        layout.addView(passwordInput);
+
+        // Create an AlertDialog
+        new AlertDialog.Builder(this)
+                .setMessage("Please enter your user ID and admin password to toggle admin privileges:")
+                .setView(layout) // Add the TextViews and EditText fields to the dialog
+                .setPositiveButton("OK", (dialog, which) -> {
+                    // Get the user ID and password entered by the user
+                    String userIdString = userIdInput.getText().toString();
+                    String password = passwordInput.getText().toString();
+
+                    // Check if the input is not empty and the password is correct
+                    if (!userIdString.isEmpty() && !password.isEmpty()) {
+                        if (password.equals("cygo")) {
+                            try {
+                                // Convert the user ID to an integer
+                                int userId = Integer.parseInt(userIdString);
+                                // Call the method to toggle admin privileges
+                                performToggleAdminRequest(userId);
+                            } catch (NumberFormatException e) {
+                                // Handle invalid user ID format
+                                Toast.makeText(this, "Invalid ID format. Please enter a valid number.", Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            // Handle incorrect password
+                            Toast.makeText(this, "Incorrect password. Admin privileges not toggled.", Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        Toast.makeText(this, "User ID and password cannot be empty.", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .setNegativeButton("Cancel", (dialog, which) -> {
+                    // Handle cancel button press if needed
+                    dialog.dismiss();
+                })
+                .show();
+    }
+
+     // Method to perform the actual network request
+    private void performToggleAdminRequest(int userId) {
+        String url = "http://10.90.72.226:8080/users/toggleAdmin/" + userId;
+
+        RequestQueue queue = Volley.newRequestQueue(this);
+        StringRequest stringRequest = new StringRequest(Request.Method.PUT, url,
+                response -> Toast.makeText(this, response, Toast.LENGTH_LONG).show(),
+                error -> Toast.makeText(this, "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show()
+        );
+
+        queue.add(stringRequest);
+    }
+
 
     // Initialize the UI components
     private void initializeUI() {
@@ -251,8 +335,8 @@ public class LoginActivity extends AppCompatActivity {
      * @param username The username to log in with.
      * @param password The password to log in with.
      */
-    private void loginUser(String username, String password) {
-        // Trim whitespace from inputs
+    private void loginUser(String username, String password){
+
         final String loginUsername = username.trim();
         password = password.trim();
 
@@ -266,7 +350,7 @@ public class LoginActivity extends AppCompatActivity {
                 Uri.encode(loginUsername) + "/" + Uri.encode(password);
 
         StringRequest loginRequest = new StringRequest(Request.Method.PUT, loginUrl,
-                response -> {
+            response -> {
                     getUserId(loginUsername);
 
                     // Show success message
@@ -274,18 +358,28 @@ public class LoginActivity extends AppCompatActivity {
                     loginStatusText.setTextColor(getResources().getColor(R.color.plain_yellow));
                     loginStatusText.setVisibility(View.VISIBLE);
 
-                    // Navigate to the MainActivity after a delay
-                    new Handler().postDelayed(() -> {
-                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                        startActivity(intent);
-                        finish();
-                        }, 2000);
-                },
-                error -> {
-                    loginStatusText.setText("Login failed: " + error.getMessage());
-                    loginStatusText.setTextColor(getResources().getColor(R.color.plain_yellow));
-                    loginStatusText.setVisibility(View.VISIBLE);
-                });
+                    // Navigate to the MainMenuActivity after a delay
+                new Handler().postDelayed(() -> {
+                    // Retrieve the isAdmin value from SharedPreferences
+                    SharedPreferences sharedPreferences = getSharedPreferences("LoginSession", MODE_PRIVATE);
+                    boolean isAdmin = sharedPreferences.getBoolean("isAdmin", false);
+
+                    Intent intent;
+                    if (isAdmin) {
+                        // If user is an admin, go to AdminActivity
+                        intent = new Intent(LoginActivity.this, AdminActivity.class);
+                    } else {
+                        // If user is not an admin, go to MainActivity
+                        intent = new Intent(LoginActivity.this, MainActivity.class);
+                    }
+                    startActivity(intent);
+                    finish();
+                }, 2000);
+            },error -> {
+                loginStatusText.setText("Login failed: " + error.getMessage());
+                loginStatusText.setTextColor(getResources().getColor(R.color.plain_yellow));
+                loginStatusText.setVisibility(View.VISIBLE);
+            });
 
         requestQueue.add(loginRequest);
     }
@@ -428,12 +522,14 @@ public class LoginActivity extends AppCompatActivity {
                 response -> {
                     try {
                         int userId = response.getInt("user_id");
+                        boolean isAdmin = response.isNull("isAdmin") ? false : response.getBoolean("isAdmin");
 
                         // Save userId and username in SharedPreferences
                         SharedPreferences sharedPreferences = getSharedPreferences("LoginSession", MODE_PRIVATE);
                         SharedPreferences.Editor editor = sharedPreferences.edit();
                         editor.putInt("userId", userId);
                         editor.putString("username", username);
+                        editor.putBoolean("isAdmin", isAdmin);  // Save isAdmin status
                         editor.apply();
 
                     } catch (JSONException e) {
@@ -447,5 +543,6 @@ public class LoginActivity extends AppCompatActivity {
         requestQueue.add(getUserIdRequest);
     }
 }
+
 
 
