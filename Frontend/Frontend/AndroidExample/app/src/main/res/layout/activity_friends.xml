@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    tools:context=".FriendsActivity"
+    android:background="@drawable/border_background">
+
+    <ImageButton
+        android:id="@+id/home_image_button"
+        android:layout_width="70dp"
+        android:layout_height="48dp"
+        android:layout_margin="8dp"
+        android:layout_marginStart="28dp"
+        android:layout_marginTop="80dp"
+        android:background="@android:color/transparent"
+        android:contentDescription="Home Button"
+        android:scaleType="fitCenter"
+        android:src="@drawable/home_button" />
+
+    <TextView
+        android:id="@+id/noFriendsMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="No friends found."
+        android:visibility="gone"
+        android:layout_centerInParent="true"
+        android:textSize="18sp"
+        android:textColor="@android:color/black"
+        android:layout_alignParentTop="true" />
+
+    <!-- Title for the Friends Page -->
+    <TextView
+        android:id="@+id/friendsPageTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Friends List"
+        android:textSize="40sp"
+        android:textColor="@color/plain_yellow"
+        android:layout_marginTop="0dp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:id="@+id/textview_friends"
+        android:layout_width="wrap_content"
+        android:layout_height="461dp"
+        android:layout_marginTop="60dp"
+        android:paddingTop="16dp"
+        android:text="Friends will be shown here"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/plain_yellow"
+        android:textSize="40sp" />
+
+    <Button
+        android:id="@+id/chatFriendButton"
+        android:layout_width="146dp"
+        android:layout_height="61dp"
+        android:layout_above="@id/addFriendButton"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="25dp"
+        android:backgroundTint="#00CAFF"
+        android:padding="8dp"
+        android:text="Chat"
+        android:textColor="@android:color/white" />
+
+    <Button
+        android:id="@+id/removeFriendButton"
+        android:layout_width="146dp"
+        android:layout_height="61dp"
+        android:layout_marginStart="220dp"
+        android:layout_above="@id/addFriendButton"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="48dp"
+        android:layout_marginBottom="27dp"
+
+        android:backgroundTint="#00CAFF"
+        android:padding="12dp"
+        android:text="Unfriend"
+        android:textColor="@android:color/white" />
+
+    <Button
+        android:id="@+id/addFriendButton"
+        android:layout_width="395dp"
+        android:layout_height="80dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="23dp"
+        android:backgroundTint="#00CAFF"
+        android:padding="12dp"
+        android:text="Add Friend"
+        android:textColor="@android:color/white"
+        />
+
+</RelativeLayout>
