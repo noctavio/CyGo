@@ -85,6 +85,9 @@ public class TeamController {
         Optional<Team> teamOptional = teamRepository.findById(teamId);
         if (teamOptional.isPresent()) {
             Team team = teamOptional.get();
+            if (team.getTimeRemaining() > 0L) {
+                return ResponseEntity.ok("Team still has time remaining." + team.getTeamName());
+            }
             gobanService.endGame(team.getLobby().getLobby_id());
             return ResponseEntity.ok("Game ended by timeElapsed of team: " + team.getTeamName());
         }

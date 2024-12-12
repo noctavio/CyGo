@@ -98,7 +98,7 @@ public class UserController {
             @ApiResponse(responseCode = "200", description = "Reset successful "),
             @ApiResponse(responseCode = "404", description = "User not found")
     })
-    @PutMapping("{adminId}/resetDetails/{userId}")
+    @PutMapping("/{adminId}/resetDetails/{userId}")
     public ResponseEntity<String> adminResetUserDetails(
             @Parameter(description = "ID of the admin.") @PathVariable Integer adminId,
             @Parameter(description = "ID of the user to reset.") @PathVariable Integer userId,
@@ -111,7 +111,7 @@ public class UserController {
             @ApiResponse(responseCode = "200", description = "Reset successful "),
             @ApiResponse(responseCode = "404", description = "User not found")
     })
-    @PutMapping("updateAfterReset/{oldUsername}/{oldPassword}")
+    @PutMapping("/updateAfterReset/{oldUsername}/{oldPassword}")
     public ResponseEntity<String> updateDetailsAfterAdminReset(
             @Parameter(description = "Username of account") @PathVariable String oldUsername,
             @Parameter(description = "Password of account") @PathVariable String oldPassword,
@@ -124,7 +124,7 @@ public class UserController {
             @ApiResponse(responseCode = "200", description = "Ban successful "),
             @ApiResponse(responseCode = "404", description = "User not found")
     })
-    @PutMapping("{adminId}/ban/{username}/length/{minuteLength}")
+    @PutMapping("/{adminId}/ban/{username}/length/{minuteLength}")
     public ResponseEntity<String> banUser(
             @Parameter(description = "adminId") @PathVariable Integer adminId,
             @Parameter(description = "Target username") @PathVariable String username,
@@ -138,7 +138,7 @@ public class UserController {
             @ApiResponse(responseCode = "400", description = "Invalid input data"),
             @ApiResponse(responseCode = "404", description = "User not found")
     })
-    @DeleteMapping("{adminId}/hardDelete/{id}")
+    @DeleteMapping("/{adminId}/hardDelete/{id}")
     public ResponseEntity<String> deleteByID(
             @Parameter(description = "ID of the user to delete") @PathVariable Integer id,
             @Parameter(description = "ID of the potential administrator") @PathVariable Integer adminId){
