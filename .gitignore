@@ -91,3 +91,4 @@ buildNumber.properties
 
 # Ignores intelliJ default config folder
 .idea.DS_Store
+**/application.properties

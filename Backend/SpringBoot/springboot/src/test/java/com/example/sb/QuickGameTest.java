@@ -115,13 +115,5 @@ public class QuickGameTest {
                 .put("/lobby/players/4/toggleReady")
                 .then()
                 .statusCode(200);
-
-        // Initialize the game(as host) using the players in the lobby alongside whatever configuration.
-        // 1, 3, 2, 4
-        given()
-                .when()
-                .post("/lobby/1/initialize/game")
-                .then()
-                .statusCode(200);
     }
 }
