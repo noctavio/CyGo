@@ -91,4 +91,6 @@ buildNumber.properties
 
 # Ignores intelliJ default config folder
 .idea.DS_Store
-**/application.properties
+## **/application.properties 
+
+### This project is meant to be run locally so I will leave the application properties file exposed
