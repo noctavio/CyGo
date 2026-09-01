@@ -36,6 +36,8 @@ public class TheProfile {
     private Integer wins;
     private Integer loss;
     private Integer games;
+    
+    @Column(name = "`rank`")
     private String rank;
 
     public TheProfile(User user) {

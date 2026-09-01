@@ -34,7 +34,7 @@ public class OctavioTests {
 
     @Test
     public void test1_registerLoginAndLogout_etc() {
-        String user1JSON = "{\"username\": \"Dummy1\", \"password\": \"password1\"}";
+        String user1JSON = "{\"username\": \"Dummy1\", \"password\": \"password1\", \"isAdmin\": true}";
         String user2JSON = "{\"username\": \"Dummy2\", \"password\": \"password1\"}";
 
         //Register
@@ -86,7 +86,7 @@ public class OctavioTests {
         //Delete dummy and verify
         given()
                 .when()
-                .delete("/users/hardDelete/2")
+                .delete("/users/1/hardDelete/2")
                 .then()
                 .statusCode(200);
         given()
